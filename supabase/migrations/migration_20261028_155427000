@@ -1,0 +1,1 @@
+delete from public.employees where code = 'TRG-008';

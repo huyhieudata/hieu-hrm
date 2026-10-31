@@ -1,0 +1,2 @@
+-- Remove the duplicate resignation entry I just added to the demo record (the original row already covers it)
+delete from public.employee_work_history where note = 'Bổ sung mốc nghỉ việc để đồng bộ với trạng thái nhân sự.';

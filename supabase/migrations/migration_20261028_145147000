@@ -1,0 +1,1 @@
+update public.employees set resignation_reason = 'Nguyện vọng cá nhân' where code = 'DEMO-006' and resignation_reason is null;

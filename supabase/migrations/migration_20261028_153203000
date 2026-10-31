@@ -1,0 +1,1 @@
+delete from public.employees where code in ('TRG-005','TRG-006');

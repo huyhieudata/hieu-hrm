@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+
+  :root {
+    /* Surfaces */
+    --background: 214 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --overlay: 222 47% 11%;
+
+    /* Brand */
+    --brand-navy: 210 69% 23%;
+    --brand-orange: 25 95% 53%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 221 83% 45%;
+    --primary-active: 221 83% 38%;
+    --primary-subtle: 221 92% 96%;
+    --primary-subtle-foreground: 221 83% 36%;
+
+    /* Neutrals */
+    --secondary: 214 32% 96%;
+    --secondary-foreground: 222 47% 18%;
+    --muted: 214 32% 96%;
+    --muted-foreground: 215 19% 42%;
+    --accent: 221 92% 96%;
+    --accent-foreground: 221 83% 38%;
+
+    /* Status */
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-subtle: 0 86% 97%;
+    --success: 152 62% 33%;
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 152 62% 95%;
+    --warning: 27 92% 36%;
+    --warning-foreground: 0 0% 100%;
+    --warning-subtle: 36 100% 95%;
+    --info: 199 89% 36%;
+    --info-foreground: 0 0% 100%;
+    --info-subtle: 199 95% 96%;
+
+    /* Lines */
+    --border: 216 26% 91%;
+    --input: 216 26% 89%;
+    --ring: 221 83% 53%;
+
+    /* Charts */
+    --chart-1: 221 83% 53%;
+    --chart-2: 258 84% 65%;
+    --chart-3: 172 62% 40%;
+    --chart-4: 32 95% 52%;
+    --chart-5: 330 72% 58%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 40% 26%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 221 92% 96%;
+    --sidebar-accent-foreground: 221 83% 36%;
+    --sidebar-border: 216 26% 92%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.16);
+    color: hsl(var(--primary-subtle-foreground));
+  }
+
+  *:focus-visible {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-slim {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.55) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.55) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  }
+
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

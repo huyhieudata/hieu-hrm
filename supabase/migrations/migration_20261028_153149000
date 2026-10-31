@@ -1,0 +1,1 @@
+delete from public.employee_work_history where employee_id = 'd0000000-0000-4000-8000-0000000000fb';

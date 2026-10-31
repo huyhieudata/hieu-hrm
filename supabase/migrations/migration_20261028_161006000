@@ -1,0 +1,1 @@
+delete from public.candidates where form_token = 'trgform0001';

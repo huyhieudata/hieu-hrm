@@ -1,0 +1,1 @@
+delete from public.employee_discipline_records where decision_no = 'TEST-2';
