@@ -146,3 +146,8 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
   - Không dùng `supabase db push` (định dạng file cũ không tương thích).
 
 - Hàm `SECURITY DEFINER` mới: luôn `set search_path = public`, rồi `revoke execute ... from public, anon` và chỉ `grant execute ... to authenticated` khi client thật sự cần gọi. Hàm trigger và hàm chỉ dùng cho edge function (service_role) không cấp cho `authenticated`. Chỉ `peek_candidate_form`, `submit_candidate_form`, `peek_company_invite` được mở cho `anon`.
+
+## Mô-đun Đánh giá (biểu mẫu tiêu chí)
+- Biểu mẫu: `evaluation_templates` + `evaluation_criteria`, quyền module `evaluations.*`. Phiếu đánh giá ứng viên vẫn là `candidate_evaluations` và dùng quyền `recruitment.*`.
+- Câu trả lời lưu trong cột `answers` (jsonb `{ "<criterion_id>": { "score", "comment" } }`) thay vì bảng riêng, để nộp phiếu là một thao tác nguyên tử. Trigger `validate_candidate_evaluation` kiểm tra thang điểm, tiêu chí, khoá phiếu đã nộp và tự tính `total_score` (máy chủ là nguồn đúng; `src/lib/evaluation-score.ts` chỉ để hiển thị, kiểm bằng `pnpm test:evaluations`).
+- Biểu mẫu đã có phiếu dùng thì khoá tiêu chí/thang điểm (BR-4.1); đổi cấu trúc qua RPC `create_evaluation_template_version`.

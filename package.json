@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "pInstall": "pnpm install",
+    "test:evaluations": "node --experimental-strip-types scripts/check-evaluation-score.ts",
     "test:payroll": "node --experimental-strip-types scripts/check-payroll-calc.ts",
     "test:payroll:sql": "node --experimental-strip-types scripts/payroll-server-parity.ts"
   },

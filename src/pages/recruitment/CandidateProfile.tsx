@@ -108,10 +108,12 @@ const interviewTone = (status: string) =>
 const CandidateProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { activeCompany, can, canManageModule } = useCompany();
+  const { activeCompany, can, canDo, canManageModule } = useCompany();
   const { user, profile } = useAuth();
   const companyId = activeCompany?.id ?? null;
   const canManage = canManageModule("recruitment");
+  // Khớp policy evaluations_delete: quyền xoá tuyển dụng, hoặc người chấm xoá phiếu nháp của mình.
+  const canDeleteEvaluation = canDo("recruitment", "delete");
   const authorName = displayName(profile, user?.email);
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
@@ -923,7 +925,7 @@ const CandidateProfile = () => {
                         >
                           {EVALUATION_RECOMMENDATION_LABELS[evaluation.recommendation] ?? evaluation.recommendation}
                         </Badge>
-                        {(canManage || evaluation.reviewer_id === user?.id) && (
+                        {(canDeleteEvaluation || (evaluation.reviewer_id === user?.id && evaluation.status === "draft")) && (
                           <Button
                             variant="ghost"
                             size="icon-sm"

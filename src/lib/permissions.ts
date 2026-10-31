@@ -41,6 +41,7 @@ export const PERMISSION_MODULES: PermissionModule[] = [
   { key: "recruitment", label: "Tuyển dụng", legacyView: "recruitment.view", legacyManage: "recruitment.manage" },
   { key: "planning", label: "Hoạch định & định biên", legacyView: "employees.view", legacyManage: "employees.manage" },
   { key: "news", label: "Truyền thông nội bộ" },
+  { key: "evaluations", label: "Đánh giá" },
   { key: "members", label: "Thành viên & quyền", legacyView: "members.view", legacyManage: "members.manage" },
   { key: "settings", label: "Cấu hình công ty", legacyView: "employees.view", legacyManage: "employees.manage" },
 ];

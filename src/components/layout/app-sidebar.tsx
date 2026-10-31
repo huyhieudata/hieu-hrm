@@ -18,6 +18,7 @@ import {
   Building2,
   Megaphone,
   Newspaper,
+  ClipboardCheck,
   FileText,
   CalendarClock,
   UserPlus,
@@ -116,6 +117,7 @@ export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }
         canDo("recruitment", "view") && { label: "Chiến dịch", to: "/tuyen-dung/chien-dich", icon: Megaphone },
         canDo("recruitment", "view") && { label: "Ứng viên", to: "/tuyen-dung/ung-vien", icon: Users },
         canDo("recruitment", "view") && { label: "Lịch hẹn phỏng vấn", to: "/tuyen-dung/lich-hen", icon: CalendarClock },
+        canDo("evaluations", "view") && { label: "Biểu mẫu đánh giá", to: "/danh-gia/bieu-mau", icon: ClipboardCheck },
       ].filter(Boolean) as NavItem[],
     },
     {

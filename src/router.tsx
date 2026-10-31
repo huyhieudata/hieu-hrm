@@ -26,6 +26,7 @@ const AttendanceSettings = lazy(() => import("./pages/attendance/AttendanceSetti
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Assets = lazy(() => import("./pages/Assets"));
 const News = lazy(() => import("./pages/News"));
+const EvaluationTemplates = lazy(() => import("@/pages/evaluations/EvaluationTemplates"));
 const Payroll = lazy(() => import("./pages/payroll/Payroll"));
 const Workspaces = lazy(() => import("./pages/admin/Workspaces"));
 const ServicePlans = lazy(() => import("./pages/admin/ServicePlans"));
@@ -277,6 +278,16 @@ export const routers = [
         <News />
       </PageSuspense>,
       "news",
+    ),
+  },
+  {
+    path: "/danh-gia/bieu-mau",
+    name: "evaluation-templates",
+    element: companyScoped(
+      <PageSuspense>
+        <EvaluationTemplates />
+      </PageSuspense>,
+      "evaluations",
     ),
   },
   {

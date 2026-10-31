@@ -300,6 +300,12 @@ export interface CandidateEvaluation {
   strengths: string | null;
   weaknesses: string | null;
   note: string | null;
+  template_id?: string | null;
+  interview_id?: string | null;
+  answers?: Record<string, { score?: number | null; comment?: string | null }>;
+  total_score?: number | null;
+  status?: "draft" | "submitted";
+  submitted_at?: string | null;
   created_at: string;
 }
 
