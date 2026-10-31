@@ -12,7 +12,7 @@ q() { jq -n --arg q "$1" '{query:$q}' | curl -sS --fail-with-body -X POST "$API"
 applied=$(q "select version from supabase_migrations.schema_migrations" | jq -r '.[].version')
 shopt -s nullglob
 count=0
-for f in $(ls supabase/migrations/*.sql 2>/dev/null | sort); do
+for f in $(find supabase/migrations -maxdepth 1 -name "*.sql" | sort); do
   base=$(basename "$f" .sql)
   if [[ ! "$base" =~ ^([0-9]{14})_([a-z0-9_]+)$ ]]; then
     echo "::error::Tên migration sai quy ước (YYYYMMDDHHMMSS_ten.sql): $f"; exit 1; fi
