@@ -132,3 +132,15 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Bảng `employees`: cột nhạy cảm (CCCD, ngân hàng, MST…) không cấp SELECT cho `authenticated`. Đọc qua `EMPLOYEE_PUBLIC_COLUMNS` + `withSensitiveFields()` (RPC `employee_sensitive_fields`). Không dùng `select("*")` trên `employees`. Thêm cột mới phải `grant select (cột) on employees to authenticated` nếu không nhạy cảm.
 - Thuế TNCN/giảm trừ/lương cơ sở theo hiệu lực: `PIT_RULES`, `BASE_WAGE_RULES` trong `src/lib/payroll-calc.ts`; kiểm tra nhanh bằng `pnpm test:payroll`.
 - `payroll_items` có trigger `validate_payroll_item` kiểm tra số liệu phía server.
+
+## Quy trình triển khai
+
+- **Giao diện (Vercel):** push lên `main` → Vercel (project `hieu-hrm`) tự build và deploy production.
+- **Supabase (project `yrdcsbjlvgycipzpogbv`):** workflow `.github/workflows/supabase-deploy.yml` chạy khi push `main` có thay đổi trong `supabase/migrations/**` hoặc `supabase/functions/**`:
+  1. `scripts/apply-supabase-migrations.sh` áp dụng các migration **mới** qua Supabase Management API, mỗi file một transaction, rồi ghi version vào `supabase_migrations.schema_migrations`. File có version đã có trong bảng sẽ bị bỏ qua (không chạy lại).
+  2. `supabase functions deploy provision-workspace-admin`.
+  - Cần GitHub secret `SUPABASE_ACCESS_TOKEN`; nếu chưa có, workflow chỉ cảnh báo và bỏ qua.
+- **Quy ước migration mới:** đặt tên `supabase/migrations/YYYYMMDDHHMMSS_ten_khong_dau.sql` (ví dụ `20261101090000_add_training_tables.sql`), version phải lớn hơn mọi migration trước. Sai tên → workflow báo lỗi.
+  - KHÔNG sửa/đổi tên các file cũ `migration_*` (không đuôi `.sql`) – chúng đã được áp dụng và được bỏ qua.
+  - Migration phải idempotent khi có thể (`if not exists`), không chứa lệnh xoá dữ liệu nếu chưa được duyệt.
+  - Không dùng `supabase db push` (định dạng file cũ không tương thích).
