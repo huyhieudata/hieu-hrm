@@ -155,7 +155,8 @@ export interface ProvisionedAdmin {
   employee_id: string;
   email: string;
   phone: string;
-  password: string;
+  /** Mật khẩu tạm ngẫu nhiên, chỉ có khi vừa tạo tài khoản mới (null nếu email đã có tài khoản). */
+  temporary_password: string | null;
   created_account: boolean;
 }
 

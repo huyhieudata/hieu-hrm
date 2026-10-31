@@ -118,8 +118,15 @@ const PublicApplyForm = () => {
       });
       if (rpcError) throw rpcError;
       setSubmitted(true);
-    } catch {
-      setError("Không gửi được hồ sơ. Vui lòng thử lại hoặc liên hệ nhà tuyển dụng.");
+    } catch (submitError) {
+      const message = submitError instanceof Error ? submitError.message : String((submitError as { message?: string })?.message ?? "");
+      if (message.includes("FORM_ALREADY_SUBMITTED")) {
+        setError("Hồ sơ đã được gửi trước đó. Liên hệ nhà tuyển dụng nếu cần cập nhật.");
+      } else if (message.includes("FORM_EXPIRED")) {
+        setError("Liên kết đã hết hạn. Vui lòng liên hệ nhà tuyển dụng để nhận liên kết mới.");
+      } else {
+        setError("Không gửi được hồ sơ. Vui lòng thử lại hoặc liên hệ nhà tuyển dụng.");
+      }
     } finally {
       setSubmitting(false);
     }

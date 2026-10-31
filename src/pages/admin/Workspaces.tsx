@@ -71,7 +71,7 @@ const Workspaces = () => {
     name: string;
     email: string;
     phone: string;
-    password: string;
+    password: string | null;
   } | null>(null);
 
   const load = useCallback(async () => {
@@ -213,7 +213,7 @@ const Workspaces = () => {
       name: String(values.name),
       email: account.email,
       phone: account.phone,
-      password: account.password,
+      password: account.temporary_password,
     });
     setFormOpen(false);
     await load();
@@ -238,7 +238,7 @@ const Workspaces = () => {
 
   const copyCredentials = async () => {
     if (!adminInfo) return;
-    const text = `Workspace: ${adminInfo.name}\nEmail: ${adminInfo.email}\nĐiện thoại: ${adminInfo.phone}\nMật khẩu: ${adminInfo.password}`;
+    const text = `Workspace: ${adminInfo.name}\nEmail: ${adminInfo.email}\nĐiện thoại: ${adminInfo.phone}\nMật khẩu: ${adminInfo.password ?? "(dùng mật khẩu hiện có của tài khoản)"}`;
     try {
       await navigator.clipboard.writeText(text);
       toast.success("Đã sao chép thông tin tài khoản");
@@ -491,13 +491,15 @@ const Workspaces = () => {
                 <p className="font-medium text-foreground">{adminInfo?.phone}</p>
               </div>
               <div className="rounded-md border border-border bg-muted/25 px-3 py-2 text-[11.5px] sm:col-span-2">
-                <p className="text-muted-foreground">Mật khẩu mặc định</p>
-                <p className="font-mono text-[15px] font-semibold text-foreground">{adminInfo?.password}</p>
+                <p className="text-muted-foreground">Mật khẩu tạm (chỉ hiển thị một lần)</p>
+                <p className="font-mono text-[15px] font-semibold text-foreground">
+                  {adminInfo?.password ?? "Email đã có tài khoản, dùng mật khẩu hiện có"}
+                </p>
               </div>
             </div>
             <p className="text-[11px] leading-4 text-muted-foreground">
-              Quản trị viên đăng nhập bằng email hoặc số điện thoại với mật khẩu trên, sau đó nên đổi mật khẩu trong
-              phần tài khoản.
+              Quản trị viên đăng nhập bằng email hoặc số điện thoại với mật khẩu trên. Mật khẩu được sinh ngẫu nhiên và
+              không lưu lại, hãy sao chép ngay và gửi riêng cho quản trị viên; họ nên đổi mật khẩu sau lần đăng nhập đầu.
             </p>
           </div>
 

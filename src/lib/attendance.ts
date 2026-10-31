@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { EmployeeRecord } from "@/lib/employee-records";
+import { EMPLOYEE_PUBLIC_COLUMNS, withSensitiveFields, type EmployeeRecord } from "@/lib/employee-records";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -366,12 +366,14 @@ export const isWorkingDay = (shift: WorkShift, date: string) => {
 export const findMyEmployee = async (companyId: string, userId: string): Promise<EmployeeRecord | null> => {
   const { data, error } = await db
     .from("employees")
-    .select("*")
+    .select(EMPLOYEE_PUBLIC_COLUMNS)
     .eq("company_id", companyId)
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error(error.message ?? "Không tìm thấy hồ sơ nhân sự.");
-  return (data ?? null) as EmployeeRecord | null;
+  if (!data) return null;
+  const [record] = await withSensitiveFields([data as EmployeeRecord]);
+  return record as EmployeeRecord;
 };
 
 export const listRecordsBetween = async (

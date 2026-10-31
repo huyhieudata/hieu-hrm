@@ -491,20 +491,101 @@ export const toOptions = (labels: Record<string, string>) =>
 /* Employee CRUD                                                      */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Cột nhạy cảm (CCCD, ngân hàng, MST) không còn SELECT trực tiếp được từ bảng employees.
+ * Chỉ owner/admin/hr hoặc chính chủ đọc được qua RPC employee_sensitive_fields.
+ */
+export const SENSITIVE_EMPLOYEE_FIELDS = [
+  "national_id",
+  "national_id_issue_date",
+  "national_id_issue_place",
+  "bank_name",
+  "bank_account",
+  "bank_branch",
+  "tax_code",
+] as const;
+
+export const EMPLOYEE_PUBLIC_COLUMNS = [
+  "avatar_url",
+  "code",
+  "company_id",
+  "concurrent_positions",
+  "created_at",
+  "created_by",
+  "current_address",
+  "date_of_birth",
+  "department",
+  "dependents_count",
+  "education_level",
+  "emergency_contact_name",
+  "emergency_contact_phone",
+  "emergency_contact_relation",
+  "employment_type",
+  "full_name",
+  "gender",
+  "hire_date",
+  "id",
+  "insurance_number",
+  "job_level",
+  "major",
+  "manager_id",
+  "marital_status",
+  "nationality",
+  "notes",
+  "official_date",
+  "permanent_address",
+  "personal_email",
+  "phone",
+  "position",
+  "probation_end_date",
+  "resignation_date",
+  "resignation_reason",
+  "school",
+  "status",
+  "updated_at",
+  "user_id",
+  "work_email",
+  "work_location",
+].join(", ");
+
+type SensitiveRow = { employee_id: string } & Partial<Record<(typeof SENSITIVE_EMPLOYEE_FIELDS)[number], string | null>>;
+
+const emptySensitive = Object.fromEntries(SENSITIVE_EMPLOYEE_FIELDS.map((field) => [field, null]));
+
+/** Gắn các cột nhạy cảm mà người dùng hiện tại được phép xem; còn lại để null. */
+export const withSensitiveFields = async <T extends { id: string; company_id: string }>(rows: T[]) => {
+  if (rows.length === 0) return rows as (T & Record<(typeof SENSITIVE_EMPLOYEE_FIELDS)[number], string | null>)[];
+  const { data, error } = await db.rpc("employee_sensitive_fields", {
+    p_company: rows[0].company_id,
+    p_employee: rows.length === 1 ? rows[0].id : null,
+  });
+  if (error) throw error;
+  const byId = new Map(((data ?? []) as SensitiveRow[]).map((row) => [row.employee_id, row]));
+  return rows.map((row) => {
+    const extra = byId.get(row.id);
+    const picked = extra
+      ? Object.fromEntries(SENSITIVE_EMPLOYEE_FIELDS.map((field) => [field, extra[field] ?? null]))
+      : emptySensitive;
+    return { ...row, ...picked } as T & Record<(typeof SENSITIVE_EMPLOYEE_FIELDS)[number], string | null>;
+  });
+};
+
 export const listEmployees = async (companyId: string): Promise<EmployeeRecord[]> => {
   const { data, error } = await db
     .from("employees")
-    .select("*")
+    .select(EMPLOYEE_PUBLIC_COLUMNS)
     .eq("company_id", companyId)
     .order("full_name", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as EmployeeRecord[];
+  return (await withSensitiveFields((data ?? []) as EmployeeRecord[])) as EmployeeRecord[];
 };
 
 export const getEmployee = async (employeeId: string): Promise<EmployeeRecord | null> => {
-  const { data, error } = await db.from("employees").select("*").eq("id", employeeId).maybeSingle();
+  const { data, error } = await db.from("employees").select(EMPLOYEE_PUBLIC_COLUMNS).eq("id", employeeId).maybeSingle();
   if (error) throw error;
-  return (data ?? null) as EmployeeRecord | null;
+  if (!data) return null;
+  const [record] = await withSensitiveFields([data as EmployeeRecord]);
+  return record as EmployeeRecord;
 };
 
 export const createEmployee = async (values: Record<string, unknown>) => {

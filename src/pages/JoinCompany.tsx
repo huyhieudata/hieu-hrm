@@ -28,6 +28,8 @@ const INVITE_ERRORS: Record<string, string> = {
   INVITE_USED: "Lời mời này đã được sử dụng.",
   INVITE_EXPIRED: "Lời mời đã hết hạn. Hãy yêu cầu quản trị viên tạo liên kết mới.",
   INVITE_EMAIL_MISMATCH: "Lời mời được gửi cho một địa chỉ email khác với tài khoản đang đăng nhập.",
+  INVITE_IDENTITY_REQUIRED:
+    "Lời mời quyền quản trị phải gắn email hoặc số điện thoại khớp với tài khoản. Hãy yêu cầu quản trị viên tạo lời mời mới.",
   AUTH_REQUIRED: "Bạn cần đăng nhập để tham gia công ty.",
 };
 

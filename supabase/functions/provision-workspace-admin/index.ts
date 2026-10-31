@@ -11,6 +11,20 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+/** Mật khẩu tạm ngẫu nhiên 16 ký tự sinh bằng crypto, chỉ trả về một lần khi tạo tài khoản mới. */
+const generatePassword = (length = 16) => {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*";
+  const limit = 256 - (256 % alphabet.length);
+  const chars: string[] = [];
+  while (chars.length < length) {
+    const bytes = crypto.getRandomValues(new Uint8Array(length * 2));
+    for (const byte of bytes) {
+      if (byte < limit && chars.length < length) chars.push(alphabet[byte % alphabet.length]);
+    }
+  }
+  return chars.join("");
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -64,7 +78,7 @@ Deno.serve(async (req) => {
       return json({ error: "Workspace không tồn tại." }, 404);
     }
 
-    const password = "123456";
+    const password = generatePassword();
     let userId: string | null = null;
     let createdAccount = false;
 
@@ -76,15 +90,17 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      const { data: list, error: listError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-      if (listError) {
-        return json({ error: listError.message }, 500);
+      // Tra trực tiếp theo email (không phụ thuộc phân trang listUsers).
+      const { data: existingId, error: lookupError } = await admin.rpc("find_auth_user_id_by_email", {
+        p_email: email,
+      });
+      if (lookupError) {
+        return json({ error: lookupError.message }, 500);
       }
-      const existing = list?.users?.find((item) => (item.email ?? "").toLowerCase() === email);
-      if (!existing) {
+      if (!existingId) {
         return json({ error: createError.message }, 400);
       }
-      userId = existing.id;
+      userId = existingId as string;
     } else {
       userId = created.user?.id ?? null;
       createdAccount = true;
@@ -110,7 +126,8 @@ Deno.serve(async (req) => {
       employee_id: employeeId,
       email,
       phone,
-      password,
+      // Chỉ trả mật khẩu tạm khi vừa tạo tài khoản mới; tài khoản có sẵn giữ nguyên mật khẩu cũ.
+      temporary_password: createdAccount ? password : null,
       created_account: createdAccount,
     });
   } catch (error) {
