@@ -74,6 +74,7 @@ import {
   updateRow,
   type OnboardingRecord,
 } from "@/lib/recruitment";
+import { todayIso } from "@/lib/attendance";
 
 interface OnboardingComment {
   id: string;
@@ -99,7 +100,6 @@ const PAGE_SIZES = [10, 20, 30, 50];
 const statusTone = (status: string) =>
   status === "completed" ? "success" : status === "in_progress" ? "info" : status === "cancelled" ? "muted" : "warning";
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 const addDays = (iso: string, days: number) => {
   const date = new Date(`${iso}T00:00:00`);

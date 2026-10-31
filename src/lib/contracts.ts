@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { todayIso } from "@/lib/attendance";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -66,7 +67,7 @@ export const syncSalaryFromContract = async (contractId: string) => {
   if (error) throw new Error(error.message ?? "Không đồng bộ được dữ liệu lương.");
   if (!contract) return;
 
-  const effectiveDate = contract.start_date ?? new Date().toISOString().slice(0, 10);
+  const effectiveDate = contract.start_date ?? todayIso();
   const values = {
     base_salary: Number(contract.base_salary ?? 0),
     other_allowance: Number(contract.allowance ?? 0),

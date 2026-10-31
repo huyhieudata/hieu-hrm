@@ -44,6 +44,7 @@ import {
   updateAsset,
   type CompanyAsset,
 } from "@/lib/assets";
+import { todayIso } from "@/lib/attendance";
 
 const assetFields = (employees: EmployeeRecord[]): FieldDef[] => [
   {
@@ -578,7 +579,7 @@ const Assets = () => {
                 assigned_date: editing.assigned_date,
                 return_date: editing.return_date ?? "",
               }
-            : { assigned_date: new Date().toISOString().slice(0, 10), status: "assigned", condition: "new" }
+            : { assigned_date: todayIso(), status: "assigned", condition: "new" }
         }
         submitLabel={editing ? "Lưu thay đổi" : "Thêm tài sản"}
         onSubmit={handleSubmit}

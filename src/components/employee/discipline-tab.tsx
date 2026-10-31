@@ -66,6 +66,7 @@ import {
   type DisciplineChecklistStep,
   type DisciplineRecord,
 } from "@/lib/employee-records";
+import { todayIso } from "@/lib/attendance";
 
 const categoryOptions = Object.entries(DISCIPLINE_CATEGORY_LABELS).map(([value, label]) => ({
   value,
@@ -94,7 +95,7 @@ const emptySteps = () =>
     ]),
   ) as Record<string, { checked: boolean; file_path: string | null; file_name: string | null }>;
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = todayIso;
 
 interface DisciplineFormProps {
   open: boolean;

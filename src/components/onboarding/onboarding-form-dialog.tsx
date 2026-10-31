@@ -18,6 +18,7 @@ import { getErrorMessage } from "@/lib/utils";
 import { listOnboardingTemplates } from "@/lib/settings";
 import { createRow } from "@/lib/recruitment";
 import type { EmployeeRecord } from "@/lib/employee-records";
+import { todayIso } from "@/lib/attendance";
 
 interface ChecklistItem {
   id: string;
@@ -34,7 +35,6 @@ interface OnboardingFormDialogProps {
   onSaved: () => void | Promise<void>;
 }
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 const addDays = (iso: string, days: number) => {
   const date = new Date(`${iso}T00:00:00`);

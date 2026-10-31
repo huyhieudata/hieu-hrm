@@ -49,6 +49,7 @@ import { exportExcel, exportPdf } from "@/lib/export-utils";
 import { currency } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { todayIso } from "@/lib/attendance";
 
 interface InsuranceRow {
   id: string;
@@ -230,7 +231,7 @@ const Insurance = () => {
               className="h-9 gap-1.5 text-[12.5px]"
               onClick={() =>
                 exportExcel(
-                  `bao-hiem-${new Date().toISOString().slice(0, 10)}`,
+                  `bao-hiem-${todayIso()}`,
                   exportHeaders,
                   exportRows(),
                   "Bảo hiểm",

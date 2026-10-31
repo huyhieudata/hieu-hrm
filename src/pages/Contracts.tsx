@@ -55,6 +55,7 @@ import {
   updateContract,
   type CompanyContract,
 } from "@/lib/contracts";
+import { todayIso } from "@/lib/attendance";
 
 const formatDay = (value: string | null) =>
   value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—";
@@ -62,7 +63,6 @@ const formatDay = (value: string | null) =>
 const formatMoney = (value: number | null) =>
   value === null || value === undefined ? "—" : `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 const Contracts = () => {
   const { activeCompany, can, canManageModule } = useCompany();

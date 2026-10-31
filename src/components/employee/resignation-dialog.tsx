@@ -36,6 +36,7 @@ import {
   type DebtRecord,
   type EmployeeRecord,
 } from "@/lib/employee-records";
+import { todayIso } from "@/lib/attendance";
 
 const RESIGNATION_REASONS = [
   "Nguyện vọng cá nhân",
@@ -47,7 +48,7 @@ const RESIGNATION_REASONS = [
   "Khác",
 ];
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = todayIso;
 
 const contractState = (contract: ContractRecord) => {
   if (contract.status !== "active") {

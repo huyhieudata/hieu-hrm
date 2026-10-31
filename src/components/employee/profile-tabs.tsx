@@ -46,6 +46,7 @@ import {
   type TrainingRecord,
   type WorkHistoryRecord,
 } from "@/lib/employee-records";
+import { todayIso } from "@/lib/attendance";
 
 interface TabProps {
   employeeId: string;
@@ -629,7 +630,7 @@ export const AssetsTab = ({ employeeId, canManage }: TabProps) => (
       run: (row) =>
         updateRecord("employee_assets", row.id, {
           status: "returned",
-          return_date: new Date().toISOString().slice(0, 10),
+          return_date: todayIso(),
         }),
       successMessage: "Đã thu hồi tài sản",
     }}

@@ -37,6 +37,7 @@ import {
   updateRecord,
   uploadEmployeeFile,
 } from "@/lib/employee-records";
+import { todayIso } from "@/lib/attendance";
 
 interface ContactRow {
   id: string;
@@ -72,7 +73,6 @@ const STATE_LABELS: Record<string, string> = {
 const stateTone = (state: string) =>
   state === "contacted" ? "success" : state === "unreachable" ? "destructive" : state === "cancelled" ? "muted" : "warning";
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 interface ContactsTabProps {
   employeeId: string;
