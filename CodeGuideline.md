@@ -144,3 +144,5 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
   - KHÔNG sửa/đổi tên các file cũ `migration_*` (không đuôi `.sql`) – chúng đã được áp dụng và được bỏ qua.
   - Migration phải idempotent khi có thể (`if not exists`), không chứa lệnh xoá dữ liệu nếu chưa được duyệt.
   - Không dùng `supabase db push` (định dạng file cũ không tương thích).
+
+- Hàm `SECURITY DEFINER` mới: luôn `set search_path = public`, rồi `revoke execute ... from public, anon` và chỉ `grant execute ... to authenticated` khi client thật sự cần gọi. Hàm trigger và hàm chỉ dùng cho edge function (service_role) không cấp cho `authenticated`. Chỉ `peek_candidate_form`, `submit_candidate_form`, `peek_company_invite` được mở cho `anon`.
