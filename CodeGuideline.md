@@ -127,3 +127,8 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
    <Route path="/profile" element={<Profile />} />
    ```
 5. **If you need a reusable button, add it to `src/components/ui/button.tsx`.**
+
+## Ghi chú bảo mật & lương (31/10/2026)
+- Bảng `employees`: cột nhạy cảm (CCCD, ngân hàng, MST…) không cấp SELECT cho `authenticated`. Đọc qua `EMPLOYEE_PUBLIC_COLUMNS` + `withSensitiveFields()` (RPC `employee_sensitive_fields`). Không dùng `select("*")` trên `employees`. Thêm cột mới phải `grant select (cột) on employees to authenticated` nếu không nhạy cảm.
+- Thuế TNCN/giảm trừ/lương cơ sở theo hiệu lực: `PIT_RULES`, `BASE_WAGE_RULES` trong `src/lib/payroll-calc.ts`; kiểm tra nhanh bằng `pnpm test:payroll`.
+- `payroll_items` có trigger `validate_payroll_item` kiểm tra số liệu phía server.

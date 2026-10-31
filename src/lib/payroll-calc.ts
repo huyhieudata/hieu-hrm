@@ -4,26 +4,97 @@
  * giảm trừ gia cảnh và thuế TNCN lũy tiến từng phần.
  */
 
-export const PERSONAL_DEDUCTION = 11_000_000;
-export const DEPENDENT_DEDUCTION = 4_400_000;
 export const INSURANCE_EMPLOYEE_RATE = 0.105;
 
-const TAX_BRACKETS: { upTo: number; rate: number }[] = [
-  { upTo: 5_000_000, rate: 0.05 },
-  { upTo: 10_000_000, rate: 0.1 },
-  { upTo: 18_000_000, rate: 0.15 },
-  { upTo: 32_000_000, rate: 0.2 },
-  { upTo: 52_000_000, rate: 0.25 },
-  { upTo: 80_000_000, rate: 0.3 },
-  { upTo: Number.POSITIVE_INFINITY, rate: 0.35 },
+/** Số ngày làm việc không hưởng lương trong tháng từ mức này trở lên thì không đóng BHXH/BHYT/BHTN. */
+export const INSURANCE_UNPAID_DAYS_EXEMPT = 14;
+/** Trần lương đóng bảo hiểm = 20 lần mức lương cơ sở. */
+export const INSURANCE_CAP_MULTIPLIER = 20;
+
+interface TaxBracket {
+  upTo: number;
+  rate: number;
+}
+
+export interface PitRule {
+  /** Áp dụng cho kỳ lương có ngày đầu tháng >= effectiveFrom (YYYY-MM-DD). */
+  effectiveFrom: string;
+  personalDeduction: number;
+  dependentDeduction: number;
+  brackets: TaxBracket[];
+  source: string;
+}
+
+/**
+ * Tham số thuế TNCN theo ngày hiệu lực, sắp xếp tăng dần.
+ * - Trước 2026: Luật 04/2007/QH12 (biểu 7 bậc), NQ 954/2020/UBTVQH14 (11 triệu / 4,4 triệu).
+ * - Từ kỳ tính thuế 2026: Luật Thuế TNCN số 109/2025/QH15 (Điều 9, biểu 5 bậc; Điều 29 khoản 2
+ *   áp dụng cho tiền lương, tiền công từ kỳ tính thuế 2026) và NQ 110/2025/UBTVQH15 (15,5 triệu / 6,2 triệu).
+ */
+export const PIT_RULES: PitRule[] = [
+  {
+    effectiveFrom: "1900-01-01",
+    personalDeduction: 11_000_000,
+    dependentDeduction: 4_400_000,
+    brackets: [
+      { upTo: 5_000_000, rate: 0.05 },
+      { upTo: 10_000_000, rate: 0.1 },
+      { upTo: 18_000_000, rate: 0.15 },
+      { upTo: 32_000_000, rate: 0.2 },
+      { upTo: 52_000_000, rate: 0.25 },
+      { upTo: 80_000_000, rate: 0.3 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.35 },
+    ],
+    source: "Luật 04/2007/QH12, NQ 954/2020/UBTVQH14",
+  },
+  {
+    effectiveFrom: "2026-01-01",
+    personalDeduction: 15_500_000,
+    dependentDeduction: 6_200_000,
+    brackets: [
+      { upTo: 10_000_000, rate: 0.05 },
+      { upTo: 30_000_000, rate: 0.1 },
+      { upTo: 60_000_000, rate: 0.2 },
+      { upTo: 100_000_000, rate: 0.3 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.35 },
+    ],
+    source: "Luật 109/2025/QH15, NQ 110/2025/UBTVQH15",
+  },
 ];
 
-/** Thuế TNCN lũy tiến từng phần theo biểu thuế tháng. */
-export const computePit = (taxable: number) => {
+/** Mức lương cơ sở theo ngày hiệu lực (NĐ 73/2024/NĐ-CP, NĐ 161/2026/NĐ-CP). */
+export const BASE_WAGE_RULES: { effectiveFrom: string; amount: number }[] = [
+  { effectiveFrom: "1900-01-01", amount: 2_340_000 },
+  { effectiveFrom: "2026-07-01", amount: 2_530_000 },
+];
+
+const periodKey = (year?: number, month?: number) => {
+  const now = new Date();
+  const y = year ?? now.getFullYear();
+  const m = month ?? now.getMonth() + 1;
+  return `${y}-${String(m).padStart(2, "0")}-01`;
+};
+
+const pickRule = <T extends { effectiveFrom: string }>(rules: T[], key: string) =>
+  rules.reduce((found, rule) => (rule.effectiveFrom <= key ? rule : found), rules[0]);
+
+/** Tham số thuế áp dụng cho kỳ lương (mặc định: tháng hiện tại). */
+export const getPitRule = (year?: number, month?: number) => pickRule(PIT_RULES, periodKey(year, month));
+
+/** Trần lương đóng bảo hiểm của kỳ lương. */
+export const getInsuranceCap = (year?: number, month?: number) =>
+  pickRule(BASE_WAGE_RULES, periodKey(year, month)).amount * INSURANCE_CAP_MULTIPLIER;
+
+/** Giảm trừ theo kỳ hiện tại, giữ để tương thích chỗ hiển thị cũ. */
+export const PERSONAL_DEDUCTION = getPitRule().personalDeduction;
+export const DEPENDENT_DEDUCTION = getPitRule().dependentDeduction;
+
+/** Thuế TNCN lũy tiến từng phần theo biểu thuế tháng của kỳ lương (mặc định: kỳ hiện tại). */
+export const computePit = (taxable: number, rule: PitRule = getPitRule()) => {
   let remaining = Math.max(taxable, 0);
   let previous = 0;
   let tax = 0;
-  for (const bracket of TAX_BRACKETS) {
+  for (const bracket of rule.brackets) {
     const span = bracket.upTo - previous;
     const amount = Math.min(remaining, span);
     if (amount <= 0) break;
@@ -32,6 +103,18 @@ export const computePit = (taxable: number) => {
     previous = bracket.upTo;
   }
   return Math.round(tax);
+};
+
+/** BH người lao động 10,5%: áp trần 20 lần lương cơ sở, miễn khi nghỉ không lương từ 14 ngày làm việc. */
+export const computeEmployeeInsurance = (input: {
+  insuranceSalary: number;
+  unpaidDays: number;
+  year?: number;
+  month?: number;
+}) => {
+  if (input.unpaidDays >= INSURANCE_UNPAID_DAYS_EXEMPT) return 0;
+  const base = Math.min(Math.max(input.insuranceSalary, 0), getInsuranceCap(input.year, input.month));
+  return Math.round(base * INSURANCE_EMPLOYEE_RATE);
 };
 
 export interface PayrollPeriodInput {
@@ -149,7 +232,9 @@ export const applyPayrollAdjustment = (
     | "dependents_count"
   >,
   adjustment: PayrollAdjustmentInput,
+  period?: { year: number; month: number },
 ) => {
+  const rule = getPitRule(period?.year, period?.month);
   const otherAllowance = Math.max(Number(adjustment.other_allowance) || 0, 0);
   const otherDeduction = Math.max(Number(adjustment.other_deduction) || 0, 0);
   const gross =
@@ -159,10 +244,10 @@ export const applyPayrollAdjustment = (
     otherAllowance;
   const dependents = Math.max(Number(item.dependents_count ?? 0), 0);
   const taxable = Math.max(
-    gross - Number(item.insurance_employee) - PERSONAL_DEDUCTION - dependents * DEPENDENT_DEDUCTION,
+    gross - Number(item.insurance_employee) - rule.personalDeduction - dependents * rule.dependentDeduction,
     0,
   );
-  const tax = computePit(taxable);
+  const tax = computePit(taxable, rule);
   const net = gross - Number(item.insurance_employee) - tax - otherDeduction;
 
   return {
@@ -172,6 +257,8 @@ export const applyPayrollAdjustment = (
     taxable_income: taxable,
     tax_amount: tax,
     net_salary: net,
+    /** Khấu trừ lớn hơn thu nhập: thực nhận âm, giao diện cần cảnh báo. */
+    negative_net: net < 0,
     note: adjustment.note?.trim() ? adjustment.note.trim() : null,
   };
 };
@@ -223,6 +310,7 @@ export const calculatePayroll = (input: {
   const { companyId, period, employees, attendance, shifts, leaves } = input;
   const { start: periodStart, end: periodEnd } = payrollPeriodRange(period.year, period.month);
   const standardDays = Number(period.standard_work_days) > 0 ? Number(period.standard_work_days) : 26;
+  const pitRule = getPitRule(period.year, period.month);
   const shiftById = new Map(shifts.map((shift) => [shift.id, shift]));
 
   // Không có bất kỳ bản ghi chấm công nào trong tháng: không thể chia lương theo
@@ -363,10 +451,21 @@ export const calculatePayroll = (input: {
     const gross = base + positionAllowance + responsibilityAllowance + otherAllowance;
 
     const insuranceSalary = Number(salary.insurance_salary ?? baseSalary);
-    const insurance = gross > 0 ? Math.round(insuranceSalary * INSURANCE_EMPLOYEE_RATE) : 0;
+    const insurance =
+      gross > 0
+        ? computeEmployeeInsurance({
+            insuranceSalary,
+            unpaidDays: Math.max(standardDays - paidDays, 0),
+            year: period.year,
+            month: period.month,
+          })
+        : 0;
     const dependents = Math.max(Number(employee.dependents_count ?? 0), 0);
-    const taxable = Math.max(gross - insurance - PERSONAL_DEDUCTION - dependents * DEPENDENT_DEDUCTION, 0);
-    const tax = computePit(taxable);
+    const taxable = Math.max(
+      gross - insurance - pitRule.personalDeduction - dependents * pitRule.dependentDeduction,
+      0,
+    );
+    const tax = computePit(taxable, pitRule);
     const net = gross - insurance - tax;
 
     items.push({

@@ -53,6 +53,7 @@ export {
   INSURANCE_EMPLOYEE_RATE,
   PERSONAL_DEDUCTION,
   computePit,
+  getPitRule,
   applyPayrollAdjustment,
   calculatePayroll,
   payrollPeriodRange,

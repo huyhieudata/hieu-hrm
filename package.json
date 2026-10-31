@@ -10,7 +10,8 @@
     "check": "pnpm lint && pnpm exec tsc --noEmit -p tsconfig.app.json",
     "lint": "eslint .",
     "preview": "vite preview",
-    "pInstall": "pnpm install"
+    "pInstall": "pnpm install",
+    "test:payroll": "node --experimental-strip-types scripts/check-payroll-calc.ts"
   },
   "dependencies": {
     "@enter-pro/analytics-sdk": "^0.0.10",

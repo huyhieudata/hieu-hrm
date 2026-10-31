@@ -1,0 +1,17 @@
+import { computePit, getPitRule, applyPayrollAdjustment, computeEmployeeInsurance, getInsuranceCap } from "../src/lib/payroll-calc.ts";
+const eq = (a: number, b: number, m: string) => { if (a !== b) { console.error("FAIL", m, a, b); process.exit(1); } console.log("ok", m, a); };
+const old = getPitRule(2025, 12), neu = getPitRule(2026, 1);
+eq(old.personalDeduction, 11_000_000, "2025 giảm trừ");
+eq(neu.personalDeduction, 15_500_000, "2026 giảm trừ");
+eq(neu.dependentDeduction, 6_200_000, "2026 NPT");
+eq(computePit(10_000_000, old), 750_000, "biểu cũ 10tr");
+eq(computePit(10_000_000, neu), 500_000, "biểu mới 10tr");
+eq(computePit(30_000_000, neu), 2_500_000, "biểu mới 30tr");
+eq(computePit(60_000_000, neu), 8_500_000, "biểu mới 60tr");
+eq(computePit(100_000_000, neu), 20_500_000, "biểu mới 100tr");
+eq(getInsuranceCap(2026, 6), 46_800_000, "trần BH 6/2026");
+eq(getInsuranceCap(2026, 7), 50_600_000, "trần BH 7/2026");
+eq(computeEmployeeInsurance({ insuranceSalary: 100_000_000, unpaidDays: 0, year: 2026, month: 7 }), 5_313_000, "BH có trần");
+eq(computeEmployeeInsurance({ insuranceSalary: 10_000_000, unpaidDays: 14, year: 2026, month: 7 }), 0, "nghỉ 14 ngày");
+const adj = applyPayrollAdjustment({ base_salary: 5_000_000, position_allowance: 0, responsibility_allowance: 0, other_allowance: 0, insurance_employee: 525_000, dependents_count: 0 }, { other_allowance: 0, other_deduction: 6_000_000, note: null }, { year: 2026, month: 1 });
+eq(Number(adj.negative_net), 1, "cảnh báo thực nhận âm");

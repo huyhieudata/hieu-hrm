@@ -70,10 +70,9 @@ import { printHtml } from "@/lib/employee-documents";
 import { cn, getErrorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  DEPENDENT_DEDUCTION,
   INSURANCE_EMPLOYEE_RATE,
   PAYROLL_STATUS_LABELS,
-  PERSONAL_DEDUCTION,
+  getPitRule,
   applyPayrollAdjustment,
   buildPayslipBatchHtml,
   buildPayslipHtml,
@@ -251,6 +250,7 @@ const Payroll = () => {
   const [pendingDelete, setPendingDelete] = useState<PayrollPeriod | null>(null);
   const [pendingLock, setPendingLock] = useState<PayrollPeriod | null>(null);
   const [detailPeriod, setDetailPeriod] = useState<PayrollPeriod | null>(null);
+  const detailPitRule = getPitRule(detailPeriod?.year, detailPeriod?.month);
   const [report, setReport] = useState<CalcReport | null>(null);
   const [adjustItem, setAdjustItem] = useState<PayrollItem | null>(null);
 
@@ -621,15 +621,26 @@ const Payroll = () => {
   const handleAdjust = async (values: Record<string, string | number | null>) => {
     if (!adjustItem) throw new Error("Không tìm thấy phiếu lương.");
     try {
-      const patch = applyPayrollAdjustment(adjustItem, {
-        other_allowance: Number(values.other_allowance ?? 0),
-        other_deduction: Number(values.other_deduction ?? 0),
-        note: (values.note as string) || null,
-      });
+      const itemPeriod = periods.find((period) => period.id === adjustItem.period_id) ?? detailPeriod;
+      const { negative_net: negativeNet, ...patch } = applyPayrollAdjustment(
+        adjustItem,
+        {
+          other_allowance: Number(values.other_allowance ?? 0),
+          other_deduction: Number(values.other_deduction ?? 0),
+          note: (values.note as string) || null,
+        },
+        itemPeriod ? { year: itemPeriod.year, month: itemPeriod.month } : undefined,
+      );
       await updatePayrollItem(adjustItem.id, patch);
-      toast.success(`Đã lưu điều chỉnh cho ${adjustItem.employee_name}`, {
-        description: `Thực nhận mới: ${money(patch.net_salary)}`,
-      });
+      if (negativeNet) {
+        toast.warning(`Thực nhận của ${adjustItem.employee_name} đang âm`, {
+          description: `Khoản khấu trừ lớn hơn thu nhập. Thực nhận: ${money(patch.net_salary)}`,
+        });
+      } else {
+        toast.success(`Đã lưu điều chỉnh cho ${adjustItem.employee_name}`, {
+          description: `Thực nhận mới: ${money(patch.net_salary)}`,
+        });
+      }
       setAdjustItem(null);
       await load();
     } catch (error) {
@@ -1008,8 +1019,9 @@ const Payroll = () => {
                 Lương và phụ cấp tính theo ngày công chấm công + phép hưởng lương, tối đa{" "}
                 {detailPeriod?.standard_work_days ?? 0} ngày công chuẩn · BHNV{" "}
                 {(INSURANCE_EMPLOYEE_RATE * 100).toLocaleString("vi-VN")}% · giảm trừ bản thân{" "}
-                {(PERSONAL_DEDUCTION / 1_000_000).toLocaleString("vi-VN")} triệu, mỗi người phụ thuộc{" "}
-                {(DEPENDENT_DEDUCTION / 1_000_000).toLocaleString("vi-VN")} triệu.
+                {(detailPitRule.personalDeduction / 1_000_000).toLocaleString("vi-VN")} triệu, mỗi người phụ thuộc{" "}
+                {(detailPitRule.dependentDeduction / 1_000_000).toLocaleString("vi-VN")} triệu
+                {" "}({detailPitRule.source}).
               </p>
 
               {visibleItems.length === 0 ? (
