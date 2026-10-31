@@ -131,7 +131,7 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 ## Ghi chú bảo mật & lương (31/10/2026)
 - Bảng `employees`: cột nhạy cảm (CCCD, ngân hàng, MST…) không cấp SELECT cho `authenticated`. Đọc qua `EMPLOYEE_PUBLIC_COLUMNS` + `withSensitiveFields()` (RPC `employee_sensitive_fields`). Không dùng `select("*")` trên `employees`. Thêm cột mới phải `grant select (cột) on employees to authenticated` nếu không nhạy cảm.
 - Thuế TNCN/giảm trừ/lương cơ sở theo hiệu lực: `PIT_RULES`, `BASE_WAGE_RULES` trong `src/lib/payroll-calc.ts`; kiểm tra nhanh bằng `pnpm test:payroll`.
-- `payroll_items` có trigger `validate_payroll_item` kiểm tra số liệu phía server.
+- `payroll_items` có trigger `validate_payroll_item` kiểm tra số liệu phía server. Từ 01/11/2026 trigger **tính lại** lương cơ bản/phụ cấp theo công, BH NLĐ, thu nhập tính thuế, thuế TNCN bằng các hàm SQL `payroll_compute_pit`, `payroll_employee_insurance`, `payroll_insurance_cap`, `payroll_personal_deduction`, `payroll_dependent_deduction` (lệch > 2 đồng là bị từ chối). Đổi tham số thuế/lương cơ sở phải sửa CẢ `payroll-calc.ts` và các hàm SQL này (migration mới), rồi chạy `pnpm test:payroll` và chạy kịch bản `pnpm -s test:payroll:sql` (in ra SQL có sẵn begin/rollback) trên DB.
 
 ## Quy trình triển khai
 

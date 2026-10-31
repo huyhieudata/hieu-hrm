@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "pInstall": "pnpm install",
-    "test:payroll": "node --experimental-strip-types scripts/check-payroll-calc.ts"
+    "test:payroll": "node --experimental-strip-types scripts/check-payroll-calc.ts",
+    "test:payroll:sql": "node --experimental-strip-types scripts/payroll-server-parity.ts"
   },
   "dependencies": {
     "@enter-pro/analytics-sdk": "^0.0.10",
