@@ -32,7 +32,6 @@ export default defineConfig(({ mode }) => {
             if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)) return 'vendor-react';
             if (id.includes('@supabase')) return 'vendor-supabase';
             if (id.includes('@radix-ui')) return 'vendor-radix';
-            if (/recharts|d3-|victory-vendor/.test(id)) return 'vendor-charts';
             if (/date-fns|dayjs/.test(id)) return 'vendor-date';
             if (/@tanstack/.test(id)) return 'vendor-query';
             return undefined;
