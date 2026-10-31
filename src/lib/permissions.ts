@@ -15,8 +15,9 @@ export type CrudAction = "view" | "create" | "edit" | "delete";
 export interface PermissionModule {
   key: string;
   label: string;
-  legacyView: Permission;
-  legacyManage: Permission;
+  /** Bỏ trống với module mới không có quyền vai trò cũ tương ứng (vd. news). */
+  legacyView?: Permission;
+  legacyManage?: Permission;
 }
 
 export const CRUD_ACTIONS: { key: CrudAction; label: string }[] = [
@@ -39,6 +40,7 @@ export const PERMISSION_MODULES: PermissionModule[] = [
   { key: "payroll", label: "Tính lương", legacyView: "payroll.view", legacyManage: "payroll.manage" },
   { key: "recruitment", label: "Tuyển dụng", legacyView: "recruitment.view", legacyManage: "recruitment.manage" },
   { key: "planning", label: "Hoạch định & định biên", legacyView: "employees.view", legacyManage: "employees.manage" },
+  { key: "news", label: "Truyền thông nội bộ" },
   { key: "members", label: "Thành viên & quyền", legacyView: "members.view", legacyManage: "members.manage" },
   { key: "settings", label: "Cấu hình công ty", legacyView: "employees.view", legacyManage: "employees.manage" },
 ];
@@ -87,8 +89,8 @@ export const toLegacyPermissions = (keys: string[]): Permission[] => {
   });
   PERMISSION_MODULES.forEach((module) => {
     const own = modulePermissionKeys(module.key);
-    if (keys.includes(own[0])) result.add(module.legacyView);
-    if (LEGACY_WRITE_MODULES.has(module.key) && own.slice(1).some((key) => keys.includes(key))) {
+    if (module.legacyView && keys.includes(own[0])) result.add(module.legacyView);
+    if (module.legacyManage && LEGACY_WRITE_MODULES.has(module.key) && own.slice(1).some((key) => keys.includes(key))) {
       result.add(module.legacyManage);
     }
   });
@@ -108,8 +110,8 @@ export const expandLegacyPermissions = (permissions: string[]): string[] => {
     // leave.approve là quyền duyệt riêng, không mở toàn bộ quyền tạo/sửa/xoá đơn.
     if (module.key === "requests" && permissions.includes("leave.approve")) return;
     const own = modulePermissionKeys(module.key);
-    if (permissions.includes(module.legacyView)) result.add(own[0]);
-    if (permissions.includes(module.legacyManage)) {
+    if (module.legacyView && permissions.includes(module.legacyView)) result.add(own[0]);
+    if (module.legacyManage && permissions.includes(module.legacyManage)) {
       result.add(own[1]);
       result.add(own[2]);
       result.add(own[3]);

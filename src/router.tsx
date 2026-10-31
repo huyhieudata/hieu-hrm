@@ -25,6 +25,7 @@ const ShiftAssignments = lazy(() => import("./pages/attendance/ShiftAssignments"
 const AttendanceSettings = lazy(() => import("./pages/attendance/AttendanceSettings"));
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Assets = lazy(() => import("./pages/Assets"));
+const News = lazy(() => import("./pages/News"));
 const Payroll = lazy(() => import("./pages/payroll/Payroll"));
 const Workspaces = lazy(() => import("./pages/admin/Workspaces"));
 const ServicePlans = lazy(() => import("./pages/admin/ServicePlans"));
@@ -266,6 +267,16 @@ export const routers = [
         <Payroll />
       </PageSuspense>,
       "payroll",
+    ),
+  },
+  {
+    path: "/tin-tuc",
+    name: "news",
+    element: companyScoped(
+      <PageSuspense>
+        <News />
+      </PageSuspense>,
+      "news",
     ),
   },
   {

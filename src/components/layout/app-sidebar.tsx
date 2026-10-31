@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Building2,
   Megaphone,
+  Newspaper,
   FileText,
   CalendarClock,
   UserPlus,
@@ -86,7 +87,10 @@ export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }
   const groups: { label: string; items: NavItem[] }[] = [
     {
       label: "Tổng quan",
-      items: [{ label: "Bảng điều khiển", to: "/", icon: LayoutDashboard }],
+      items: [
+        { label: "Bảng điều khiển", to: "/", icon: LayoutDashboard, exact: true },
+        canDo("news", "view") && { label: "Tin nội bộ", to: "/tin-tuc", icon: Newspaper },
+      ].filter(Boolean) as NavItem[],
     },
     {
       label: "Quản lý nhân sự",

@@ -20,6 +20,7 @@ import { BirthdaysCard } from "@/components/dashboard/birthdays-card";
 import { ActivityCard } from "@/components/dashboard/activity-card";
 import { DepartmentBreakdown } from "@/components/dashboard/department-breakdown";
 import { HeadcountChart } from "@/components/dashboard/headcount-chart";
+import { NewsCard } from "@/components/dashboard/news-card";
 import { LeaveApprovals, type DashboardLeaveItem } from "@/components/dashboard/leave-approvals";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -47,7 +48,7 @@ const secondLast = (values: number[]) => (values.length >= 2 ? values[values.len
 
 const Dashboard = () => {
   const { profile, user } = useAuth();
-  const { activeCompany, role, can } = useCompany();
+  const { activeCompany, role, can, canDo } = useCompany();
   const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -290,6 +291,8 @@ const Dashboard = () => {
               className="animate-fade-up animation-delay-300"
             />
           </div>
+
+          {companyId && canDo("news", "view") && <NewsCard companyId={companyId} />}
 
           <div className="grid gap-4 lg:grid-cols-3">
             <HeadcountChart data={data?.headcountTrend ?? []} />
