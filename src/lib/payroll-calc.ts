@@ -231,6 +231,39 @@ export interface PayrollLeaveInput {
   status: string;
   category: string | null;
   deduct_leave: boolean | null;
+  ot_hours?: number | null;
+  ot_kind?: string | null;
+}
+
+/** Hệ số tăng ca theo Điều 98 BLLĐ 2019. */
+export const OT_MULTIPLIERS: Record<string, number> = { weekday: 1.5, weekend: 2, holiday: 3 };
+export const OT_KIND_LABELS: Record<string, string> = {
+  weekday: "Ngày thường (150%)",
+  weekend: "Ngày nghỉ hằng tuần (200%)",
+  holiday: "Ngày lễ, Tết (300%)",
+};
+export const OT_HOURS_PER_DAY = 8;
+
+/**
+ * Tiền tăng ca = lương giờ × giờ OT × hệ số; lương giờ = lương cơ bản / ngày công chuẩn / 8.
+ * Chỉ phần 100% lương giờ chịu thuế TNCN, phần chênh lệch được miễn.
+ */
+export const computeOvertimePay = (
+  baseSalary: number,
+  standardDays: number,
+  entries: { hours: number; kind: string | null | undefined }[],
+) => {
+  const hourly = standardDays > 0 ? baseSalary / standardDays / OT_HOURS_PER_DAY : 0;
+  let hours = 0;
+  let pay = 0;
+  let taxable = 0;
+  for (const entry of entries) {
+    const h = Math.max(Number(entry.hours) || 0, 0);
+    hours += h;
+    pay += hourly * h * (OT_MULTIPLIERS[entry.kind ?? "weekday"] ?? 1.5);
+    taxable += hourly * h;
+  }
+  return { hours: round(hours, 2), pay: Math.round(pay), taxable: Math.round(taxable) };
 }
 
 export interface PayrollItemDraft {
@@ -247,6 +280,9 @@ export interface PayrollItemDraft {
   position_allowance: number;
   responsibility_allowance: number;
   other_allowance: number;
+  overtime_hours: number;
+  overtime_pay: number;
+  overtime_taxable: number;
   gross_salary: number;
   insurance_salary: number;
   insurance_employee: number;
@@ -295,7 +331,8 @@ export const applyPayrollAdjustment = (
     | "other_allowance"
     | "insurance_employee"
     | "dependents_count"
-  >,
+  > &
+    Partial<Pick<PayrollItemDraft, "overtime_pay" | "overtime_taxable">>,
   adjustment: PayrollAdjustmentInput,
   period?: { year: number; month: number },
 ) => {
@@ -306,10 +343,12 @@ export const applyPayrollAdjustment = (
     Number(item.base_salary) +
     Number(item.position_allowance) +
     Number(item.responsibility_allowance) +
-    otherAllowance;
+    otherAllowance +
+    Number(item.overtime_pay ?? 0);
+  const otExempt = Number(item.overtime_pay ?? 0) - Number(item.overtime_taxable ?? 0);
   const dependents = Math.max(Number(item.dependents_count ?? 0), 0);
   const taxable = Math.max(
-    gross - Number(item.insurance_employee) - rule.personalDeduction - dependents * rule.dependentDeduction,
+    gross - otExempt - Number(item.insurance_employee) - rule.personalDeduction - dependents * rule.dependentDeduction,
     0,
   );
   const tax = computePit(taxable, rule);
@@ -394,6 +433,11 @@ export const calculatePayroll = (input: {
     .filter((row) => row.effective_date <= periodEnd)
     .sort((a, b) => a.effective_date.localeCompare(b.effective_date))
     .forEach((row) => salaryByEmployee.set(row.employee_id, row));
+
+  const overtimeByEmployee = new Map<string, PayrollLeaveInput[]>();
+  leaves
+    .filter((row) => row.status === "approved" && row.category === "overtime" && row.start_date >= periodStart && row.start_date <= periodEnd)
+    .forEach((row) => overtimeByEmployee.set(row.employee_id, [...(overtimeByEmployee.get(row.employee_id) ?? []), row]));
 
   const leavesByEmployee = new Map<string, PayrollLeaveInput[]>();
   leaves
@@ -513,7 +557,14 @@ export const calculatePayroll = (input: {
     const positionAllowance = Math.round(Number(salary.position_allowance ?? 0) * ratio);
     const responsibilityAllowance = Math.round(Number(salary.responsibility_allowance ?? 0) * ratio);
     const otherAllowance = Math.round(Number(salary.other_allowance ?? 0) * ratio);
-    const gross = base + positionAllowance + responsibilityAllowance + otherAllowance;
+    const overtime = computeOvertimePay(
+      baseSalary,
+      standardDays,
+      (overtimeByEmployee.get(employee.id) ?? [])
+        .filter((row) => row.start_date >= employmentStart && row.start_date <= employmentEnd)
+        .map((row) => ({ hours: Number(row.ot_hours ?? 0), kind: row.ot_kind })),
+    );
+    const gross = base + positionAllowance + responsibilityAllowance + otherAllowance + overtime.pay;
 
     const insuranceSalary = Number(salary.insurance_salary ?? baseSalary);
     const insurance =
@@ -527,7 +578,7 @@ export const calculatePayroll = (input: {
         : 0;
     const dependents = Math.max(Number(employee.dependents_count ?? 0), 0);
     const taxable = Math.max(
-      gross - insurance - pitRule.personalDeduction - dependents * pitRule.dependentDeduction,
+      gross - (overtime.pay - overtime.taxable) - insurance - pitRule.personalDeduction - dependents * pitRule.dependentDeduction,
       0,
     );
     const tax = computePit(taxable, pitRule);
@@ -547,6 +598,9 @@ export const calculatePayroll = (input: {
       position_allowance: positionAllowance,
       responsibility_allowance: responsibilityAllowance,
       other_allowance: otherAllowance,
+      overtime_hours: overtime.hours,
+      overtime_pay: overtime.pay,
+      overtime_taxable: overtime.taxable,
       gross_salary: gross,
       insurance_salary: insuranceSalary,
       insurance_employee: insurance,

@@ -11,6 +11,7 @@ export const REQUEST_CATEGORY_LABELS: Record<string, string> = {
   remote: "Làm từ xa",
   attendance_fix: "Sửa chấm công",
   outside: "Ra ngoài",
+  overtime: "Tăng ca",
   other: "Khác",
 };
 
@@ -130,6 +131,7 @@ export const REQUEST_CATEGORY_ORDER = [
   "remote",
   "outside",
   "attendance_fix",
+  "overtime",
   "other",
 ];
 
