@@ -8,8 +8,14 @@ const lazy = <T extends ComponentType<any>>(loader: () => Promise<{ default: T }
   routeLoaders.push(loader);
   return reactLazy(loader);
 };
-export const preloadRoutes = () => {
-  routeLoaders.forEach((load) => void load().catch(() => undefined));
+export const preloadRoutes = async () => {
+  // Không tranh băng thông với dữ liệu trang: bỏ qua khi tiết kiệm dữ liệu / mạng 2G,
+  // và tải TUẦN TỰ từng chunk thay vì bắn 50 request cùng lúc.
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn?.saveData || /2g/.test(conn?.effectiveType ?? "")) return;
+  for (const load of routeLoaders) {
+    await load().catch(() => undefined);
+  }
 };
 import { Navigate } from "react-router-dom";
 

@@ -415,7 +415,7 @@ const Payroll = () => {
       span: 2,
       hint: "Chọn tháng cần tính lương. Mỗi tháng chỉ có một kỳ lương.",
     },
-    { name: "standard_work_days", label: "Ngày công chuẩn", type: "number", placeholder: "26" },
+    { name: "standard_work_days", label: "Ngày công chuẩn", type: "number", placeholder: "26", required: true },
     { name: "note", label: "Ghi chú", placeholder: "Kỳ lương tháng…" },
   ];
 
@@ -452,6 +452,9 @@ const Payroll = () => {
     const standardDays = Number(values.standard_work_days ?? 26);
     if (!Number.isFinite(standardDays) || standardDays <= 0 || standardDays > 31) {
       throw new Error("Ngày công chuẩn phải trong khoảng 1 – 31.");
+    }
+    if (periods.some((period) => period.year === year && period.month === month)) {
+      throw new Error(`Kỳ lương tháng ${month}/${year} đã tồn tại.`);
     }
 
     try {

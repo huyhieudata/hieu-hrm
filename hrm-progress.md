@@ -17,3 +17,10 @@ Chưa làm / ghi chú:
 
 ## Tiếp theo (đợt riêng)
 - Tốc độ tải (React Query, RLS/index), validate Tạo kỳ lương / chính sách phép, seed loại đơn có dấu, đánh dấu bản ghi chấm công nhập tay, các mục nhỏ.
+
+## 01/11/2026 — Đợt xếp hàng (tốc độ + validate + việc nhỏ)
+- Tốc độ: cache/dedupe truy vấn, 1 truy vấn platform_admins, profile tải 1 lần, preload chunk tuần tự; migration bọc auth.*() trong RLS (initplan) + 89 index FK.
+- Validate Tạo kỳ lương (chặn trùng tháng) và Tạo chính sách phép (bắt buộc, trùng tên/năm, trùng loại phép, kiểm phạm vi trước khi ghi) + toast.
+- Loại đơn mặc định có dấu cho mọi công ty + trigger công ty mới; "Phep" → "Nghỉ phép".
+- Chấm công cũ → nhãn "Nhập tay/cũ".
+- Định biên mặc định năm hiện tại; cột Vào làm lấy HĐ đầu tiên nếu thiếu; PDF ngang + ngày/điện thoại; import .xlsx; bỏ nút Đóng trùng ở import; lỗi theo ô ở Thêm nhân viên; sửa menu "..." ; nhãn ô quyền; xác nhận Thu hồi lời mời; dialog lý do từ chối.

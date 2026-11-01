@@ -2,6 +2,7 @@
 // Powered by EnterCloud Managed Supabase
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { cachingFetch } from '@/lib/query-cache';
 
 export const SUPABASE_URL = "https://yrdcsbjlvgycipzpogbv.supabase.co";
 export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zlmh2Lp8ojohDx6IlnbzIg_g9TofE70";
@@ -14,5 +15,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+  },
+  global: { fetch: cachingFetch },
 });

@@ -47,8 +47,11 @@ export const PermissionMatrix = ({
                   type="button"
                   disabled={readOnly}
                   onClick={() => onToggle(key)}
+                  role="checkbox"
+                  aria-checked={blocked ? "mixed" : checked}
                   aria-label={`${module.label} · ${action.label}`}
-                  className="flex w-9 justify-center disabled:cursor-default"
+                  title={`${action.label} ${module.label.toLowerCase()}${blocked ? " (đã thu hồi)" : ""}`}
+                  className="flex w-9 flex-col items-center gap-0.5 disabled:cursor-default"
                 >
                   <span
                     className={`flex h-4 w-4 items-center justify-center rounded border ${
@@ -61,6 +64,7 @@ export const PermissionMatrix = ({
                   >
                     {blocked ? <Minus className="h-3 w-3" /> : checked ? <Check className="h-3 w-3" /> : null}
                   </span>
+                  <span className="text-[9.5px] leading-3 text-muted-foreground">{action.label}</span>
                 </button>
               );
             })}

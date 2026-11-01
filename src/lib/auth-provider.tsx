@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -63,7 +64,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const profileFor = useRef<string | null>(null);
   const loadProfile = useCallback(async (currentUser: User) => {
+    // INITIAL_SESSION + getSession + TOKEN_REFRESHED cùng bắn ⇒ chỉ tải hồ sơ 1 lần cho mỗi user.
+    if (profileFor.current === currentUser.id) {
+      setLoading(false);
+      return;
+    }
+    profileFor.current = currentUser.id;
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -93,6 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (createError) throw createError;
       setProfile(created);
     } catch (error) {
+      profileFor.current = null;
       console.error("Không tải được hồ sơ người dùng", error);
     } finally {
       setLoading(false);
@@ -106,9 +115,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!active) return;
 
       setSession(nextSession);
-      setUser(nextSession?.user ?? null);
+      // Giữ nguyên object user khi chỉ refresh token ⇒ không làm re-render/refetch toàn app.
+      setUser((current) => (current && nextSession?.user && current.id === nextSession.user.id ? current : nextSession?.user ?? null));
 
       if (!nextSession?.user) {
+        profileFor.current = null;
         setProfile(null);
         setLoading(false);
         return;
@@ -128,7 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       setSession(data.session);
-      setUser(data.session.user);
+      setUser((current) => (current && current.id === data.session!.user.id ? current : data.session!.user));
       const restoredUser = data.session.user;
       setTimeout(() => {
         if (active) void loadProfile(restoredUser);

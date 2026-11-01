@@ -1,3 +1,4 @@
+import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +65,10 @@ export interface EmployeeRequest {
 
 type RequestTable = "request_types" | "requests";
 
-export const listRequestTypes = async (companyId: string, onlyActive = false): Promise<RequestType[]> => {
+export const listRequestTypes = (companyId: string, onlyActive = false): Promise<RequestType[]> =>
+  cached(`requestTypes:${companyId}:${onlyActive}`, 60_000, () => listRequestTypesRaw(companyId, onlyActive)).then((rows) => [...rows]);
+
+const listRequestTypesRaw = async (companyId: string, onlyActive: boolean): Promise<RequestType[]> => {
   let query = db.from("request_types").select("*").eq("company_id", companyId);
   if (onlyActive) query = query.eq("active", true);
   const { data, error } = await query.order("sort_order", { ascending: true }).order("created_at", { ascending: true });

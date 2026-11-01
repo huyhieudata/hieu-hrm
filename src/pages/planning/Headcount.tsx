@@ -100,7 +100,9 @@ const Headcount = () => {
       setDepartments(departmentRows);
       setPositions(positionRows);
       setSelectedPlanId((current) =>
-        current && planRows.some((plan) => plan.id === current) ? current : planRows[0]?.id ?? "",
+        current && planRows.some((plan) => plan.id === current)
+          ? current
+          : (planRows.find((plan) => plan.year === new Date().getFullYear()) ?? planRows[0])?.id ?? "",
       );
     } catch (error) {
       toast.error("Không tải được kế hoạch định biên", {
@@ -563,7 +565,7 @@ const Headcount = () => {
         title={editingPlan ? "Sửa bản ghi định biên" : "Tạo bản ghi định biên"}
         description="Mỗi năm chỉ có một bản ghi định biên."
         fields={planFields}
-        initial={editingPlan ?? { year: new Date().getFullYear() + 1 }}
+        initial={editingPlan ?? { year: new Date().getFullYear() }}
         submitLabel={editingPlan ? "Lưu thay đổi" : "Tạo bản ghi"}
         onSubmit={handlePlanSubmit}
       />

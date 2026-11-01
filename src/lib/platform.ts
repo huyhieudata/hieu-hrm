@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-provider";
@@ -39,34 +39,20 @@ export const WORKSPACE_STATUS_LABELS: Record<string, string> = {
   suspended: "Tạm dừng",
 };
 
+/** Một truy vấn platform_admins dùng chung cho sidebar, mobile-nav, settings-nav, trang admin (React Query cache). */
 export const usePlatformAdmin = () => {
   const { user } = useAuth();
-  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    if (!user?.id) {
-      setIsPlatformAdmin(false);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    db.from("platform_admins")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }: { data: { user_id: string } | null }) => {
-        if (!active) return;
-        setIsPlatformAdmin(!!data);
-        setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [user?.id]);
-
-  return { isPlatformAdmin, loading };
+  const userId = user?.id ?? null;
+  const query = useQuery({
+    queryKey: ["platform-admin", userId],
+    enabled: !!userId,
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const { data } = await db.from("platform_admins").select("user_id").eq("user_id", userId).maybeSingle();
+      return !!data;
+    },
+  });
+  return { isPlatformAdmin: query.data ?? false, loading: !!userId && query.isPending };
 };
 
 export const listServicePlans = async (): Promise<ServicePlan[]> => {

@@ -60,6 +60,7 @@ export const exportPdf = (
   const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8" />
 <title>${escapeHtml(title)}</title>
 <style>
+  @page{size:A4 landscape;margin:12mm}
   body{font-family:"Segoe UI",system-ui,sans-serif;color:#111;margin:32px}
   h1{font-size:20px;margin:0 0 4px}
   p.sub{color:#666;font-size:12px;margin:0 0 18px}

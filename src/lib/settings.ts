@@ -1,3 +1,4 @@
+import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,7 +105,10 @@ export interface DepartmentPosition {
   created_at: string;
 }
 
-export const listDepartmentPositions = async (companyId: string): Promise<DepartmentPosition[]> => {
+export const listDepartmentPositions = (companyId: string): Promise<DepartmentPosition[]> =>
+  cached(`listDepartmentPositions:${companyId}`, 60_000, () => listDepartmentPositionsRaw(companyId)).then((rows) => [...rows]);
+
+const listDepartmentPositionsRaw = async (companyId: string): Promise<DepartmentPosition[]> => {
   const { data, error } = await db
     .from("department_positions")
     .select("*")
@@ -115,7 +119,10 @@ export const listDepartmentPositions = async (companyId: string): Promise<Depart
   return (data ?? []) as DepartmentPosition[];
 };
 
-export const listDepartments = async (companyId: string): Promise<DepartmentRecord[]> => {
+export const listDepartments = (companyId: string): Promise<DepartmentRecord[]> =>
+  cached(`listDepartments:${companyId}`, 60_000, () => listDepartmentsRaw(companyId)).then((rows) => [...rows]);
+
+const listDepartmentsRaw = async (companyId: string): Promise<DepartmentRecord[]> => {
   const { data, error } = await db
     .from("departments")
     .select("*")

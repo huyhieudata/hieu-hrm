@@ -1,3 +1,4 @@
+import { ConfirmAction } from "@/components/common/confirm-action";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Copy,
@@ -592,14 +593,20 @@ const Members = () => {
                           >
                             <Copy className="h-3 w-3" /> Sao chép
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 gap-1 text-[11.5px] text-destructive"
-                            onClick={() => void revokeInvite(invite)}
+                          <ConfirmAction
+                            title="Thu hồi lời mời?"
+                            description={`Lời mời gửi ${invite.email ?? ""} sẽ không dùng được nữa.`}
+                            confirmLabel="Thu hồi"
+                            onConfirm={() => revokeInvite(invite)}
                           >
-                            <Trash2 className="h-3 w-3" /> Thu hồi
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 gap-1 text-[11.5px] text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" /> Thu hồi
+                            </Button>
+                          </ConfirmAction>
                         </>
                       )}
                     </div>

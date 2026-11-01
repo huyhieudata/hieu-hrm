@@ -503,11 +503,14 @@ const Requests = () => {
           className="h-9 rounded-md border border-border bg-card px-2.5 text-[12px] text-foreground shadow-xs outline-none focus:border-primary"
         >
           <option value="all">Tất cả loại đơn</option>
-          {types.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
-          ))}
+          {[...types]
+            .sort((a, b) => Number(b.active) - Number(a.active) || a.sort_order - b.sort_order)
+            .map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+                {type.active ? "" : " (đã tắt)"}
+              </option>
+            ))}
         </select>
         <label className="relative block">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />

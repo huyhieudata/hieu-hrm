@@ -201,3 +201,12 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Bảng mới: `employee_certificates`, `employee_change_requests`, `employee_sensitive_audit`, `contract_appendices` (stamp company/employee từ hợp đồng), `contract_templates`. Thêm cột employees ⇒ nhớ cập nhật `EMPLOYEE_PUBLIC_COLUMNS`.
 - Xuất HĐ: `src/lib/contract-docs.ts` (Word = HTML `.doc`, PDF = in iframe); biến `{{ten_bien}}` luôn escape. Mẫu sửa ở `/cai-dat/mau-hop-dong`; không có mẫu ⇒ `DEFAULT_CONTRACT_TEMPLATE`. Cảnh báo pháp lý `contractLegalWarnings` (BLLĐ 2019 Điều 20, 22, 25).
 - Dry-run DB: `scripts/ho-so-hop-dong-dryrun.sql` (kết thúc bằng `raise exception` ⇒ rollback toàn bộ).
+
+## Cache & form (đợt 01/11/2026)
+- Đọc danh sách dùng chung (nhân viên, phòng ban, vị trí, loại đơn) qua `cached()` trong `src/lib/query-cache.ts`; mọi request ghi (POST/PATCH/DELETE, RPC không thuộc READ_RPCS) tự xoá cache. RPC chỉ đọc mới → thêm vào READ_RPCS.
+- `usePlatformAdmin` dùng react-query (1 truy vấn platform_admins cho cả app).
+- Form dùng `FieldDialog`: lỗi hiện dưới từng ô + toast. Lỗi server gắn ô → `throw new FieldError("ten_o", "...")`.
+- Hành động huỷ/thu hồi → bọc `ConfirmAction`. Không dùng `window.prompt/confirm`.
+- Import nhân sự nhận .xlsx (đọc bằng `src/lib/xlsx-reader.ts`, không thêm thư viện) và .csv.
+- Chấm công không ảnh/GPS/thiết bị: `isLegacyAttendance()` → nhãn "Nhập tay/cũ", không xoá.
+- Mở dialog từ DropdownMenuItem: bọc `setTimeout(...,0)` để menu đóng hẳn.

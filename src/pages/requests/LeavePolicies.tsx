@@ -360,25 +360,42 @@ const LeavePolicies = () => {
   const savePolicy = async () => {
     if (!companyId) return;
     setPolicyError(null);
+    const fail = (message: string) => {
+      setPolicyError(message);
+      toast.error(message);
+    };
 
-    if (!draft.name.trim()) {
-      setPolicyError("Vui lòng nhập tên chính sách.");
-      return;
-    }
+    const name = draft.name.trim();
+    if (!name) return fail("Vui lòng nhập tên chính sách.");
+    const yearNum = Number(draft.year);
+    if (!Number.isInteger(yearNum) || yearNum < 2000 || yearNum > 2100) return fail("Năm áp dụng không hợp lệ.");
+    const carry = Number(draft.carry_over_max || 0);
+    if (Number.isNaN(carry) || carry < 0 || carry > 365) return fail("Số ngày chuyển sang năm sau phải từ 0 – 365.");
+    const duplicate = policies.find(
+      (policy) =>
+        policy.id !== editingPolicy?.id &&
+        Number(policy.year) === yearNum &&
+        policy.name.trim().toLowerCase() === name.toLowerCase(),
+    );
+    if (duplicate) return fail(`Đã có chính sách "${name}" cho năm ${yearNum}.`);
     if (!draft.auto_annual_leave && draft.items.length === 0) {
-      setPolicyError("Thêm ít nhất một loại phép vào quỹ hoặc bật phép năm tự động.");
-      return;
+      return fail("Thêm ít nhất một loại phép vào quỹ hoặc bật phép năm tự động.");
     }
+    const seen = new Set<string>();
     for (const [index, item] of draft.items.entries()) {
-      if (!item.name.trim()) {
-        setPolicyError(`Loại phép ${index + 1}: chưa nhập tên.`);
-        return;
-      }
-      if (Number.isNaN(Number(item.days)) || Number(item.days) < 0) {
-        setPolicyError(`Loại phép ${index + 1}: số ngày không hợp lệ.`);
-        return;
+      const itemName = item.name.trim().toLowerCase();
+      if (!itemName) return fail(`Loại phép ${index + 1}: chưa nhập tên.`);
+      if (seen.has(itemName)) return fail(`Loại phép "${item.name.trim()}" bị trùng.`);
+      seen.add(itemName);
+      if (item.days === "" || Number.isNaN(Number(item.days)) || Number(item.days) < 0 || Number(item.days) > 365) {
+        return fail(`Loại phép ${index + 1}: số ngày không hợp lệ.`);
       }
     }
+    // Kiểm tra phạm vi áp dụng TRƯỚC khi ghi để không tạo chính sách mồ côi.
+    if (assignMode === "department" && assignDepartments.length === 0) return fail("Chọn ít nhất một bộ phận áp dụng chính sách.");
+    if (assignMode === "position" && assignPositions.length === 0) return fail("Chọn ít nhất một vị trí áp dụng chính sách.");
+    if (assignMode === "employee" && assignEmployees.length === 0) return fail("Chọn ít nhất một nhân sự áp dụng chính sách.");
+    if (savingPolicy) return;
 
     setSavingPolicy(true);
     try {
@@ -441,6 +458,7 @@ const LeavePolicies = () => {
       await load();
     } catch (error) {
       setPolicyError(getErrorMessage(error));
+      toast.error("Không lưu được chính sách", { description: getErrorMessage(error) });
     } finally {
       setSavingPolicy(false);
     }

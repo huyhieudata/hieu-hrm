@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -26,6 +27,17 @@ import { getErrorMessage } from "@/lib/utils";
 export type { FieldDef, FieldType } from "@/lib/field-defs";
 
 export type FieldValues = Record<string, string>;
+
+/** Ném lỗi này trong onSubmit để hiện lỗi ngay dưới ô `field`. */
+export class FieldError extends Error {
+  constructor(
+    public field: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "FieldError";
+  }
+}
 
 interface FieldDialogProps {
   open: boolean;
@@ -86,6 +98,7 @@ export const FieldDialog = ({
 }: FieldDialogProps) => {
   const [values, setValues] = useState<FieldValues>({});
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [customFields, setCustomFields] = useState<Record<string, boolean>>({});
   const wasOpen = useRef(false);
@@ -97,6 +110,7 @@ export const FieldDialog = ({
       setValues(buildValues(fields, initial));
       setCustomFields({});
       setError(null);
+      setFieldErrors({});
     }
     wasOpen.current = open;
   }, [fields, initial, open]);
@@ -113,6 +127,12 @@ export const FieldDialog = ({
   }, [fields]);
 
   const setField = (name: string, value: string) => {
+    setFieldErrors((prev) => {
+      if (!prev[name]) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
     setValues((prev) => {
       const next = { ...prev, [name]: value };
       // Xoá giá trị của field phụ thuộc nếu không còn hợp lệ (vd: đổi phòng ban → chức danh cũ).
@@ -135,25 +155,33 @@ export const FieldDialog = ({
     event.preventDefault();
     setError(null);
 
+    // Gom lỗi TỪNG trường (hiện ngay dưới ô), không dừng ở lỗi đầu tiên.
+    const nextErrors: Record<string, string> = {};
     for (const field of fields) {
       const raw = (values[field.name] ?? "").trim();
       if (field.required && !raw) {
-        setError(`Vui lòng nhập ${field.label.toLowerCase()}.`);
-        return;
+        nextErrors[field.name] = `Vui lòng nhập ${field.label.toLowerCase()}.`;
+        continue;
       }
       if (
         (field.type === "number" || field.type === "currency") &&
         raw &&
         Number.isNaN(Number(raw))
       ) {
-        setError(`${field.label} phải là số.`);
-        return;
+        nextErrors[field.name] = `${field.label} phải là số.`;
+        continue;
       }
       const invalid = raw && field.validate ? field.validate(raw) : null;
-      if (invalid) {
-        setError(invalid);
-        return;
-      }
+      if (invalid) nextErrors[field.name] = invalid;
+    }
+    setFieldErrors(nextErrors);
+    const firstInvalid = fields.find((field) => nextErrors[field.name]);
+    if (firstInvalid) {
+      const count = Object.keys(nextErrors).length;
+      setError(count > 1 ? `Còn ${count} ô cần sửa.` : nextErrors[firstInvalid.name]);
+      toast.error(count > 1 ? `Còn ${count} ô cần sửa` : nextErrors[firstInvalid.name]);
+      document.getElementById(`field-${firstInvalid.name}`)?.focus();
+      return;
     }
 
     const payload: Record<string, string | number | null> = {};
@@ -180,7 +208,13 @@ export const FieldDialog = ({
       await onSubmit(payload);
       onOpenChange(false);
     } catch (submitError) {
-      setError(getErrorMessage(submitError));
+      const message = getErrorMessage(submitError);
+      if (submitError instanceof FieldError) {
+        setFieldErrors((prev) => ({ ...prev, [submitError.field]: message }));
+        document.getElementById(`field-${submitError.field}`)?.focus();
+      }
+      setError(message);
+      toast.error("Chưa lưu được", { description: message });
     } finally {
       setSaving(false);
     }
@@ -220,7 +254,10 @@ export const FieldDialog = ({
                         ? "sm:col-span-2"
                         : "";
                     return (
-                      <div key={field.name} className={`space-y-1.5 ${span}`}>
+                      <div
+                        key={field.name}
+                        className={`space-y-1.5 ${span} ${fieldErrors[field.name] ? "[&_input]:border-destructive [&_textarea]:border-destructive [&_button[role=combobox]]:border-destructive" : ""}`}
+                      >
                         <Label htmlFor={id} className="text-[12px]">
                           {field.label}
                           {field.required && (
@@ -357,7 +394,12 @@ export const FieldDialog = ({
                           />
                         )}
 
-                        {field.hint && (
+                        {fieldErrors[field.name] && (
+                          <p className="text-[11px] font-medium leading-4 text-destructive" role="alert">
+                            {fieldErrors[field.name]}
+                          </p>
+                        )}
+                        {field.hint && !fieldErrors[field.name] && (
                           <p className="text-[11px] leading-4 text-muted-foreground">
                             {field.hint}
                           </p>

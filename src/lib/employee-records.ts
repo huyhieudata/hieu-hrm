@@ -1,3 +1,4 @@
+import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -626,7 +627,10 @@ export const withSensitiveFields = async <T extends { id: string; company_id: st
   });
 };
 
-export const listEmployees = async (companyId: string): Promise<EmployeeRecord[]> => {
+export const listEmployees = (companyId: string): Promise<EmployeeRecord[]> =>
+  cached(`employees:${companyId}`, 30_000, () => fetchEmployees(companyId)).then((rows) => [...rows]);
+
+const fetchEmployees = async (companyId: string): Promise<EmployeeRecord[]> => {
   const { data, error } = await db
     .from("employees")
     .select(EMPLOYEE_PUBLIC_COLUMNS)

@@ -138,6 +138,7 @@ export const ChangeRequestsReview = ({
 }) => {
   const [rows, setRows] = useState<ChangeRequest[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<ChangeRequest | null>(null);
   const load = useCallback(async () => {
     try {
       setRows(await listChangeRequests(companyId, { employeeId, pendingOnly: true }));
@@ -151,8 +152,7 @@ export const ChangeRequestsReview = ({
 
   if (rows.length === 0) return null;
 
-  const act = async (row: ChangeRequest, approve: boolean) => {
-    const note = approve ? undefined : (window.prompt("Lý do từ chối (không bắt buộc)") ?? undefined);
+  const act = async (row: ChangeRequest, approve: boolean, note?: string) => {
     setBusy(row.id);
     try {
       await reviewChangeRequest(row.id, approve, note);
@@ -185,7 +185,7 @@ export const ChangeRequestsReview = ({
               {row.note && <p className="mt-1 text-[11.5px] italic text-muted-foreground">“{row.note}”</p>}
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button variant="outline" className="h-9 gap-1" disabled={busy === row.id} onClick={() => void act(row, false)}>
+              <Button variant="outline" className="h-9 gap-1" disabled={busy === row.id} onClick={() => setRejecting(row)}>
                 <X className="h-3.5 w-3.5" /> Từ chối
               </Button>
               <Button className="h-9 gap-1" disabled={busy === row.id} onClick={() => void act(row, true)}>
@@ -195,6 +195,22 @@ export const ChangeRequestsReview = ({
           </li>
         ))}
       </ul>
+      <FieldDialog
+        open={rejecting !== null}
+        onOpenChange={(open) => !open && setRejecting(null)}
+        title="Từ chối đề nghị cập nhật"
+        description="Lý do sẽ được gửi kèm cho nhân viên."
+        submitLabel="Từ chối"
+        fields={[
+          { name: "note", label: "Lý do từ chối", type: "textarea", span: 2, placeholder: "Không bắt buộc" },
+        ]}
+        onSubmit={async (values) => {
+          if (!rejecting) return;
+          const row = rejecting;
+          setRejecting(null);
+          await act(row, false, (values.note as string)?.trim() || undefined);
+        }}
+      />
     </Card>
   );
 };

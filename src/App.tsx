@@ -12,12 +12,16 @@ if (typeof window !== "undefined") {
   const schedule =
     (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback ??
     ((cb: () => void) => window.setTimeout(cb, 2500));
-  window.addEventListener("load", () => schedule(preloadRoutes), { once: true });
+  window.addEventListener("load", () => schedule(() => void preloadRoutes()), { once: true });
 }
 import { AuthProvider } from "./lib/auth-provider";
 import { CompanyProvider } from "./lib/company-provider";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 60_000, gcTime: 10 * 60_000, refetchOnWindowFocus: false, retry: 1 },
+  },
+});
 
 // Created once so remounting App (e.g. after an error-boundary retry) never
 // leaves a second router listening to history. The pathless root route is the

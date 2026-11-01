@@ -1,3 +1,4 @@
+import { ConfirmAction } from "@/components/common/confirm-action";
 import { useCallback, useEffect, useState } from "react";
 import { Ban, Copy, Loader2, RotateCcw, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -92,12 +93,11 @@ export const InviteStatusBar = ({
           >
             <Copy className="h-3 w-3" /> Liên kết
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 gap-1 text-[11px] text-destructive"
-            disabled={busy}
-            onClick={async () => {
+          <ConfirmAction
+            title="Thu hồi lời mời?"
+            description="Liên kết đã gửi sẽ không dùng được nữa. Có thể gửi lời mời mới sau."
+            confirmLabel="Thu hồi"
+            onConfirm={async () => {
               setBusy(true);
               try {
                 await revokeEmployeeInvite(status.invite_id!);
@@ -110,13 +110,20 @@ export const InviteStatusBar = ({
               }
             }}
           >
-            {busy ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Ban className="h-3 w-3" />
-            )}{" "}
-            Thu hồi
-          </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 gap-1 text-[11px] text-destructive"
+              disabled={busy}
+                        >
+              {busy ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Ban className="h-3 w-3" />
+              )}{" "}
+              Thu hồi
+            </Button>
+          </ConfirmAction>
         </>
       )}
     </div>

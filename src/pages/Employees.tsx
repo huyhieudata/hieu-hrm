@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { findEmployeeDuplicates } from "@/lib/change-requests";
 import { ChangeRequestsReview } from "@/components/employee/change-requests";
 
-import { FieldDialog } from "@/components/employee/field-dialog";
+import { FieldDialog, FieldError } from "@/components/employee/field-dialog";
 import { ImportEmployeesDialog } from "@/components/employee/import-employees-dialog";
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar } from "@/components/common/avatar";
@@ -487,7 +487,14 @@ const Employees = () => {
       setFormOpen(false);
       await load();
     } catch (submitError) {
-      throw new Error(friendlyError(submitError));
+      const message = friendlyError(submitError);
+      const raw = submitError instanceof Error ? submitError.message : "";
+      if (raw.includes("Email đã tồn tại")) {
+        throw new FieldError(values.work_email ? "work_email" : "personal_email", message);
+      }
+      if (raw.includes("Số điện thoại đã tồn tại")) throw new FieldError("phone", message);
+      if (raw.includes("duplicate key")) throw new FieldError("code", message);
+      throw new Error(message);
     }
   };
 
@@ -531,6 +538,28 @@ const Employees = () => {
     org,
   );
 
+  /** Dòng xuất Excel/PDF: ngày dạng dd/mm/yyyy, thiếu ngày vào làm → ngày bắt đầu HĐ đầu tiên. */
+  const exportRows = () =>
+    filtered.map((person) => {
+      const hire =
+        person.hire_date ??
+        (contractsByEmployee[person.id] ?? [])
+          .map((contract) => contract.start_date)
+          .filter(Boolean)
+          .sort()[0] ??
+        null;
+      return [
+        person.code,
+        person.full_name,
+        person.department ?? "—",
+        person.position ?? "—",
+        EMPLOYEE_STATUS_META[person.status]?.label ?? person.status,
+        person.work_email ?? person.personal_email ?? "—",
+        person.phone || "—",
+        hire ? formatDate(hire) : "—",
+      ];
+    });
+
   return (
     <AppShell>
       <PageHeader
@@ -559,16 +588,7 @@ const Employees = () => {
                     "Điện thoại",
                     "Ngày vào làm",
                   ],
-                  filtered.map((person) => [
-                    person.code,
-                    person.full_name,
-                    person.department ?? "",
-                    person.position ?? "",
-                    EMPLOYEE_STATUS_META[person.status]?.label ?? person.status,
-                    person.work_email ?? person.personal_email ?? "",
-                    person.phone ?? "",
-                    person.hire_date ?? "",
-                  ]),
+                  exportRows(),
                   "Danh sách nhân viên",
                 )
               }
@@ -592,16 +612,7 @@ const Employees = () => {
                     "Điện thoại",
                     "Ngày vào làm",
                   ],
-                  filtered.map((person) => [
-                    person.code,
-                    person.full_name,
-                    person.department ?? "",
-                    person.position ?? "",
-                    EMPLOYEE_STATUS_META[person.status]?.label ?? person.status,
-                    person.work_email ?? person.personal_email ?? "",
-                    person.phone ?? "",
-                    person.hire_date ?? "",
-                  ]),
+                  exportRows(),
                 )
               }
             >
@@ -993,7 +1004,20 @@ const Employees = () => {
                   </span>
 
                   <span className="hidden w-[110px] shrink-0 text-[12px] text-muted-foreground lg:block">
-                    {formatDate(person.hire_date)}
+                    {person.hire_date ? (
+                      formatDate(person.hire_date)
+                    ) : (() => {
+                      // Chưa nhập ngày vào làm → lấy ngày bắt đầu HĐ sớm nhất (nếu có).
+                      const firstStart = (contractsByEmployee[person.id] ?? [])
+                        .map((contract) => contract.start_date)
+                        .filter(Boolean)
+                        .sort()[0];
+                      return firstStart ? (
+                        <span title="Theo ngày bắt đầu hợp đồng đầu tiên">{formatDate(firstStart)}*</span>
+                      ) : (
+                        <span title="Chưa nhập ngày vào làm">Chưa nhập</span>
+                      );
+                    })()}
                   </span>
 
                   <div className="w-9 shrink-0">
@@ -1022,8 +1046,11 @@ const Employees = () => {
                             <DropdownMenuItem
                               className="gap-2 text-[12.5px]"
                               onSelect={() => {
-                                setEditing(person);
-                                setFormOpen(true);
+                                // Đợi menu đóng hẳn rồi mới mở dialog (tránh body bị khoá pointer-events).
+                                window.setTimeout(() => {
+                                  setEditing(person);
+                                  setFormOpen(true);
+                                }, 0);
                               }}
                             >
                               <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa thông
@@ -1034,7 +1061,7 @@ const Employees = () => {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   className="gap-2 text-[12.5px] text-destructive focus:bg-destructive-subtle focus:text-destructive"
-                                  onSelect={() => setRemoval(person)}
+                                  onSelect={() => window.setTimeout(() => setRemoval(person), 0)}
                                 >
                                   <Trash2 className="h-3.5 w-3.5" /> Xoá hồ sơ
                                 </DropdownMenuItem>
