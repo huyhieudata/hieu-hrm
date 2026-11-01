@@ -19,7 +19,7 @@ const STAFF_PREFIXES: { prefix: string; module: string | null }[] = [
 ];
 
 /** Trang cấu hình chỉ Owner/Admin/HR (Quản lý cũng không vào). */
-const HR_ONLY_PREFIXES = ["/cai-dat/nhat-ky-hoat-dong", "/cai-dat/thanh-vien", "/cai-dat/quy-trinh-duyet", "/thanh-vien"];
+const HR_ONLY_PREFIXES = ["/cai-dat/lich-lam-viec", "/cai-dat/nhat-ky-hoat-dong", "/cai-dat/thanh-vien", "/cai-dat/quy-trinh-duyet", "/thanh-vien"];
 
 export const isStaffPath = (path: string) =>
   STAFF_PREFIXES.some(({ prefix }) => path === prefix || path.startsWith(`${prefix}/`));

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useCompany } from "@/lib/company-provider";
+import { useWorkCalendar } from "@/lib/work-calendar";
 import { CalendarDays, Clock, FileText, Home, Loader2, LogOut, MapPin, PenLine } from "lucide-react";
 
 import { OT_KIND_LABELS } from "@/lib/payroll-calc";
@@ -71,6 +73,8 @@ const RequestDialog = ({
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const { activeCompany } = useCompany();
+  const calendar = useWorkCalendar(activeCompany?.id);
 
   const categories = useMemo(
     () => REQUEST_CATEGORY_ORDER.filter((value) => types.some((type) => type.category === value)),
@@ -112,8 +116,7 @@ const RequestDialog = ({
 
   const needsTime = TIME_CATEGORIES.includes(category);
   const needsSession = SESSION_CATEGORIES.includes(category);
-  const computedDays = listDates(startDate, endDate).length;
-  const leaveDayCount = leaveDays(startDate, endDate, session);
+  const leaveDayCount = leaveDays(startDate, endDate, session, calendar);
   const employee = employees.find((item) => item.id === employeeId) ?? null;
   const leaveInfo = employeeId ? leaveSummaries?.[employeeId] ?? null : null;
 
@@ -134,7 +137,7 @@ const RequestDialog = ({
       setError("Ngày kết thúc phải sau ngày bắt đầu.");
       return;
     }
-    if (selectedType.max_days && computedDays > selectedType.max_days) {
+    if (selectedType.max_days && listDates(startDate, endDate).length > selectedType.max_days) {
       setError(`Loại đơn này tối đa ${selectedType.max_days} ngày.`);
       return;
     }
@@ -392,8 +395,8 @@ const RequestDialog = ({
           {category === "leave" && selectedType && (
             <div className="rounded-md border border-border bg-muted/30 px-3 py-2.5 text-[11.5px] text-muted-foreground">
               <p className="font-medium text-foreground">
-                {employee?.full_name ?? "Nhân sự"} nghỉ {computedDays} ngày
-                {session !== "full_day" ? ` (${REQUEST_SESSION_LABELS[session]})` : ""}
+                {employee?.full_name ?? "Nhân sự"} nghỉ {leaveDayCount} ngày làm việc
+                {session !== "full_day" ? ` · ${REQUEST_SESSION_LABELS[session]}` : ""}
               </p>
               <p>
                 {selectedType.deduct_leave
