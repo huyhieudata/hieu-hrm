@@ -411,6 +411,13 @@ const EmployeeProfile = () => {
   const [notFound, setNotFound] = useState(false);
   const [tab, setTab] = useState<TabId>("overview");
   const [editOpen, setEditOpen] = useState(false);
+  const autoEditDone = useRef(false);
+  useEffect(() => {
+    // Link "Sửa hồ sơ" (?edit=1) mở luôn form sửa khi hồ sơ đã tải và có quyền.
+    if (autoEditDone.current || !employee || !canManage || searchParams.get("edit") !== "1") return;
+    autoEditDone.current = true;
+    setEditOpen(true);
+  }, [employee, canManage, searchParams]);
   const [removeOpen, setRemoveOpen] = useState(false);
   const [resignOpen, setResignOpen] = useState(false);
   const [removing, setRemoving] = useState(false);
