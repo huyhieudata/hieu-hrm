@@ -202,8 +202,10 @@ const Requests = () => {
   const canActOn = useCallback(
     (request: EmployeeRequest) => {
       if (request.status !== "pending") return false;
+      // Không tự duyệt đơn của chính mình (server cũng chặn).
+      if (myEmployeeId && request.employee_id === myEmployeeId) return false;
       const current = currentApprovalFor(request.id);
-      if (!current) return canApprove && (canManage || request.employee_id !== myEmployeeId);
+      if (!current) return canApprove;
       if (current.approver_employee_id && current.approver_employee_id === myEmployeeId) return true;
       if (!current.approver_employee_id && canManage) return true;
       return canManage;
