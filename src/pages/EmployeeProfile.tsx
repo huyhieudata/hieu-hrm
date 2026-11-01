@@ -62,6 +62,10 @@ import RequestsTab from "@/components/employee/requests-tab";
 import PermissionsTab from "@/components/employee/permissions-tab";
 import ContactsTab from "@/components/employee/contacts-tab";
 import NotesTab from "@/components/employee/notes-tab";
+import {
+  ChangeRequestsReview,
+  SensitiveAuditCard,
+} from "@/components/employee/change-requests";
 import { BankInfoCard } from "@/components/employee/bank-info-card";
 import { OnboardingTab } from "@/components/employee/onboarding-tab";
 import { ResignationDialog } from "@/components/employee/resignation-dialog";
@@ -72,6 +76,7 @@ import { DocumentsTab } from "@/components/employee/documents-tab";
 import { EmployeeEvaluationsTab } from "@/components/employee/evaluations-tab";
 import {
   AssetsTab,
+  CertificatesTab,
   ContractsTab,
   DebtsTab,
   DependentsTab,
@@ -641,7 +646,7 @@ const EmployeeProfile = () => {
       list.push({ id: "insurance", label: "Bảo hiểm", icon: HeartPulse });
     }
     list.push({ id: "rewards", label: "Khen thưởng & kỷ luật", icon: Award });
-    list.push({ id: "training", label: "Đào tạo", icon: GraduationCap });
+    list.push({ id: "training", label: "Đào tạo & chứng chỉ", icon: GraduationCap });
     list.push({ id: "evaluations", label: "Đánh giá", icon: ClipboardCheck });
     list.push({ id: "assets", label: "Tài sản", icon: Laptop });
     if (canSensitive)
@@ -1492,6 +1497,15 @@ const EmployeeProfile = () => {
         </div>
       )}
 
+      {tab === "personal" && canInvite && activeCompany && (
+        <div className="mb-5">
+          <ChangeRequestsReview
+            companyId={activeCompany.id}
+            employeeId={employee.id}
+            onApplied={load}
+          />
+        </div>
+      )}
       {tab === "personal" && (
         <div className="grid gap-5 lg:grid-cols-2">
           <SectionCard
@@ -1879,7 +1893,10 @@ const EmployeeProfile = () => {
       )}
 
       {tab === "training" && (
-        <TrainingTab employeeId={employee.id} canManage={canManage} />
+        <div className="space-y-5">
+          <TrainingTab employeeId={employee.id} canManage={canManage} />
+          <CertificatesTab employeeId={employee.id} canManage={canManage} />
+        </div>
       )}
       {tab === "evaluations" && activeCompany && (
         <EmployeeEvaluationsTab
@@ -1954,7 +1971,10 @@ const EmployeeProfile = () => {
       )}
 
       {tab === "history" && (
-        <ActivityTimeline entityType="employee" entityId={employee.id} />
+        <div className="space-y-5">
+          {canInvite && <SensitiveAuditCard employeeId={employee.id} />}
+          <ActivityTimeline entityType="employee" entityId={employee.id} />
+        </div>
       )}
 
       {tab === "documents" && canSensitive && activeCompany && (

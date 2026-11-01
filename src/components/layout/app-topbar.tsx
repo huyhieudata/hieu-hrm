@@ -46,6 +46,7 @@ const routeMeta: Record<string, { group: string; label: string }> = {
   "/tai-san": { group: "Quản lý nhân sự", label: "Tài sản" },
   "/tinh-luong": { group: "Tính lương", label: "Kỳ lương" },
   "/cai-dat/tham-so-luong": { group: "Cài đặt", label: "Tham số lương" },
+  "/cai-dat/mau-hop-dong": { group: "Cài đặt", label: "Mẫu hợp đồng" },
   "/cai-dat/he-thong/workspace": { group: "Cài đặt", label: "Workspace" },
   "/cai-dat/he-thong/goi-dich-vu": { group: "Cài đặt", label: "Gói dịch vụ" },
   "/cai-dat/he-thong/phan-quyen": { group: "Cài đặt", label: "Phân quyền" },

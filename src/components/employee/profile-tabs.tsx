@@ -14,6 +14,7 @@ import {
 
 import { RecordsTab } from "@/components/employee/records-tab";
 import type { FieldDef } from "@/components/employee/field-dialog";
+import { validateNationalId, validateTaxCode } from "@/lib/field-defs";
 import { Badge } from "@/components/ui/badge";
 import { currency } from "@/lib/format";
 import {
@@ -36,7 +37,9 @@ import {
   toOptions,
   updateRecord,
   DEPENDENT_RELATION_LABELS,
+  daysUntil,
   type AssetRecord,
+  type CertificateRecord,
   type ContractRecord,
   type DebtRecord,
   type DependentRecord,
@@ -169,10 +172,11 @@ const contractFields: FieldDef[] = [
     options: toOptions(CONTRACT_TYPE_LABELS),
     required: true,
   },
-  { name: "start_date", label: "Ngày bắt đầu", type: "date" },
-  { name: "end_date", label: "Ngày kết thúc", type: "date" },
+  { name: "start_date", label: "Ngày bắt đầu", type: "date", required: true },
+  { name: "end_date", label: "Ngày kết thúc", type: "date", hint: "Bỏ trống nếu không xác định thời hạn." },
   { name: "department", label: "Phòng ban", type: "select" },
   { name: "position", label: "Chức danh" },
+  { name: "work_location", label: "Địa điểm làm việc", span: 2 },
   {
     name: "base_salary",
     label: "Lương cơ bản",
@@ -268,6 +272,7 @@ export const ContractsTab = ({ employeeId, canManage }: TabProps) => {
         end_date: row.end_date,
         department: row.department,
         position: row.position,
+        work_location: row.work_location ?? "",
         base_salary: numberOrNull(row.base_salary),
         allowance: numberOrNull(row.allowance),
         insurance_salary: numberOrNull(row.insurance_salary),
@@ -717,6 +722,69 @@ export const TrainingTab = ({ employeeId, canManage }: TabProps) => (
   />
 );
 
+/* ------------------------------ Certificates ----------------------------- */
+
+const certificateFields: FieldDef[] = [
+  { name: "name", label: "Tên chứng chỉ", required: true, span: 2, placeholder: "Chứng chỉ An toàn lao động nhóm 3" },
+  { name: "issuer", label: "Đơn vị cấp" },
+  { name: "certificate_no", label: "Số hiệu" },
+  { name: "issue_date", label: "Ngày cấp", type: "date" },
+  { name: "expiry_date", label: "Ngày hết hạn", type: "date", hint: "Bỏ trống nếu không thời hạn." },
+  { name: "note", label: "Ghi chú", type: "textarea" },
+];
+
+export const CertificatesTab = ({ employeeId, canManage }: TabProps) => (
+  <RecordsTab<CertificateRecord>
+    table="employee_certificates"
+    employeeId={employeeId}
+    title="Chứng chỉ & giấy phép hành nghề"
+    icon={Award}
+    addLabel="Thêm chứng chỉ"
+    emptyText="Chưa có chứng chỉ nào."
+    canManage={canManage}
+    orderColumn="expiry_date"
+    columns={[
+      {
+        key: "name",
+        label: "Chứng chỉ",
+        render: (row) => (
+          <div>
+            <p className="font-medium text-foreground">{row.name}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {[row.issuer, row.certificate_no].filter(Boolean).join(" · ") || "—"}
+            </p>
+          </div>
+        ),
+      },
+      {
+        key: "expiry_date",
+        label: "Hiệu lực",
+        width: "170px",
+        render: (row) => {
+          const days = daysUntil(row.expiry_date);
+          return (
+            <div className="text-[11.5px]">
+              <p>{formatDate(row.issue_date)} → {row.expiry_date ? formatDate(row.expiry_date) : "không thời hạn"}</p>
+              {days !== null && days < 0 && <Badge variant="destructive">Đã hết hạn</Badge>}
+              {days !== null && days >= 0 && days <= 30 && <Badge variant="warning">Còn {days} ngày</Badge>}
+            </div>
+          );
+        },
+      },
+    ]}
+    fields={certificateFields}
+    initialForEdit={(row) => ({
+      name: row.name,
+      issuer: row.issuer,
+      certificate_no: row.certificate_no,
+      issue_date: row.issue_date,
+      expiry_date: row.expiry_date,
+      note: row.note,
+    })}
+    rowKeyText={(row) => row.name}
+  />
+);
+
 /* --------------------------------- Assets ------------------------------- */
 
 const assetFields: FieldDef[] = [
@@ -1021,8 +1089,8 @@ const dependentFields: FieldDef[] = [
       { value: "other", label: "Khác" },
     ],
   },
-  { name: "national_id", label: "Số CCCD / CMND" },
-  { name: "tax_code", label: "Mã số thuế", placeholder: "8012345678-001" },
+  { name: "national_id", label: "Số CCCD / mã định danh", validate: validateNationalId },
+  { name: "tax_code", label: "Mã số thuế", placeholder: "8012345678-001", validate: validateTaxCode },
   {
     name: "registered_for_deduction",
     label: "Đăng ký giảm trừ gia cảnh",

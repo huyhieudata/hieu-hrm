@@ -23,6 +23,8 @@ import {
   Send,
 } from "lucide-react";
 import { toast } from "sonner";
+import { findEmployeeDuplicates } from "@/lib/change-requests";
+import { ChangeRequestsReview } from "@/components/employee/change-requests";
 
 import { FieldDialog } from "@/components/employee/field-dialog";
 import { ImportEmployeesDialog } from "@/components/employee/import-employees-dialog";
@@ -451,6 +453,17 @@ const Employees = () => {
     values: Record<string, string | number | null>,
   ) => {
     try {
+      if (companyId && (values.national_id || values.work_email || values.personal_email)) {
+        const dups = await findEmployeeDuplicates(companyId, values, editing?.id).catch(() => []);
+        if (dups.length > 0) {
+          toast.warning("Có thể trùng hồ sơ", {
+            description: dups
+              .map((d) => `${d.kind === "national_id" ? "CCCD" : "Email"} trùng với ${d.full_name}${d.code ? ` (${d.code})` : ""}`)
+              .join("; "),
+            duration: 8000,
+          });
+        }
+      }
       if (editing) {
         await updateEmployee(editing.id, values);
         toast.success("Đã cập nhật hồ sơ nhân viên");
@@ -619,6 +632,10 @@ const Employees = () => {
           </>
         }
       />
+
+      {companyId && (role === "owner" || role === "admin" || role === "hr") && (
+        <ChangeRequestsReview companyId={companyId} onApplied={load} />
+      )}
 
       <div className="grid grid-cols-2 gap-3.5 xl:grid-cols-4">
         {[

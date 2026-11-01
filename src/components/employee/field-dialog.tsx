@@ -149,6 +149,11 @@ export const FieldDialog = ({
         setError(`${field.label} phải là số.`);
         return;
       }
+      const invalid = raw && field.validate ? field.validate(raw) : null;
+      if (invalid) {
+        setError(invalid);
+        return;
+      }
     }
 
     const payload: Record<string, string | number | null> = {};

@@ -192,3 +192,12 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - `position_id` (FK department_positions) + trigger `sync_row_position(<cột text>)` trên employees, employee_contracts, employee_work_history, company_invites(job_title), candidate_offers, job_descriptions(title), onboarding_records, shift_assignments(scope_value khi scope_type='position'). Đổi tên chức danh tự cập nhật text.
 - `org_assert_valid(company, department, position)`: lỗi rõ khi không có trên sơ đồ (công ty đã có sơ đồ); "Khác…" được phép cho owner/admin/hr. Lời mời kiểm tra qua trigger `trg_validate_invite_org`.
 - `attendance_punch`: chặn ảnh đã dùng, ghi IP/user-agent từ `request.headers` vào punch_logs/records, cờ `ua_changed` khi trình duyệt khác lúc đăng ký thiết bị.
+
+## Hồ sơ nhân viên & Hợp đồng — Đợt 1 (2026-11-01)
+- CCCD 12 số, MST 10/13 số: kiểm tra 2 lớp — `validate` trong `FieldDef` (client, `validateNationalId`/`validateTaxCode` ở `src/lib/field-defs.ts`) và trigger `validate_employee_identity` / `validate_dependent_identity` (chỉ khi giá trị thay đổi ⇒ dữ liệu cũ không bị chặn).
+- Trùng CCCD/email: RPC `employee_duplicate_check` (chỉ owner/admin/hr) — chỉ CẢNH BÁO, không chặn lưu.
+- Sửa trường nhạy cảm tự ghi `employee_sensitive_audit` (CHỈ tên trường, không lưu giá trị). Nguồn qua `set_config('app.change_source', ...)`.
+- Nhân viên KHÔNG update trực tiếp `employees`; đổi liên hệ/khẩn cấp/ngân hàng qua `submit_employee_change_request` → HR `review_employee_change_request`. Danh sách trường cho phép duy nhất ở `employee_self_editable_fields()` (DB) và `SELF_EDITABLE_FIELDS` (`src/lib/change-requests.ts`) — sửa phải sửa cả hai.
+- Bảng mới: `employee_certificates`, `employee_change_requests`, `employee_sensitive_audit`, `contract_appendices` (stamp company/employee từ hợp đồng), `contract_templates`. Thêm cột employees ⇒ nhớ cập nhật `EMPLOYEE_PUBLIC_COLUMNS`.
+- Xuất HĐ: `src/lib/contract-docs.ts` (Word = HTML `.doc`, PDF = in iframe); biến `{{ten_bien}}` luôn escape. Mẫu sửa ở `/cai-dat/mau-hop-dong`; không có mẫu ⇒ `DEFAULT_CONTRACT_TEMPLATE`. Cảnh báo pháp lý `contractLegalWarnings` (BLLĐ 2019 Điều 20, 22, 25).
+- Dry-run DB: `scripts/ho-so-hop-dong-dryrun.sql` (kết thúc bằng `raise exception` ⇒ rollback toàn bộ).

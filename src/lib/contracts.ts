@@ -17,6 +17,8 @@ export interface CompanyContract {
   base_salary: number | null;
   allowance: number | null;
   insurance_salary: number | null;
+  work_location: string | null;
+  signed_date: string | null;
   status: string;
   note: string | null;
   contract_file_path: string | null;
@@ -35,7 +37,7 @@ export const listCompanyContracts = async (companyId: string): Promise<CompanyCo
   const { data, error } = await db
     .from("employee_contracts")
     .select(
-      "id, company_id, employee_id, contract_no, contract_type, start_date, end_date, position, department, base_salary, allowance, insurance_salary, status, note, contract_file_path, contract_file_name, created_at, employees(full_name, code, department)",
+      "id, company_id, employee_id, contract_no, contract_type, start_date, end_date, position, department, base_salary, allowance, insurance_salary, work_location, signed_date, status, note, contract_file_path, contract_file_name, created_at, employees(full_name, code, department)",
     )
     .eq("company_id", companyId)
     .order("start_date", { ascending: false })

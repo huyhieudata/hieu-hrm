@@ -34,6 +34,7 @@ const HomeWidgets = lazy(() => import("./pages/settings/HomeWidgets"));
 const OnboardingChecklist = lazy(
   () => import("./pages/settings/OnboardingChecklist"),
 );
+const ContractTemplates = lazy(() => import("./pages/settings/ContractTemplates"));
 const DocumentChecklist = lazy(
   () => import("./pages/settings/DocumentChecklist"),
 );
@@ -584,6 +585,16 @@ export const routers = [
         <OnboardingChecklist />
       </PageSuspense>,
       "settings",
+    ),
+  },
+  {
+    path: "/cai-dat/mau-hop-dong",
+    name: "contract-templates",
+    element: companyScoped(
+      <PageSuspense>
+        <ContractTemplates />
+      </PageSuspense>,
+      "contracts",
     ),
   },
   {
