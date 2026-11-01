@@ -8,6 +8,7 @@ export type FieldType =
   | "datetime"
   | "textarea"
   | "select"
+  | "multiselect"
   | "currency";
 
 export interface FieldDef {
@@ -20,6 +21,11 @@ export interface FieldDef {
   optionsByValue?: Record<string, { value: string; label: string }[]>;
   /** Select: cho phép chọn "Khác" để nhập tay giá trị ngoài danh sách. */
   allowCustom?: boolean;
+  /** Select: cho phép tạo mới ngay tại chỗ (vd "+ Tạo phòng ban mới…"). Trả về giá trị vừa tạo để tự chọn. */
+  onCreate?: (input: { name: string; parentId: string | null }, values: Record<string, string>) => Promise<string>;
+  createLabel?: string;
+  /** Danh sách cha (vd phòng ban cha) hiện trong hộp thoại tạo mới. */
+  createParentOptions?: { value: string; label: string }[];
   placeholder?: string;
   required?: boolean;
   /** 2 = full width inside the two-column dialog grid. */

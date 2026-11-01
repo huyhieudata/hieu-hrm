@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { FieldDef } from "@/lib/field-defs";
+import { MultiSelectField } from "@/components/employee/multi-select-field";
 import { getErrorMessage } from "@/lib/utils";
 
 export type { FieldDef, FieldType } from "@/lib/field-defs";
@@ -102,6 +103,29 @@ export const FieldDialog = ({
   const [saving, setSaving] = useState(false);
   const [customFields, setCustomFields] = useState<Record<string, boolean>>({});
   const wasOpen = useRef(false);
+  const [createFor, setCreateFor] = useState<FieldDef | null>(null);
+  const [createName, setCreateName] = useState("");
+  const [createParent, setCreateParent] = useState("none");
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  const submitCreate = async () => {
+    if (!createFor?.onCreate) return;
+    const name = createName.trim();
+    if (!name) return setCreateError("Vui lòng nhập tên.");
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const created = await createFor.onCreate({ name, parentId: createParent === "none" ? null : createParent }, values);
+      setField(createFor.name, created);
+      toast.success(`Đã tạo “${created}”`);
+      setCreateFor(null);
+    } catch (caught) {
+      setCreateError(getErrorMessage(caught));
+    } finally {
+      setCreating(false);
+    }
+  };
 
   // Reset only when the dialog opens (not on every render), otherwise typing
   // would be wiped by a new `fields`/`initial` identity each render.
@@ -310,6 +334,13 @@ export const FieldDialog = ({
                               <Select
                                 value={current || "none"}
                                 onValueChange={(value) => {
+                                  if (value === "__create__") {
+                                    setCreateFor(field);
+                                    setCreateName("");
+                                    setCreateParent("none");
+                                    setCreateError(null);
+                                    return;
+                                  }
                                   if (value === "__custom__") {
                                     setCustomFields((prev) => ({
                                       ...prev,
@@ -345,6 +376,11 @@ export const FieldDialog = ({
                                       {option.label}
                                     </SelectItem>
                                   ))}
+                                  {field.onCreate && (
+                                    <SelectItem value="__create__" className="font-semibold text-brand-orange">
+                                      {field.createLabel ?? "+ Tạo mới…"}
+                                    </SelectItem>
+                                  )}
                                   {field.allowCustom && (
                                     <SelectItem value="__custom__">
                                       Khác (nhập tay)…
@@ -354,6 +390,15 @@ export const FieldDialog = ({
                               </Select>
                             );
                           })()
+                        ) : field.type === "multiselect" ? (
+                          <MultiSelectField
+                            id={id}
+                            value={values[field.name] ?? ""}
+                            options={field.options ?? []}
+                            allowCustom={field.allowCustom}
+                            placeholder={field.placeholder}
+                            onChange={(value) => setField(field.name, value)}
+                          />
                         ) : field.type === "textarea" ? (
                           <Textarea
                             id={id}
@@ -433,6 +478,42 @@ export const FieldDialog = ({
           </DialogFooter>
         </form>
       </DialogContent>
+      <Dialog open={!!createFor} onOpenChange={(next) => !next && setCreateFor(null)}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>{(createFor?.createLabel ?? "Tạo mới").replace(/^\+\s*/, "").replace(/…$/, "")}</DialogTitle>
+            <DialogDescription>Lưu vào sơ đồ tổ chức của công ty và tự chọn vào ô.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="create-option-name">Tên</Label>
+              <Input id="create-option-name" autoFocus value={createName} onChange={(event) => setCreateName(event.target.value)}
+                onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void submitCreate(); } }} className="h-10" />
+            </div>
+            {createFor?.createParentOptions?.length ? (
+              <div className="space-y-1.5">
+                <Label>Phòng ban cha (nếu có)</Label>
+                <Select value={createParent} onValueChange={setCreateParent}>
+                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Không có</SelectItem>
+                    {createFor.createParentOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+            {createError ? <p className="text-[13px] font-medium text-destructive">{createError}</p> : null}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setCreateFor(null)}>Huỷ</Button>
+            <Button type="button" disabled={creating} onClick={() => void submitCreate()}>
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Tạo và chọn
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
