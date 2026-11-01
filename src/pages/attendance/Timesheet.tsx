@@ -5,6 +5,7 @@ import { FileDown, FileSpreadsheet,
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import EmployeeTimesheet from "@/pages/me/EmployeeTimesheet";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -424,4 +425,10 @@ const Timesheet = () => {
   );
 };
 
-export default Timesheet;
+const TimesheetPage = () => {
+  const { role } = useCompany();
+  if (role === "employee") return <EmployeeTimesheet />;
+  return <Timesheet />;
+};
+
+export default TimesheetPage;

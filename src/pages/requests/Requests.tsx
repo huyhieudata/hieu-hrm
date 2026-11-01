@@ -3,6 +3,7 @@ import { Check, FileText, Loader2, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
 import RequestDialog from "@/components/requests/request-dialog";
+import { EmployeeRequestsView } from "@/pages/me/EmployeeRequestsView";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +82,7 @@ const shortTime = (value: string | null) => (value ? value.slice(0, 5) : "");
 
 const Requests = () => {
   const { user } = useAuth();
-  const { activeCompany, can, canManageModule } = useCompany();
+  const { activeCompany, can, canManageModule, role } = useCompany();
   const companyId = activeCompany?.id ?? null;
   const canManage = canManageModule("requests");
   const canApprove = can("leave.approve");
@@ -400,6 +401,32 @@ const Requests = () => {
       toast.error("Không xoá được đơn", { description: getErrorMessage(error) });
     }
   };
+
+  if (role === "employee") {
+    return (
+      <AppShell>
+        <EmployeeRequestsView
+          loading={loading}
+          requests={requests}
+          types={types}
+          me={myEmployee}
+          status={statusFilter}
+          onStatus={setStatusFilter}
+          remainingLeave={myEmployee ? leaveSummaries[myEmployee.id]?.remaining : null}
+          onCreate={() => setFormOpen(true)}
+        />
+        <RequestDialog
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          employees={myEmployee ? [myEmployee] : employees}
+          types={types.filter((type) => type.active)}
+          defaultEmployeeId={myEmployee?.id}
+          leaveSummaries={leaveSummaries}
+          onSubmit={handleCreate}
+        />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

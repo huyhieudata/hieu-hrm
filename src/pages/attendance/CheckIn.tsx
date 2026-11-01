@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { EmployeeCheckInView, type PunchFlash } from "@/pages/me/EmployeeCheckInView";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ interface SessionRow {
 
 const CheckIn = () => {
   const { user } = useAuth();
-  const { activeCompany } = useCompany();
+  const { activeCompany, role } = useCompany();
   const companyId = activeCompany?.id ?? null;
 
   const [me, setMe] = useState<EmployeeRecord | null>(null);
@@ -89,6 +90,7 @@ const CheckIn = () => {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [busySession, setBusySession] = useState<string | null>(null);
+  const [punchFlash, setPunchFlash] = useState<PunchFlash | null>(null);
 
   const today = todayIso();
   const monthStart = `${currentMonthIso()}-01`;
@@ -204,8 +206,10 @@ const CheckIn = () => {
         return;
       }
       const record = result.record as { check_in?: string; check_out?: string; flags?: string[] };
-      const flags = (record.flags ?? []).map((flag) => FLAG_LABELS[flag] ?? flag);
+      const rawFlags = record.flags ?? [];
+      const flags = rawFlags.map((flag) => FLAG_LABELS[flag] ?? flag);
       const at = action === "in" ? record.check_in : record.check_out;
+      setPunchFlash({ action, at: at ?? null, flags: rawFlags });
       toast.success(action === "in" ? "Đã chấm công vào" : "Đã chấm công ra", {
         description: [formatTime(at ?? null), ...flags].join(" · "),
       });
@@ -220,6 +224,7 @@ const CheckIn = () => {
 
   const handlePunch = async (session: string, action: "in" | "out") => {
     if (!me || !companyId || !policy) return;
+    setPunchFlash(null);
     const existing = todayRecords.find((record) => record.session === session);
     if (action === "in" && existing?.check_in) {
       toast.error("Buổi này bạn đã chấm công vào rồi.");
@@ -270,8 +275,35 @@ const CheckIn = () => {
           myShift.afternoon_start,
         )}–${short(myShift.afternoon_end ?? myShift.end_time)}`;
 
+  const employeeView = (
+    <EmployeeCheckInView
+      loading={loading}
+      me={me}
+      policy={policy}
+      device={device}
+      deviceName={deviceName}
+      step={step}
+      records={records}
+      todayRecords={todayRecords}
+      sessionRows={sessionRows}
+      shift={myShift}
+      shiftRangeLabel={shiftRangeLabel}
+      today={today}
+      busySession={busySession}
+      cameraOpen={!!camera}
+      companyId={companyId}
+      punchFlash={punchFlash}
+      onPunch={(session, action) => void handlePunch(session, action)}
+      onDismissFlash={() => setPunchFlash(null)}
+    />
+  );
+
   return (
     <AppShell>
+      {role === "employee" ? (
+        employeeView
+      ) : (
+      <>
       <PageHeader
         eyebrow="Chấm công"
         title="Chấm công"
@@ -511,6 +543,8 @@ const CheckIn = () => {
             </Card>
           </div>
         </div>
+      )}
+      </>
       )}
       <SelfieCameraDialog
         open={!!camera}

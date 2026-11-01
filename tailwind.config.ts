@@ -107,6 +107,7 @@ export default {
         lg: "var(--radius)",
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 10px)",
+        "3xl": "1.75rem",
       },
       boxShadow: {        xs: "0 1px 2px 0 hsl(222 47% 11% / 0.04)",
         soft: "0 1px 3px 0 hsl(222 47% 11% / 0.05), 0 1px 2px -1px hsl(222 47% 11% / 0.04)",
@@ -116,11 +117,14 @@ export default {
         focus: "0 0 0 3px hsl(var(--ring) / 0.18)",
         "primary-glow": "0 12px 28px -12px hsl(var(--primary) / 0.55)",
         brand: "0 12px 26px -14px hsl(var(--brand-navy) / 0.55)",
+        glow: "0 14px 30px -10px rgb(14 45 88 / 0.6)",
       },
       backgroundImage: {
-        brand: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(258 84% 62%) 100%)",
+        brand: "linear-gradient(135deg, #0e2d58 0%, #1d4a84 100%)",
+        "gradient-primary": "linear-gradient(135deg, #0e2d58 0%, #1d4a84 100%)",
+        "gradient-accent": "linear-gradient(135deg, #fc600b 0%, #ff8a3d 100%)",
         "brand-soft":
-          "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(258 84% 62% / 0.12) 100%)",
+          "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(21 98% 52% / 0.12) 100%)",
         panel:
           "linear-gradient(155deg, hsl(214 100% 97%) 0%, hsl(221 92% 93%) 45%, hsl(258 96% 96%) 100%)",
         sheen: "linear-gradient(180deg, hsl(0 0% 100% / 0.7), hsl(0 0% 100% / 0))",
@@ -162,6 +166,15 @@ export default {
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
+        "pulse-ring": {
+          "0%": { boxShadow: "0 0 0 0 rgb(252 96 11 / 0.45)" },
+          "70%": { boxShadow: "0 0 0 16px rgb(252 96 11 / 0)" },
+          "100%": { boxShadow: "0 0 0 0 rgb(252 96 11 / 0)" },
+        },
+        "check-draw": {
+          from: { strokeDashoffset: "48" },
+          to: { strokeDashoffset: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -172,6 +185,8 @@ export default {
         "slide-left": "slide-left 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
         float: "float 6s ease-in-out infinite",
         shimmer: "shimmer 1.8s infinite",
+        "pulse-ring": "pulse-ring 2s ease-out infinite",
+        "check-draw": "check-draw 0.6s ease-out both",
       },
     },
   },
