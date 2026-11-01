@@ -1,4 +1,4 @@
-const CACHE_NAME = "onhrm-v2";
+const CACHE_NAME = "onhrm-v3";
 
 self.addEventListener("install", (event) => {
   // Không precache HTML: lần mở đầu trên mạng chậm không bị SW kéo thêm bản sao của trang.
