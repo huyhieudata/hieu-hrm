@@ -10,9 +10,23 @@ export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zlmh2Lp8ojohDx6IlnbzIg_g
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Trong lúc đăng xuất: chặn mọi lần ghi phiên (refresh token/onAuthStateChange) vào storage
+// để phiên cũ không bị ghi lại sau khi đã xoá. Cờ chỉ nằm trong bộ nhớ ⇒ hết khi nạp lại trang.
+let signingOut = false;
+export const beginSignOutGuard = () => {
+  signingOut = true;
+};
+const guardedStorage = {
+  getItem: (key: string) => (signingOut ? null : localStorage.getItem(key)),
+  setItem: (key: string, value: string) => {
+    if (!signingOut) localStorage.setItem(key, value);
+  },
+  removeItem: (key: string) => localStorage.removeItem(key),
+};
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: guardedStorage,
     persistSession: true,
     autoRefreshToken: true,
     // Khoá trong tab thay cho navigator.locks: tránh treo vô hạn (updateUser/ghi dữ liệu kẹt tới khi F5)

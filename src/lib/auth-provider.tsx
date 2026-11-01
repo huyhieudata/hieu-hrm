@@ -13,7 +13,7 @@ import {
 } from "react";
 
 import { noticeIfSlow } from "./net-retry";
-import { supabase } from "@/integrations/supabase/client";
+import { beginSignOutGuard, supabase } from "@/integrations/supabase/client";
 
 export interface Profile {
   id: string;
@@ -191,23 +191,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
-    // Đăng xuất LOCAL ngay (không chờ mạng/khoá): giới hạn 1.5s, sau đó tự xoá mọi token + cache
-    // và nạp lại hẳn trang /login để không còn state/phiên cũ trong bộ nhớ.
+    // 1) Khoá ghi phiên + dừng refresh ⇒ không gì ghi lại token sau khi xoá.
+    beginSignOutGuard();
+    try {
+      supabase.auth.stopAutoRefresh();
+    } catch {
+      /* bỏ qua */
+    }
+    const wipe = () => {
+      for (const storage of [window.localStorage, window.sessionStorage]) {
+        try {
+          Object.keys(storage)
+            .filter((key) => key.startsWith("sb-") || key.includes("supabase") || key.includes("auth-token"))
+            .forEach((key) => storage.removeItem(key));
+        } catch {
+          /* storage bị chặn */
+        }
+      }
+      try {
+        document.cookie.split(";").forEach((c) => {
+          const name = c.split("=")[0]?.trim();
+          if (name && (name.startsWith("sb-") || name.includes("auth"))) {
+            document.cookie = `${name}=; Max-Age=0; path=/`;
+          }
+        });
+      } catch {
+        /* bỏ qua */
+      }
+    };
+    wipe();
+    // 2) Huỷ phiên (local) – tối đa 1.5s, rồi xoá lại lần nữa phòng khi có ghi muộn.
     await Promise.race([
       supabase.auth.signOut({ scope: "local" }).catch(() => undefined),
       new Promise((resolve) => window.setTimeout(resolve, 1500)),
     ]);
     setProfile(null);
     clearQueryCache();
-    for (const storage of [window.localStorage, window.sessionStorage]) {
-      try {
-        Object.keys(storage)
-          .filter((key) => key.startsWith("sb-") || key.includes("supabase") || key.includes("auth-token"))
-          .forEach((key) => storage.removeItem(key));
-      } catch {
-        /* storage bị chặn */
-      }
-    }
+    wipe();
     window.location.replace("/login");
   }, []);
 
