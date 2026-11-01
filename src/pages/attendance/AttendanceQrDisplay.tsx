@@ -12,7 +12,7 @@ import { useCompany } from "@/lib/company-provider";
 import { issueAttendanceQr, listLocations, rotateAttendanceQr, type AttendanceLocation } from "@/lib/attendance-verify";
 import { getErrorMessage } from "@/lib/utils";
 
-/** Màn hình treo tại điểm chấm công: QR đổi mỗi 30 giây, mã chụp lại hết hạn sau tối đa 90 giây. */
+/** Màn hình treo tại điểm chấm công: QR đổi mỗi 15 giây, mỗi mã dùng 1 lần/người, hết hạn sau tối đa 60 giây. */
 const AttendanceQrDisplay = () => {
   const { activeCompany } = useCompany();
   const companyId = activeCompany?.id ?? null;
@@ -65,7 +65,7 @@ const AttendanceQrDisplay = () => {
 
   return (
     <AppShell>
-      <PageHeader title="Mã QR chấm công" description="Mở màn này trên máy tính bảng/màn hình tại điểm chấm công. Mã tự đổi mỗi 30 giây." />
+      <PageHeader title="Mã QR chấm công" description="Mở màn này trên máy tính bảng/màn hình tại điểm chấm công. Mã tự đổi mỗi 15 giây." />
       <Card className="mx-auto mt-4 max-w-lg space-y-4 p-5 text-center">
         <select className="h-11 w-full rounded-xl border bg-background px-3" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
           {locations.length === 0 && <option value="">Chưa có điểm chấm công đang bật</option>}

@@ -82,6 +82,9 @@ export const FLAG_LABELS: Record<string, string> = {
   unregistered_device_out: "Ra: thiết bị chưa đăng ký",
   ua_changed: "Vào: trình duyệt khác lúc đăng ký máy",
   ua_changed_out: "Ra: trình duyệt khác lúc đăng ký máy",
+  shared_device: "Vào: thiết bị này cũng đăng ký cho nhân viên khác",
+  shared_device_out: "Ra: thiết bị này cũng đăng ký cho nhân viên khác",
+  gps_accuracy_invalid: "Độ chính xác GPS bất thường (±0 m)",
 };
 
 /* ------------------------------ Thiết bị ------------------------------ */
