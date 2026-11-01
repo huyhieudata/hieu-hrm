@@ -1,0 +1,4 @@
+
+# Hàm tự xác thực JWT (auth.getUser) — tắt verify ở gateway vì dự án dùng khoá publishable/khoá ký JWT mới (gateway trả 401).
+[functions.create-employee-accounts]
+verify_jwt = false

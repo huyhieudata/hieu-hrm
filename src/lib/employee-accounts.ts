@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { readXlsxFirstSheet } from "@/lib/xlsx-reader";
 
-export type AccountRowInput = { key: string; employee_id?: string; email?: string; full_name?: string };
+export type AccountRowInput = { key: string; employee_id?: string; email?: string; full_name?: string; role?: string; group_id?: string | null };
 export type AccountResult = {
   key: string;
   employee_id: string | null;
