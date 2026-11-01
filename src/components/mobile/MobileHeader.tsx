@@ -1,43 +1,126 @@
-import { Bell, ChevronLeft } from "lucide-react";
+import type { ReactNode } from "react";
+import { Bell, ChevronLeft, ScanLine, Search } from "lucide-react";
 
-import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 
 interface MobileHeaderProps {
   title: string;
-  hello?: boolean;
+  variant?: "bar" | "hero";
+  compact?: boolean;
   back?: boolean;
   onBack?: () => void;
   onNotify?: () => void;
+  onSearch?: () => void;
+  onScan?: () => void;
   notifyDot?: boolean;
+  companyName?: string;
+  personName?: string;
+  personMeta?: string;
+  initials?: string;
 }
 
-export const MobileHeader = ({ title, hello, back, onBack, onNotify, notifyDot }: MobileHeaderProps) => (
-  <header className="glass-bar sticky top-0 z-40 border-x-0 border-t-0 pt-[env(safe-area-inset-top)]">
-    <div className="mx-auto flex min-h-[var(--header-h)] w-full max-w-md items-center gap-2 px-3">
-      {back ? (
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Quay lại"
-          className="touch-target flex h-10 w-10 items-center justify-center rounded-xl bg-card text-foreground shadow-mobile"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-      ) : null}
-      {hello ? <Logo size="sm" subtitle="" className="shrink-0" /> : null}
-      <h1 className={cn("min-w-0 flex-1 truncate font-display text-[17px] font-extrabold tracking-tight text-foreground", hello && "sr-only")}>
-        {title || "ONHRM"}
-      </h1>
-      <button
-        type="button"
-        onClick={onNotify}
-        aria-label="Tin tức và thông báo"
-        className="touch-target relative flex h-10 w-10 items-center justify-center rounded-xl bg-card text-foreground shadow-mobile"
-      >
-        <Bell className="h-[18px] w-[18px]" />
-        {notifyDot ? <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-brand-orange" /> : null}
-      </button>
-    </div>
-  </header>
+const IconButton = ({
+  label,
+  onClick,
+  children,
+  light,
+}: {
+  label: string;
+  onClick?: () => void;
+  children: ReactNode;
+  light?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label={label}
+    className={cn(
+      "relative flex h-11 w-11 items-center justify-center rounded-full",
+      light ? "bg-white/10 text-white" : "text-foreground",
+    )}
+  >
+    {children}
+  </button>
 );
+
+export const MobileHeader = ({
+  title,
+  variant = "bar",
+  compact = false,
+  back,
+  onBack,
+  onNotify,
+  onSearch,
+  onScan,
+  notifyDot,
+  companyName,
+  personName,
+  personMeta,
+  initials,
+}: MobileHeaderProps) => {
+  if (variant === "hero") {
+    return (
+      <header className={cn("bg-home-header relative overflow-hidden rounded-b-[28px] text-white", compact ? "pb-5" : "pb-24")}>
+        <div className="pointer-events-none absolute -right-14 -top-10 h-52 w-52 rounded-full bg-white/[0.07]" />
+        <div className="relative z-[1] pt-[env(safe-area-inset-top)]">
+          <div className="flex items-center justify-between px-5 pt-2">
+            <p className="min-w-0 truncate font-display text-[22px] font-bold tracking-tight">{companyName || "ONHRM"}</p>
+            <div className="flex items-center gap-1">
+              {onScan ? (
+                <IconButton label="Mở chấm công" onClick={onScan} light>
+                  <ScanLine className="h-5 w-5" strokeWidth={1.8} />
+                </IconButton>
+              ) : null}
+              {onSearch ? (
+                <IconButton label="Tìm chức năng" onClick={onSearch} light>
+                  <Search className="h-5 w-5" strokeWidth={1.8} />
+                </IconButton>
+              ) : null}
+              <IconButton label="Tin tức và thông báo" onClick={onNotify} light>
+                <Bell className="h-5 w-5" strokeWidth={1.8} />
+                {notifyDot ? <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-brand-orange ring-2 ring-brand-navy" /> : null}
+              </IconButton>
+            </div>
+          </div>
+          {personName ? (
+            <div className="flex items-center gap-3 px-5 pb-1 pt-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-[16px] font-bold text-brand-navy ring-2 ring-white/40">
+                {initials || "NV"}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[16px] font-semibold">{personName}</p>
+                {personMeta ? <p className="mt-0.5 truncate text-[13px] text-white/70">{personMeta}</p> : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </header>
+    );
+  }
+
+  return (
+    <header className="border-b border-border bg-card pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex h-14 w-full max-w-md items-center gap-1 px-3">
+        {back ? (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Quay lại"
+            className="-ml-1 flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+        ) : null}
+        <h1 className={cn("min-w-0 flex-1 truncate font-display font-bold tracking-tight", back ? "text-[18px]" : "px-2 text-[24px]")}>
+          {title || "ONHRM"}
+        </h1>
+        {onNotify ? (
+          <IconButton label="Tin tức và thông báo" onClick={onNotify}>
+            <Bell className="h-5 w-5" />
+            {notifyDot ? <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-brand-orange" /> : null}
+          </IconButton>
+        ) : null}
+      </div>
+    </header>
+  );
+};

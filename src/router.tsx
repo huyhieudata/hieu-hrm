@@ -90,6 +90,8 @@ const EmployeeTimesheetPage = lazy(
 );
 const EmployeePayslip = lazy("/toi/phieu-luong", () => import("./pages/me/EmployeePayslip"));
 const EmployeeNewsPage = lazy("/toi/tin-tuc", () => import("./pages/me/EmployeeNews"));
+const EmployeeWorkPage = lazy("/cong-viec", () => import("./pages/me/EmployeeWork"));
+const EmployeeAppsPage = lazy("/ung-dung", () => import("./pages/me/EmployeeApps"));
 const MobilePreview = lazy("/xem-truoc-nhan-vien", () => import("./pages/me/MobilePreview"));
 const Contracts = lazy("/hop-dong", () => import("./pages/Contracts"));
 const Assets = lazy("/tai-san", () => import("./pages/Assets"));
@@ -491,6 +493,24 @@ export const routers = [
         <RequestTypes />
       </PageSuspense>,
       "requests",
+    ),
+  },
+  {
+    path: "/cong-viec",
+    name: "employee-work",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeWorkPage />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/ung-dung",
+    name: "employee-apps",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeAppsPage />
+      </PageSuspense>,
     ),
   },
   {

@@ -4,6 +4,9 @@ import { CalendarDays, ChevronRight, LogOut, Moon, Smartphone, User, Wallet } fr
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { useMyDay } from "@/components/mobile/use-my-day";
+import { useDeviceMode } from "@/hooks/use-device-mode";
+import { initials as personInitials } from "@/lib/format";
 import { SelfChangeRequestCard } from "@/components/employee/change-requests";
 import { Switch } from "@/components/ui/switch";
 import { useAuth, displayName } from "@/lib/auth-provider";
@@ -65,6 +68,9 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
     [me, profile?.email, user?.email],
   );
 
+  const mobile = useDeviceMode() === "mobile";
+  const day = useMyDay(mobile);
+
   const logout = async () => {
     try {
       await signOut();
@@ -72,6 +78,82 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
       navigate("/login", { replace: true });
     }
   };
+
+  if (mobile) {
+    const deviceLabel =
+      day.device?.status === "approved" ? "Đã đăng ký" : day.deviceBlocked ? "Chưa duyệt" : null;
+    return (
+      <AppShell>
+        <div className="-mx-4 space-y-2">
+          <section className="flex items-center gap-4 bg-card px-5 py-5">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary text-[20px] font-bold text-brand-navy">
+              {personInitials(fullName)}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[18px] font-bold">{fullName}</p>
+              <p className="mt-0.5 text-[13px] text-muted-foreground">
+                {[me?.code, me?.position, me?.department].filter(Boolean).join(" · ") || activeCompany?.name}
+              </p>
+            </div>
+          </section>
+          {infoOnly ? (
+            <section className="bg-card px-5">
+              {rows.map(([label, value]) => (
+                <div key={label} className="flex min-h-12 items-center justify-between gap-3 border-t border-border py-2 text-[14px] first:border-t-0">
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="text-right font-semibold">{value}</span>
+                </div>
+              ))}
+            </section>
+          ) : (
+            <section className="bg-card px-5">
+              <Link to="/toi/ho-so" className="flex h-14 items-center gap-3 text-[15px] font-medium">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
+                  <User className="h-4 w-4" />
+                </span>
+                <span className="flex-1">Thông tin cá nhân</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+              <Link to="/toi/thiet-bi" className="flex h-14 items-center gap-3 border-t border-border text-[15px] font-medium">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
+                  <Smartphone className="h-4 w-4" />
+                </span>
+                <span className="flex-1">Thiết bị</span>
+                {deviceLabel ? (
+                  <span className={day.device?.status === "approved" ? "rounded-full bg-success-subtle px-2 py-0.5 text-[12px] font-semibold text-success" : "rounded-full bg-accent px-2 py-0.5 text-[12px] font-semibold text-accent-foreground"}>
+                    {deviceLabel}
+                  </span>
+                ) : null}
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+              <label className="flex h-14 items-center gap-3 border-t border-border text-[15px] font-medium">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
+                  <Moon className="h-4 w-4" />
+                </span>
+                <span className="flex-1">Giao diện tối</span>
+                <Switch
+                  checked={dark}
+                  onCheckedChange={(checked) => {
+                    writeTheme(checked ? "dark" : "light");
+                    setDark(checked);
+                  }}
+                  aria-label="Bật giao diện tối"
+                />
+              </label>
+              <button type="button" onClick={() => void logout()} className="flex h-14 w-full items-center gap-3 border-t border-border text-left text-[15px] font-semibold text-destructive">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive-subtle text-destructive">
+                  <LogOut className="h-4 w-4" />
+                </span>
+                Đăng xuất
+              </button>
+            </section>
+          )}
+          {infoOnly && me && activeCompany ? <div className="px-4"><SelfChangeRequestCard companyId={activeCompany.id} employee={me} /></div> : null}
+          <p className="py-3 text-center text-[12px] text-muted-foreground">ONHRM</p>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

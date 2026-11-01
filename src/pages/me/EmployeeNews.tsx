@@ -4,7 +4,10 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/mobile/EmptyState";
+import { NewsPoster } from "@/components/mobile/NewsPoster";
+import { Segmented } from "@/components/mobile/Segmented";
 import { Badge } from "@/components/ui/badge";
+import { useDeviceMode } from "@/hooks/use-device-mode";
 import { useAuth } from "@/lib/auth-provider";
 import { findMyEmployee } from "@/lib/attendance";
 import { useCompany } from "@/lib/company-provider";
@@ -12,7 +15,7 @@ import { isVisibleOnHome, listNewsPosts, type NewsPost } from "@/lib/news";
 import { listRequests, REQUEST_STATUS_LABELS, type EmployeeRequest } from "@/lib/requests";
 import { getErrorMessage } from "@/lib/utils";
 
-type Feed = "alerts" | "news";
+type Feed = "all" | "alerts" | "news";
 
 const relative = (value: string) => {
   const delta = Date.now() - new Date(value).getTime();
@@ -29,7 +32,8 @@ const EmployeeNews = () => {
   const { user } = useAuth();
   const { activeCompany } = useCompany();
   const companyId = activeCompany?.id ?? null;
-  const [feed, setFeed] = useState<Feed>("alerts");
+  const mobile = useDeviceMode() === "mobile";
+  const [feed, setFeed] = useState<Feed>(mobile ? "all" : "alerts");
   const [posts, setPosts] = useState<NewsPost[]>([]);
   const [requests, setRequests] = useState<EmployeeRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +75,74 @@ const EmployeeNews = () => {
     () => [...requests].sort((a, b) => (b.decided_at ?? b.created_at).localeCompare(a.decided_at ?? a.created_at)),
     [requests],
   );
+
+  if (mobile) {
+    const showAlerts = feed === "all" || feed === "alerts";
+    const showNews = feed === "all" || feed === "news";
+    return (
+      <AppShell>
+        <div className="space-y-4">
+          <Segmented
+            label="Nội bộ"
+            value={feed}
+            onChange={(value) => setFeed(value as Feed)}
+            options={[
+              { value: "all", label: "Tất cả" },
+              { value: "alerts", label: "Thông báo", count: alerts.length || undefined },
+              { value: "news", label: "Tin tức" },
+            ]}
+          />
+          {loading ? <div className="h-28 animate-pulse rounded-[20px] bg-card" /> : null}
+          {!loading && showAlerts && alerts.length === 0 && feed === "alerts" ? (
+            <EmptyState emoji="🔔" title="Không có thông báo mới" description="Kết quả duyệt đơn của bạn hiện ở đây." />
+          ) : null}
+          {!loading && showAlerts
+            ? alerts.map((request) => (
+                <article key={request.id} className="flex items-start gap-3 border-t border-border py-3.5 first:border-t-0">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success-subtle text-success">
+                    <Check className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-semibold">Đơn {REQUEST_STATUS_LABELS[request.status] ?? request.status}</p>
+                    <p className="mt-0.5 text-[12px] text-muted-foreground">
+                      {request.decision_note || "Phòng Nhân sự"} · {relative(request.decided_at ?? request.created_at)}
+                    </p>
+                  </div>
+                </article>
+              ))
+            : null}
+          {!loading && showNews && newsError ? (
+            <EmptyState emoji="📭" title="Chưa mở được tin nội bộ" description="Tài khoản chưa được cấp quyền xem tin, hoặc bài chưa phát hành." />
+          ) : null}
+          {!loading && showNews && !newsError && posts.length === 0 && feed === "news" ? (
+            <EmptyState emoji="📭" title="Chưa có tin" description="Khi HR đăng tin, bài sẽ hiện ở đây." />
+          ) : null}
+          {!loading && showNews && !newsError && feed === "all" && posts[0] ? (
+            <NewsPoster hideAll title={posts[0].title} meta={[posts[0].author_name, posts[0].published_at ? relative(posts[0].published_at) : null].filter(Boolean).join(" · ")} />
+          ) : null}
+          {!loading && showNews && !newsError && feed === "news"
+            ? posts.map((post) => (
+                <article key={post.id} className="flex items-start gap-3 border-t border-border py-3.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
+                    <Newspaper className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-semibold">{post.title}</p>
+                    {post.summary ? <p className="mt-0.5 line-clamp-2 text-[13px] text-muted-foreground">{post.summary}</p> : null}
+                    <p className="mt-0.5 text-[12px] text-muted-foreground">
+                      {[post.author_name, post.published_at ? relative(post.published_at) : null].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </article>
+              ))
+            : null}
+          {!loading && feed === "all" && alerts.length === 0 && posts.length === 0 ? (
+            <EmptyState emoji="🔔" title="Chưa có nội dung" description="Thông báo duyệt đơn và tin nội bộ sẽ hiện ở đây." />
+          ) : null}
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

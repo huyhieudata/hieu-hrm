@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Loader2, ScanFace } from "lucide-react";
+import { useRef, useState, type MouseEvent } from "react";
+import { Loader2, Lock, Power, ScanFace } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,9 +12,11 @@ interface CheckInButtonProps {
   onPress: () => void;
   /** Milliseconds the pointer must stay down before Ra ca fires. */
   holdMs?: number;
+  /** Orb matches the approved mobile check-in. Legacy keeps the desktop control. */
+  appearance?: "legacy" | "orb";
 }
 
-export const CheckInButton = ({ mode, label, hint, onPress, holdMs = 1000 }: CheckInButtonProps) => {
+export const CheckInButton = ({ mode, label, hint, onPress, holdMs = 1000, appearance = "legacy" }: CheckInButtonProps) => {
   const [progress, setProgress] = useState(0);
   const timer = useRef<number | null>(null);
   const locked = mode === "locked" || mode === "busy";
@@ -46,6 +48,47 @@ export const CheckInButton = ({ mode, label, hint, onPress, holdMs = 1000 }: Che
     }, 30);
   };
 
+  const handlers = {
+    disabled: locked,
+    "aria-disabled": locked,
+    onClick: () => {
+      if (holding) return;
+      fire();
+    },
+    onPointerDown: startHold,
+    onPointerUp: clear,
+    onPointerLeave: clear,
+    onPointerCancel: clear,
+    onContextMenu: (event: MouseEvent) => event.preventDefault(),
+  };
+
+  if (appearance === "orb") {
+    const blocked = mode === "locked";
+    return (
+      <div className="flex flex-col items-center py-2 text-center">
+        <div className={cn("flex h-[164px] w-[164px] items-center justify-center rounded-full", blocked ? "bg-secondary" : mode === "out" ? "bg-primary-subtle" : "bg-accent")}>
+          <button
+            type="button"
+            {...handlers}
+            className={cn(
+              "flex h-32 w-32 flex-col items-center justify-center gap-1.5 rounded-full text-[15px] font-bold tracking-wide text-white active:scale-95 disabled:active:scale-100",
+              blocked ? "bg-muted-foreground" : mode === "out" ? "bg-brand-navy" : "bg-brand-orange",
+            )}
+          >
+            {mode === "busy" ? <Loader2 className="h-7 w-7 animate-spin" /> : blocked ? <Lock className="h-7 w-7" /> : <Power className="h-7 w-7" />}
+            <span>{label}</span>
+          </button>
+        </div>
+        {hint ? <p className={cn("mt-3 text-[13px]", blocked ? "font-semibold text-destructive" : "text-muted-foreground")}>{hint}</p> : null}
+        {holding && progress > 0 ? (
+          <div className="mt-3 h-1.5 w-40 overflow-hidden rounded-full bg-secondary" aria-hidden>
+            <div className="h-full bg-brand-orange" style={{ width: `${progress * 100}%` }} />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center py-2">
       <div
@@ -56,17 +99,7 @@ export const CheckInButton = ({ mode, label, hint, onPress, holdMs = 1000 }: Che
       >
         <button
           type="button"
-          disabled={locked}
-          aria-disabled={locked}
-          onClick={() => {
-            if (holding) return;
-            fire();
-          }}
-          onPointerDown={startHold}
-          onPointerUp={clear}
-          onPointerLeave={clear}
-          onPointerCancel={clear}
-          onContextMenu={(event) => event.preventDefault()}
+          {...handlers}
           className={cn(
             "flex h-[120px] w-[120px] flex-col items-center justify-center gap-1 rounded-full text-white transition-transform active:scale-95 disabled:active:scale-100",
             locked ? "bg-slate-300 text-white shadow-none" : mode === "out" ? "bg-gradient-accent shadow-glow" : "bg-gradient-primary shadow-glow-navy",

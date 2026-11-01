@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 
@@ -20,6 +20,7 @@ import {
 } from "@/lib/attendance";
 import { mapsUrl, type AttendancePolicy, type EmployeeDevice } from "@/lib/attendance-verify";
 import type { EmployeeRecord } from "@/lib/employee-records";
+import { useDeviceMode } from "@/hooks/use-device-mode";
 
 export interface PunchFlash {
   action: "in" | "out";
@@ -98,7 +99,9 @@ export const EmployeeCheckInView = ({
   onDismissFlash,
 }: EmployeeCheckInViewProps) => {
   const navigate = useNavigate();
+  const mobile = useDeviceMode() === "mobile";
   const [session, setSession] = useState(sessionRows[0]?.session ?? "morning");
+  const [hrNote, setHrNote] = useState(false);
   const [helpDismissed, setHelpDismissed] = useState(false);
   const activeSession = sessionRows.some((row) => row.session === session) ? session : sessionRows[0]?.session ?? "morning";
   const record = todayRecords.find((item) => item.session === activeSession) ?? null;
@@ -207,6 +210,167 @@ export const EmployeeCheckInView = ({
   }
 
   const history = [...records].sort((a, b) => (a.work_date === b.work_date ? a.session.localeCompare(b.session) : b.work_date.localeCompare(a.work_date)));
+
+  if (mobile) {
+    const shownSteps = steps.map((item) => {
+      if (item.id === "selfie") return { ...item, label: "Ảnh khuôn mặt" };
+      if (item.id === "gps" && geo.distanceM != null) {
+        const distance = geo.distanceM >= 1000 ? `${(geo.distanceM / 1000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} km` : `${geo.distanceM} m`;
+        return { ...item, note: `Cách ${distance}${geo.radiusM != null ? ` · cho phép ${geo.radiusM} m` : ""}` };
+      }
+      if (item.id === "device" && device?.status === "approved") {
+        return { ...item, note: `${device.device_name ?? deviceName} · đã đăng ký` };
+      }
+      return item;
+    });
+    const orbLabel = busy ? "ĐANG XỬ LÝ" : finished ? "ĐÃ XONG" : blocked ? "BỊ CHẶN" : action === "out" ? "RA CA" : "VÀO CA";
+    const orbHint = zoneBlocked
+      ? "Bạn đang ở ngoài bán kính chấm công"
+      : deviceBlocked
+        ? "Thiết bị này chưa được phép chấm công"
+        : blocked
+          ? (geo.message ?? "Chưa đủ điều kiện chấm công")
+          : finished
+            ? "Ca hôm nay đã đủ"
+            : action === "out"
+              ? "Giữ 1 giây để ra ca"
+              : "Chạm để vào ca sau khi đã đủ 3 bước";
+    const mobileDate = new Date(`${today}T00:00:00`).toLocaleDateString("vi-VN", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return (
+      <div className="space-y-3">
+        <div className="px-2 pt-2 text-center">
+          <LiveClock />
+          <p className="mt-1 text-[13px] capitalize text-muted-foreground">
+            {mobileDate}
+            {shift ? ` · ${shift.name}` : ""}
+          </p>
+        </div>
+        {offDay ? (
+          <EmptyState
+            emoji="🏖️"
+            title="Hôm nay bạn không có ca"
+            description="Nghỉ ngơi nhé. Nút chấm công được ẩn vì hôm nay không phải ngày làm của ca này."
+            action={
+              <Link to="/toi/bang-cong" className="text-[13px] font-bold text-brand-navy">
+                Xem bảng công tháng
+              </Link>
+            }
+          />
+        ) : (
+          <CheckInButton
+            appearance="orb"
+            mode={mode}
+            label={orbLabel}
+            hint={orbHint}
+            onPress={() => {
+              if (blocked || finished) return;
+              onPunch(activeSession, action);
+            }}
+          />
+        )}
+        {punchFlash && !hardFlag ? (
+          <section className="shadow-card-soft rounded-[20px] bg-card px-4 py-5 text-center">
+            <p className="font-display text-[18px] font-bold">{actionLabel(punchFlash.action)} thành công</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">{formatTime(punchFlash.at)}</p>
+            <button type="button" onClick={onDismissFlash} className="mt-2 h-11 text-[13px] font-bold text-brand-navy">
+              Xem lịch sử hôm nay
+            </button>
+          </section>
+        ) : null}
+        <CheckInSteps variant="list" steps={shownSteps} />
+        {sessionRows.length > 1 && !offDay ? (
+          <div className="flex gap-2">
+            {sessionRows.map((row) => (
+              <button
+                key={row.session}
+                type="button"
+                onClick={() => setSession(row.session)}
+                className={`h-11 flex-1 rounded-2xl text-[13px] font-bold ${row.session === activeSession ? "bg-brand-navy text-white" : "bg-card text-muted-foreground shadow-card-soft"}`}
+              >
+                {row.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {record ? (
+          <div className="shadow-card-soft flex items-center justify-between rounded-[20px] bg-card px-4 py-3 text-[13px]">
+            <span>
+              Vào {formatTime(record.check_in)} · Ra {formatTime(record.check_out)}
+            </span>
+            <Badge variant={statusVariant(record.status)}>{ATTENDANCE_STATUS_LABELS[record.status] ?? record.status}</Badge>
+          </div>
+        ) : null}
+        <section id="lich-su" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-[15px] font-bold">Lịch sử tháng này</h2>
+            <Link to="/toi/bang-cong" className="flex h-11 items-center text-[13px] font-bold text-brand-navy">
+              Bảng công
+            </Link>
+          </div>
+          {history.length === 0 ? (
+            <EmptyState emoji="🗓️" title="Chưa có lần chấm công" description="Lần chấm hợp lệ sẽ hiện ở đây." />
+          ) : (
+            history.slice(0, 8).map((item) => (
+              <div key={item.id} className="shadow-card-soft flex items-center justify-between gap-2 rounded-2xl bg-card px-3 py-2.5">
+                <div>
+                  <p className="text-[13px] font-bold">
+                    {new Date(`${item.work_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" })}
+                    <span className="ml-1 font-medium text-muted-foreground">{item.session === "afternoon" ? "Chiều" : "Sáng"}</span>
+                  </p>
+                  <p className="text-[12px] text-muted-foreground">
+                    {formatTime(item.check_in)} – {formatTime(item.check_out)}
+                  </p>
+                </div>
+                <Badge variant={statusVariant(item.status)}>{ATTENDANCE_STATUS_LABELS[item.status] ?? item.status}</Badge>
+              </div>
+            ))
+          )}
+        </section>
+        {!offDay && blocked ? (
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+            <div className="mx-auto flex max-w-md flex-col gap-2">
+              {deviceBlocked && device?.status !== "pending" ? (
+                <button type="button" onClick={() => navigate("/toi/thiet-bi")} className="flex h-12 items-center justify-center rounded-[14px] bg-brand-navy text-[15px] font-semibold text-white">
+                  Đăng ký thiết bị
+                </button>
+              ) : null}
+              {zoneBlocked ? (
+                <button type="button" onClick={() => navigate("/don-tu")} className="flex h-12 items-center justify-center gap-2 rounded-[14px] bg-brand-navy text-[15px] font-semibold text-white">
+                  Tạo đơn quên chấm công
+                </button>
+              ) : null}
+              {(zoneBlocked || geo.phase === "denied" || geo.phase === "error" || accuracyBlocked) && !deviceBlocked ? (
+                <button type="button" onClick={geo.refresh} className="flex h-12 items-center justify-center rounded-[14px] bg-card text-[15px] font-semibold text-brand-navy ring-1 ring-border">
+                  Thử lại vị trí
+                </button>
+              ) : null}
+              {deviceBlocked ? (
+                <button type="button" onClick={() => setHrNote(true)} className="flex h-12 items-center justify-center rounded-[14px] bg-card text-[15px] font-semibold text-brand-navy ring-1 ring-border">
+                  Liên hệ HR
+                </button>
+              ) : null}
+              {hrNote ? <p className="text-center text-[12px] text-muted-foreground">Công ty chưa khai báo đầu mối HR trên ứng dụng. Nhờ quản lý chuyển giúp.</p> : null}
+              {noZones ? <p className="text-center text-[12px] text-destructive">Công ty chưa khai báo địa điểm chấm công.</p> : null}
+            </div>
+          </div>
+        ) : null}
+        <PermissionHelpSheet
+          open={geo.phase === "denied" && !helpDismissed}
+          kind="location"
+          onClose={() => setHelpDismissed(true)}
+          onRetry={() => {
+            setHelpDismissed(false);
+            geo.refresh();
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))]">
@@ -377,3 +541,16 @@ export const EmployeeCheckInView = ({
 };
 
 const actionLabel = (action: "in" | "out") => (action === "in" ? "Vào ca" : "Ra ca");
+
+const LiveClock = () => {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <p className="font-display text-[40px] font-bold tabular tracking-tight">
+      {now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+    </p>
+  );
+};
