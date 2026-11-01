@@ -5,6 +5,7 @@
 // Chưa cấu hình ⇒ trả { sent: false, reason: "NOT_CONFIGURED" } để giao diện dùng sao chép liên kết / mailto.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import nodemailer from "npm:nodemailer@6.9.14";
+import { renderTemplate, wrapEmail, htmlToText } from "../_shared/mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
     const { data: inv } = await admin
       .from("company_invites")
       .select(
-        "id, company_id, email, role, job_title, department, token, expires_at, revoked, accepted_at, companies(name)",
+        "id, company_id, employee_id, email, role, job_title, department, token, expires_at, revoked, accepted_at, companies(name)",
       )
       .eq("id", invite_id)
       .maybeSingle();
@@ -85,7 +86,7 @@ Deno.serve(async (req) => {
     const company = ((inv as any).companies?.name as string) ?? "công ty";
     const from = Deno.env.get("MAIL_FROM");
     const fromName = Deno.env.get("MAIL_FROM_NAME") ?? "ONHRM";
-    const subject = `Lời mời tham gia ${company} trên ONHRM`;
+    let subject = `Lời mời tham gia ${company} trên ONHRM`;
     const expires = new Date(inv.expires_at).toLocaleDateString("vi-VN", {
       timeZone: "Asia/Ho_Chi_Minh",
     });
@@ -96,13 +97,35 @@ Deno.serve(async (req) => {
     ]
       .filter(Boolean)
       .join(" · ");
-    const text = `Xin chào,\n\nBạn được mời tham gia ${company} trên ONHRM (${detail}).\nBấm liên kết sau để tạo tài khoản bằng email ${inv.email} và tham gia:\n${link}\n\nLiên kết hết hạn ngày ${expires}.`;
-    const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#0e2d58">
+    let text = `Xin chào,\n\nBạn được mời tham gia ${company} trên ONHRM (${detail}).\nBấm liên kết sau để tạo tài khoản bằng email ${inv.email} và tham gia:\n${link}\n\nLiên kết hết hạn ngày ${expires}.`;
+    let html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#0e2d58">
 <h2 style="color:#0e2d58">Lời mời tham gia ${esc(company)}</h2>
 <p>Bạn được mời tham gia <b>${esc(company)}</b> trên ONHRM với vai trò <b>${esc(detail)}</b>.</p>
 <p>Đăng ký/đăng nhập bằng email <b>${esc(inv.email)}</b> rồi bấm nút dưới đây:</p>
 <p><a href="${link}" style="display:inline-block;background:#f47b20;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:bold">Tham gia ngay</a></p>
 <p style="font-size:12px;color:#667">Hoặc mở: ${link}<br/>Liên kết hết hạn ngày ${expires}.</p></div>`;
+
+    // Dùng mẫu "loi_moi" của công ty (module Cài đặt › Email) nếu đang bật; không có ⇒ mẫu mặc định ở trên.
+    const { data: tpl } = await admin
+      .from("email_templates")
+      .select("subject, body_html, active")
+      .eq("company_id", inv.company_id)
+      .eq("code", "loi_moi")
+      .maybeSingle();
+    if (tpl?.active && tpl.body_html) {
+      const { data: emp } = inv.employee_id
+        ? await admin.from("employees").select("full_name, code").eq("id", inv.employee_id).maybeSingle()
+        : { data: null };
+      const vars = {
+        ten_nhan_vien: emp?.full_name ?? inv.email, ma_nhan_vien: emp?.code ?? "", email_nhan_vien: inv.email,
+        phong_ban: inv.department ?? "", chuc_danh: inv.job_title ?? "", ten_cong_ty: company,
+        vai_tro: ROLE_LABELS[inv.role] ?? inv.role, link_loi_moi: link, han_loi_moi: expires,
+        ngay: new Date().toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }), link_app: appUrl,
+      };
+      subject = renderTemplate(tpl.subject, vars, false) || subject;
+      html = wrapEmail(renderTemplate(tpl.body_html, vars));
+      text = htmlToText(html);
+    }
 
     const brevoKey = Deno.env.get("BREVO_API_KEY");
     const smtpHost = Deno.env.get("SMTP_HOST");
@@ -152,6 +175,11 @@ Deno.serve(async (req) => {
         email_sent_at: status === "sent" ? new Date().toISOString() : null,
       })
       .eq("id", inv.id);
+
+    await admin.from("email_logs").insert({
+      company_id: inv.company_id, event_key: "invite_sent", to_email: inv.email, subject,
+      status: status === "sent" ? "sent" : "failed", error: status === "sent" ? null : status,
+    });
 
     if (status === "NOT_CONFIGURED")
       return json({ sent: false, reason: "NOT_CONFIGURED", link });
