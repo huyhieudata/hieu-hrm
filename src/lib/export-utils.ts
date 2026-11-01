@@ -1,5 +1,37 @@
 import { printViaFrame } from "@/lib/print-frame";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+/** SEC-07: giới hạn số dòng mỗi lần xuất và ngưỡng cảnh báo xuất hàng loạt. */
+export const MAX_EXPORT_ROWS = 5000;
+const BULK_WARN_ROWS = 200;
+let auditCompanyId: string | null = null;
+/** CompanyProvider gọi khi đổi công ty đang mở để nhật ký xuất gắn đúng công ty. */
+export const setExportAuditCompany = (companyId: string | null) => {
+  auditCompanyId = companyId;
+};
+
+const limitRows = <T>(rows: T[]): T[] => {
+  if (rows.length <= MAX_EXPORT_ROWS) return rows;
+  toast.warning(`Chỉ xuất ${MAX_EXPORT_ROWS} dòng đầu`, {
+    description: `Có ${rows.length} dòng. Hãy lọc bớt rồi xuất tiếp để giới hạn dữ liệu cá nhân bị sao chép.`,
+  });
+  return rows.slice(0, MAX_EXPORT_ROWS);
+};
+
+/** Ghi nhật ký xuất: chỉ loại, tên tệp và số dòng — không gửi nội dung. */
+const auditExport = (kind: "export_excel" | "export_pdf", target: string, rowCount: number) => {
+  if (rowCount >= BULK_WARN_ROWS) {
+    toast.info("Xuất hàng loạt đã được ghi nhật ký", {
+      description: `${rowCount} dòng. Vui lòng bảo quản tệp, không chia sẻ ra ngoài.`,
+    });
+  }
+  if (!auditCompanyId) return;
+  const db = supabase as unknown as { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<unknown> };
+  void Promise.resolve(
+    db.rpc("log_data_access", { p_company: auditCompanyId, p_kind: kind, p_target: target, p_row_count: rowCount }),
+  ).catch(() => undefined);
+};
 
 const escapeHtml = (value: unknown) =>
   String(value ?? "")
@@ -25,6 +57,8 @@ export const exportExcel = (
   rows: (string | number)[][],
   sheetTitle = filename,
 ) => {
+  rows = limitRows(rows);
+  auditExport("export_excel", filename, rows.length);
   const head = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
   const body = rows
     .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
@@ -53,6 +87,8 @@ export const exportPdf = (
   headers: string[],
   rows: (string | number)[][],
 ) => {
+  rows = limitRows(rows);
+  auditExport("export_pdf", title, rows.length);
   const head = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
   const body = rows
     .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
