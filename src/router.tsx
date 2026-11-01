@@ -81,6 +81,8 @@ const PublicApplyForm = lazy(
   () => import("./pages/recruitment/PublicApplyForm"),
 );
 const Members = lazy(() => import("./pages/Members"));
+const SettingsHome = lazy(() => import("./pages/settings/SettingsHome"));
+const EmailSettings = lazy(() => import("./pages/settings/email/EmailSettings"));
 
 const authenticated = (node: ReactNode) => <RequireAuth>{node}</RequireAuth>;
 
@@ -200,7 +202,7 @@ export const routers = [
     ),
   },
   {
-    path: "/cham-cong/ca-lam-viec",
+    path: "/cai-dat/ca-lam-viec",
     name: "work-shifts",
     element: companyScoped(
       <PageSuspense>
@@ -220,7 +222,7 @@ export const routers = [
     ),
   },
   {
-    path: "/quan-tri",
+    path: "/cai-dat/he-thong/workspace",
     name: "workspaces",
     element: authenticated(
       <PageSuspense>
@@ -229,7 +231,7 @@ export const routers = [
     ),
   },
   {
-    path: "/quan-tri/phan-quyen",
+    path: "/cai-dat/he-thong/phan-quyen",
     name: "permission-groups",
     element: authenticated(
       <PageSuspense>
@@ -238,7 +240,7 @@ export const routers = [
     ),
   },
   {
-    path: "/quan-tri/goi-dich-vu",
+    path: "/cai-dat/he-thong/goi-dich-vu",
     name: "service-plans",
     element: authenticated(
       <PageSuspense>
@@ -327,7 +329,7 @@ export const routers = [
     ),
   },
   {
-    path: "/tinh-luong/tham-so",
+    path: "/cai-dat/tham-so-luong",
     name: "payroll-parameters",
     element: companyScoped(
       <PageSuspense>
@@ -347,7 +349,7 @@ export const routers = [
     ),
   },
   {
-    path: "/danh-gia/bieu-mau",
+    path: "/cai-dat/bieu-mau-danh-gia",
     name: "evaluation-templates",
     element: companyScoped(
       <PageSuspense>
@@ -397,7 +399,7 @@ export const routers = [
     ),
   },
   {
-    path: "/don-tu/quy-trinh-duyet",
+    path: "/cai-dat/quy-trinh-duyet",
     name: "approval-workflow",
     element: companyScoped(
       <PageSuspense>
@@ -407,7 +409,7 @@ export const routers = [
     ),
   },
   {
-    path: "/don-tu/chinh-sach-phep",
+    path: "/cai-dat/chinh-sach-phep",
     name: "leave-policies",
     element: companyScoped(
       <PageSuspense>
@@ -417,7 +419,7 @@ export const routers = [
     ),
   },
   {
-    path: "/don-tu/loai-don",
+    path: "/cai-dat/loai-don",
     name: "request-types",
     element: companyScoped(
       <PageSuspense>
@@ -483,7 +485,7 @@ export const routers = [
     ),
   },
   {
-    path: "/cham-cong/thiet-bi",
+    path: "/cai-dat/thiet-bi-cham-cong",
     name: "attendance-devices",
     element: companyScoped(
       <PageSuspense>
@@ -503,7 +505,7 @@ export const routers = [
     ),
   },
   {
-    path: "/cham-cong/cai-dat",
+    path: "/cai-dat/cham-cong",
     name: "attendance-settings",
     element: companyScoped(
       <PageSuspense>
@@ -523,7 +525,7 @@ export const routers = [
     ),
   },
   {
-    path: "/thanh-vien",
+    path: "/cai-dat/thanh-vien",
     name: "members",
     element: companyScoped(
       <PageSuspense>
@@ -599,6 +601,38 @@ export const routers = [
       </PageSuspense>,
     ),
   },
+  {
+    path: "/cai-dat",
+    name: "settings-home",
+    element: companyScoped(
+      <PageSuspense>
+        <SettingsHome />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/cai-dat/email/:tab",
+    name: "settings-email",
+    element: companyScoped(
+      <PageSuspense>
+        <EmailSettings />
+      </PageSuspense>,
+    ),
+  },
+  { path: "/cai-dat/email", name: "settings-email-root", element: <Navigate to="/cai-dat/email/mau" replace /> },
+  /* URL cũ trước khi gom về CÀI ĐẶT */
+  { path: "/cham-cong/ca-lam-viec", name: "legacy-cham-cong-ca-lam-viec", element: <Navigate to="/cai-dat/ca-lam-viec" replace /> },
+  { path: "/quan-tri", name: "legacy-quan-tri", element: <Navigate to="/cai-dat/he-thong/workspace" replace /> },
+  { path: "/quan-tri/phan-quyen", name: "legacy-quan-tri-phan-quyen", element: <Navigate to="/cai-dat/he-thong/phan-quyen" replace /> },
+  { path: "/quan-tri/goi-dich-vu", name: "legacy-quan-tri-goi-dich-vu", element: <Navigate to="/cai-dat/he-thong/goi-dich-vu" replace /> },
+  { path: "/tinh-luong/tham-so", name: "legacy-tinh-luong-tham-so", element: <Navigate to="/cai-dat/tham-so-luong" replace /> },
+  { path: "/danh-gia/bieu-mau", name: "legacy-danh-gia-bieu-mau", element: <Navigate to="/cai-dat/bieu-mau-danh-gia" replace /> },
+  { path: "/don-tu/quy-trinh-duyet", name: "legacy-don-tu-quy-trinh-duyet", element: <Navigate to="/cai-dat/quy-trinh-duyet" replace /> },
+  { path: "/don-tu/chinh-sach-phep", name: "legacy-don-tu-chinh-sach-phep", element: <Navigate to="/cai-dat/chinh-sach-phep" replace /> },
+  { path: "/don-tu/loai-don", name: "legacy-don-tu-loai-don", element: <Navigate to="/cai-dat/loai-don" replace /> },
+  { path: "/cham-cong/thiet-bi", name: "legacy-cham-cong-thiet-bi", element: <Navigate to="/cai-dat/thiet-bi-cham-cong" replace /> },
+  { path: "/cham-cong/cai-dat", name: "legacy-cham-cong-cai-dat", element: <Navigate to="/cai-dat/cham-cong" replace /> },
+  { path: "/thanh-vien", name: "legacy-thanh-vien", element: <Navigate to="/cai-dat/thanh-vien" replace /> },
   /* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */
   {
     path: "*",

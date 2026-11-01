@@ -33,7 +33,7 @@ interface ScreenMeta {
 
 const screenMeta = (pathname: string): ScreenMeta => {
   if (pathname === "/" || pathname === "/m") return { title: "Trang chủ", tab: "home", hello: true };
-  if (pathname.startsWith("/toi/thiet-bi") || pathname === "/cham-cong/thiet-bi")
+  if (pathname.startsWith("/toi/thiet-bi") || pathname === "/cai-dat/thiet-bi-cham-cong")
     return { title: "Thiết bị của tôi", tab: "me", back: true };
   if (pathname.startsWith("/toi/bang-cong") || pathname.startsWith("/cham-cong/bang-cong"))
     return { title: "Bảng công", tab: "me", back: true };

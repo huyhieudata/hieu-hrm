@@ -5,6 +5,8 @@ import { MobileShell } from "@/components/mobile/MobileShell";
 import { useCompany } from "@/lib/company-provider";
 import { cn } from "@/lib/utils";
 
+import { SettingsNav } from "@/components/settings/settings-nav";
+
 import { AppSidebar } from "./app-sidebar";
 import { AppTopbar } from "./app-topbar";
 import { MobileNav } from "./mobile-nav";
@@ -71,7 +73,14 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         <AppTopbar onOpenSidebar={() => setMobileOpen(true)} />
         <main className="flex-1 px-4 pb-[calc(88px+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:pb-12 lg:pt-6 xl:px-8">
           <div key={pathname} className="mx-auto w-full max-w-[1440px] space-y-6 animate-fade-up">
-            {children}
+            {pathname === "/cai-dat" || pathname.startsWith("/cai-dat/") ? (
+              <div className="flex flex-col gap-4 lg:flex-row lg:gap-8">
+                <SettingsNav />
+                <div className="min-w-0 flex-1 space-y-6">{children}</div>
+              </div>
+            ) : (
+              children
+            )}
           </div>
         </main>
         <footer className="hidden border-t border-border/60 px-4 py-5 sm:px-6 lg:block lg:pb-5 xl:px-8">

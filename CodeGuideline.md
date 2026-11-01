@@ -180,3 +180,9 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Cài app chỉ ghi nhận khi người dùng mở app đã cài (standalone) hoặc sự kiện `appinstalled`; iOS standalone là thiết bị riêng.
 - Mời nhân viên qua RPC `invite_employee` (không insert trực tiếp); email qua edge function `send-invite-email`, fallback sao chép link/mailto.
 - Migration: version 14 số phải DUY NHẤT — `git pull` trước khi đặt tên.
+
+## Module Cài đặt & Email tự động (2026-11-01)
+- Mọi trang cấu hình nằm dưới `/cai-dat/...`; nhóm/quyền khai báo duy nhất ở `src/lib/settings-nav.ts` (`buildSettingsGroups`). AppShell tự hiện `SettingsNav` cho path `/cai-dat*`. Đường dẫn cũ giữ `<Navigate replace>` trong router — thêm trang cài đặt mới thì thêm vào `settings-nav.ts`, không thêm vào sidebar.
+- Email: bảng `email_templates`, `email_rules`, `email_queue` (dedupe_key unique), `email_logs`, `email_dispatch_config` (secret cron, không grant client). Trigger nghiệp vụ gọi `email_enqueue_event` và luôn nuốt lỗi; sự kiện theo ngày do `email_enqueue_daily` (pg_cron `email-tick` 10 phút) → Edge `send-queued-emails` (`--no-verify-jwt`, tự kiểm tra secret/JWT).
+- Gửi mail chỉ qua `supabase/functions/_shared/mailer.ts` (Brevo/SMTP, trả `NOT_CONFIGURED` nếu thiếu secret). Biến `{{ten_bien}}` luôn escape; HTML mẫu được sanitize cả client (DOMPurify) lẫn DB (`email_sanitize_html`).
+- Thêm sự kiện mới: thêm vào check `email_rules.event_key`, trigger/hàm daily, `EVENTS` trong `src/lib/email-automation.ts` và `SAMPLE_VARS`.

@@ -61,6 +61,7 @@ import { displayName, useAuth } from "@/lib/auth-provider";
 import { companyInitials, useCompany } from "@/lib/company-provider";
 import { usePlatformAdmin } from "@/lib/platform";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
+import { buildSettingsGroups } from "@/lib/settings-nav";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {
@@ -177,11 +178,6 @@ export const buildNavGroups = ({
           to: "/tuyen-dung/lich-hen",
           icon: CalendarClock,
         },
-        canDo("evaluations", "view") && {
-          label: "Biểu mẫu đánh giá",
-          to: "/danh-gia/bieu-mau",
-          icon: ClipboardCheck,
-        },
       ].filter(Boolean) as NavItem[],
     },
     {
@@ -190,11 +186,6 @@ export const buildNavGroups = ({
         canDo("payroll", "view") && {
           label: "Kỳ lương",
           to: "/tinh-luong",
-          icon: Calculator,
-        },
-        canDo("payroll", "view") && {
-          label: "Tham số lương",
-          to: "/tinh-luong/tham-so",
           icon: Calculator,
         },
       ].filter(Boolean) as NavItem[],
@@ -219,11 +210,6 @@ export const buildNavGroups = ({
           icon: CalendarDays,
         },
         canManageModule("shifts") && {
-          label: "Ca làm việc",
-          to: "/cham-cong/ca-lam-viec",
-          icon: Clock,
-        },
-        canManageModule("shifts") && {
           label: "Phân ca",
           to: "/cham-cong/phan-ca",
           icon: CalendarRange,
@@ -232,16 +218,6 @@ export const buildNavGroups = ({
           label: "Chi tiết chấm công",
           to: "/cham-cong/nhat-ky",
           icon: MapPinned,
-        },
-        canManageModule("attendance") && {
-          label: "Thiết bị chấm công",
-          to: "/cham-cong/thiet-bi",
-          icon: Smartphone,
-        },
-        canManageModule("attendance") && {
-          label: "Cài đặt chấm công",
-          to: "/cham-cong/cai-dat",
-          icon: Settings2,
         },
       ].filter(Boolean) as NavItem[],
     },
@@ -253,16 +229,6 @@ export const buildNavGroups = ({
           to: "/don-tu",
           icon: FileText,
           exact: true,
-        },
-        canManageModule("requests") && {
-          label: "Loại đơn",
-          to: "/don-tu/loai-don",
-          icon: FileCog,
-        },
-        canManageModule("requests") && {
-          label: "Quy trình duyệt",
-          to: "/don-tu/quy-trinh-duyet",
-          icon: GitBranch,
         },
       ].filter(Boolean) as NavItem[],
     },
@@ -279,57 +245,11 @@ export const buildNavGroups = ({
     {
       label: "Cài đặt",
       items: [
-        canDo("settings", "view") && {
-          label: "Widget trang chủ",
-          to: "/cai-dat/widget-trang-chu",
-          icon: LayoutGrid,
-        },
-        canDo("settings", "view") && {
-          label: "Cơ cấu tổ chức",
-          to: "/cai-dat/co-cau-to-chuc",
-          icon: Network,
-        },
-        canDo("members", "view") &&
-          role !== "employee" && {
-            label: "Thành viên & quyền",
-            to: "/thanh-vien",
-            icon: ShieldCheck,
-          },
-      ].filter(Boolean) as NavItem[],
-    },
-    {
-      label: "Cài đặt check list",
-      items: [
-        canDo("settings", "view") && {
-          label: "Checklist hội nhập",
-          to: "/cai-dat/checklist-hoi-nhap",
-          icon: ListChecks,
-        },
-        canDo("settings", "view") && {
-          label: "Checklist hồ sơ",
-          to: "/cai-dat/checklist-ho-so",
-          icon: FolderOpen,
-        },
-      ].filter(Boolean) as NavItem[],
-    },
-    {
-      label: "Quản trị hệ thống",
-      items: [
-        isPlatformAdmin && {
-          label: "Workspace",
-          to: "/quan-tri",
-          icon: ServerCog,
-          exact: true,
-        },
-        isPlatformAdmin && {
-          label: "Gói dịch vụ",
-          to: "/quan-tri/goi-dich-vu",
-          icon: PackagePlus,
-        },
-        isPlatformAdmin && {
-          label: "Phân quyền",
-          to: "/quan-tri/phan-quyen",
-          icon: KeyRound,
+        buildSettingsGroups({ canDo, canManageModule, isPlatformAdmin, role })
+          .length > 0 && {
+          label: "Cài đặt",
+          to: "/cai-dat",
+          icon: Settings2,
         },
       ].filter(Boolean) as NavItem[],
     },

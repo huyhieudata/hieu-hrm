@@ -1326,7 +1326,7 @@ const CandidateProfile = () => {
             <p className="text-[11.5px] text-muted-foreground">
               Chưa có biểu mẫu đánh giá đang dùng.{" "}
               <Link
-                to="/danh-gia/bieu-mau"
+                to="/cai-dat/bieu-mau-danh-gia"
                 className="font-medium text-primary hover:underline"
               >
                 Tạo biểu mẫu
