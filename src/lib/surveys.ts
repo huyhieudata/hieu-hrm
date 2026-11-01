@@ -53,6 +53,12 @@ export const setSurveyStatus = async (id: string, status: Survey["status"]) => {
   if (error) throw new Error(error.message);
 };
 
+export const deleteSurvey = async (id: string) => {
+  const { data, error } = await db.from("surveys").delete().eq("id", id).select("id");
+  if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error("Không xoá được: bạn không có quyền hoặc khảo sát không còn.");
+};
+
 export interface SurveyResults {
   survey: Survey;
   members: number;

@@ -10,12 +10,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCompany } from "@/lib/company-provider";
 import {
   createSurvey,
   listMyResponses,
   listSurveys,
   loadSurveyResults,
+  deleteSurvey,
   setSurveyStatus,
   submitSurvey,
   type Answers,
@@ -45,14 +47,15 @@ const EmployeeSurveys = () => {
     setLoading(true);
     try {
       const [list, mine] = await Promise.all([listSurveys(companyId), listMyResponses(companyId)]);
-      setSurveys(list);
+      // Nhân viên thường chỉ thấy khảo sát đang mở; đã đóng/nháp ẩn.
+      setSurveys(isHr ? list : list.filter((s) => s.status === "open"));
       setDone(mine);
     } catch (error) {
       toast.error("Không tải được khảo sát", { description: getErrorMessage(error) });
     } finally {
       setLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, isHr]);
   useEffect(() => void load(), [load]);
 
   const expired = (s: Survey) => s.status !== "open" || (s.closes_at ? new Date(s.closes_at) < new Date() : false);
@@ -101,7 +104,7 @@ const EmployeeSurveys = () => {
                     <Badge variant={s.status === "open" ? "success" : "muted"}>{STATUS[s.status]}</Badge>
                     {s.anonymous && <Badge variant="info">Ẩn danh</Badge>}
                     <Badge variant="muted">{s.questions.length} câu</Badge>
-                    {s.closes_at && <Badge variant="muted">Hạn {new Date(s.closes_at).toLocaleDateString("vi-VN")}</Badge>}
+                    {s.closes_at && <Badge variant="muted">Hạn {new Date(s.closes_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}</Badge>}
                   </div>
                 </div>
               </div>
@@ -118,8 +121,26 @@ const EmployeeSurveys = () => {
                     <Button size="sm" variant="outline" className="gap-1 rounded-full" onClick={() => loadSurveyResults(s.id).then(setResults).catch((e) => toast.error(getErrorMessage(e)))}>
                       <BarChart3 className="h-3.5 w-3.5" /> Kết quả
                     </Button>
-                    <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setSurveyStatus(s.id, s.status === "open" ? "closed" : "open").then(load).catch((e) => toast.error(getErrorMessage(e)))}>
+                    <Button size="sm" variant="ghost" className="rounded-full" onClick={async () => {
+                      const closing = s.status === "open";
+                      if (closing && !(await confirmDialog(`Đóng khảo sát “${s.title}”? Nhân viên sẽ không còn thấy và trả lời được.`, { confirmLabel: "Đóng khảo sát" }))) return;
+                      try {
+                        await setSurveyStatus(s.id, closing ? "closed" : "open");
+                        toast.success(closing ? "Đã đóng khảo sát" : "Đã mở lại khảo sát");
+                        await load();
+                      } catch (e) { toast.error(getErrorMessage(e)); }
+                    }}>
                       {s.status === "open" ? "Đóng" : "Mở lại"}
+                    </Button>
+                    <Button size="sm" variant="ghost" className="gap-1 rounded-full text-destructive" onClick={async () => {
+                      if (!(await confirmDialog(`Xoá khảo sát “${s.title}” và toàn bộ câu trả lời? Không thể hoàn tác.`, { confirmLabel: "Xoá" }))) return;
+                      try {
+                        await deleteSurvey(s.id);
+                        toast.success("Đã xoá khảo sát");
+                        await load();
+                      } catch (e) { toast.error(getErrorMessage(e)); }
+                    }}>
+                      <Trash2 className="h-3.5 w-3.5" /> Xoá
                     </Button>
                   </>
                 )}
