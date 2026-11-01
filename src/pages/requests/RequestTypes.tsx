@@ -130,6 +130,33 @@ const RequestTypes = () => {
     }
   };
 
+  const hasOvertime = types.some((type) => type.category === "overtime");
+  const [addingOt, setAddingOt] = useState(false);
+  const handleAddOvertime = async () => {
+    if (!companyId || hasOvertime) return;
+    setAddingOt(true);
+    try {
+      await createRequestType({
+        company_id: companyId,
+        name: "Tăng ca",
+        category: "overtime",
+        deduct_leave: false,
+        requires_attachment: false,
+        max_days: null,
+        sort_order: types.length + 1,
+        active: true,
+      });
+      toast.success("Đã thêm loại đơn Tăng ca", {
+        description: "Nhân viên có thể gửi đơn tăng ca; đơn đã duyệt được tính tiền OT trong bảng lương.",
+      });
+      await load();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setAddingOt(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!pendingDelete) return;
     try {
@@ -152,6 +179,17 @@ const RequestTypes = () => {
         description="Thiết lập các loại đơn và cách cập nhật bảng công khi đơn được duyệt."
         actions={
           canManage && (
+            <div className="flex flex-wrap gap-2">
+            {!loading && !hasOvertime && (
+              <Button
+                variant="outline"
+                className="h-9 gap-1.5 text-[12.5px]"
+                disabled={addingOt}
+                onClick={() => void handleAddOvertime()}
+              >
+                {addingOt ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Thêm loại đơn Tăng ca
+              </Button>
+            )}
             <Button
               className="h-9 gap-1.5 text-[12.5px]"
               onClick={() => {
@@ -161,6 +199,7 @@ const RequestTypes = () => {
             >
               <Plus className="h-4 w-4" /> Thêm loại đơn
             </Button>
+            </div>
           )
         }
       />
