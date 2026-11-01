@@ -8,6 +8,7 @@ import { useDeviceInfo } from "@/hooks/useDeviceInfo";
 import { useAuth } from "@/lib/auth-provider";
 import { findMyEmployee } from "@/lib/attendance";
 import {
+  cancelMyDevice,
   getPolicy,
   listMyDevices,
   registerDevice,
@@ -71,6 +72,20 @@ const EmployeeDevices = () => {
     }
   };
 
+  const cancel = async (device: EmployeeDevice) => {
+    if (!window.confirm(`Huỷ yêu cầu đăng ký "${device.device_name || "thiết bị"}"?`)) return;
+    setBusy(true);
+    try {
+      await cancelMyDevice(device.id);
+      toast.success("Đã huỷ yêu cầu thiết bị");
+      await load();
+    } catch (error) {
+      toast.error("Không huỷ được yêu cầu", { description: getErrorMessage(error) });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <AppShell>
       <div className="text-center text-[40px] leading-none" aria-hidden>
@@ -98,13 +113,15 @@ const EmployeeDevices = () => {
           current
           note={
             current.status === "pending"
-              ? `Gửi ${new Date(current.created_at).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}. Bạn nhận thông báo khi HR xử lý. Huỷ yêu cầu cần HR — ứng dụng chưa có thao tác tự huỷ.`
+              ? `Gửi ${new Date(current.created_at).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}. Bạn nhận thông báo khi HR xử lý. Bạn có thể tự huỷ nếu gửi nhầm.`
               : current.status === "rejected"
                 ? "HR từ chối thiết bị này. Bạn có thể gửi lại hoặc liên hệ HR."
                 : current.status === "approved"
                   ? `Duyệt ${current.approved_at ? new Date(current.approved_at).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" }) : ""}`.trim()
                   : "Thiết bị đã ngừng dùng."
           }
+          actionLabel={current.status === "pending" && !busy ? "Huỷ yêu cầu" : undefined}
+          onAction={current.status === "pending" ? () => void cancel(current) : undefined}
         />
       )}
 
@@ -114,6 +131,8 @@ const EmployeeDevices = () => {
           name={item.device_name || "Thiết bị khác"}
           detail={[item.platform, item.browser].filter(Boolean).join(" · ")}
           status={item.status}
+          actionLabel={item.status === "pending" && !busy ? "Huỷ yêu cầu" : undefined}
+          onAction={item.status === "pending" ? () => void cancel(item) : undefined}
         />
       ))}
 

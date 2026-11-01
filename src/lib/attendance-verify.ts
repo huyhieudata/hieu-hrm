@@ -200,6 +200,12 @@ export const reviewDevice = async (deviceId: string, action: "approve" | "revoke
   if (error) throw new Error(error.message ?? "Không cập nhật được thiết bị.");
 };
 
+/** Nhân viên tự huỷ yêu cầu thiết bị đang chờ duyệt của chính mình. */
+export const cancelMyDevice = async (deviceId: string) => {
+  const { error } = await db.rpc("cancel_my_attendance_device", { p_device: deviceId });
+  if (error) throw new Error(error.message ?? "Không huỷ được yêu cầu.");
+};
+
 export const resetEmployeeDevices = async (employeeId: string) => {
   const { error } = await db.rpc("reset_employee_devices", { p_employee: employeeId });
   if (error) throw new Error(error.message ?? "Không đặt lại được thiết bị.");
