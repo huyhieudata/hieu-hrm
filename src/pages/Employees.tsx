@@ -928,13 +928,15 @@ const Employees = () => {
                   className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/25"
                 >
                   {canDelete && (
-                    <input
-                      type="checkbox"
-                      aria-label={`Chọn ${person.full_name}`}
-                      className="h-3.5 w-3.5 shrink-0 accent-primary"
-                      checked={selected.includes(person.id)}
-                      onChange={() => toggle(person.id)}
-                    />
+                    <label className="touch-check">
+                      <input
+                        type="checkbox"
+                        aria-label={`Chọn ${person.full_name}`}
+                        className="h-3.5 w-3.5 shrink-0 accent-primary"
+                        checked={selected.includes(person.id)}
+                        onChange={() => toggle(person.id)}
+                      />
+                    </label>
                   )}
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <Avatar name={person.full_name} src={person.avatar_url} />

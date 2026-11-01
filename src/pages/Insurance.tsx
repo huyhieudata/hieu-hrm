@@ -441,13 +441,15 @@ const Insurance = () => {
                   className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/25"
                 >
                   {canManage && (
-                    <input
-                      type="checkbox"
-                      aria-label={`Chọn ${group.employee.full_name}`}
-                      className="h-3.5 w-3.5 shrink-0 accent-primary"
-                      checked={selected.includes(group.employee.id)}
-                      onChange={() => toggle(group.employee.id)}
-                    />
+                    <label className="touch-check">
+                      <input
+                        type="checkbox"
+                        aria-label={`Chọn ${group.employee.full_name}`}
+                        className="h-3.5 w-3.5 shrink-0 accent-primary"
+                        checked={selected.includes(group.employee.id)}
+                        onChange={() => toggle(group.employee.id)}
+                      />
+                    </label>
                   )}
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[11px] font-semibold text-primary-subtle-foreground">

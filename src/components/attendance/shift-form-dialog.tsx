@@ -536,7 +536,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
                     type="button"
                     onClick={() => toggleDay(day)}
                     aria-pressed={active}
-                    className={`h-9 rounded-md border text-[11.5px] font-medium transition-colors ${
+                    className={`h-11 min-w-0 rounded-md border px-0 text-[11.5px] font-medium transition-colors ${
                       active
                         ? "border-primary bg-primary-subtle text-primary-subtle-foreground"
                         : "border-border bg-card text-muted-foreground hover:border-primary/40"

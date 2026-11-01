@@ -349,8 +349,11 @@
   /* Ô chọn / thao tác không có tiêu đề: gom gọn một hàng, không nhãn. */
   .mobile-cards table:not([data-keep-table]) tbody td[data-label=""] { justify-content: flex-end; min-height: 0; }
   .mobile-cards table:not([data-keep-table]) tbody td:has(> input[type="checkbox"]),
+  .mobile-cards table:not([data-keep-table]) tbody td:has(> label.touch-check),
   .mobile-cards table:not([data-keep-table]) tbody td:has(> button[role="checkbox"]) {
     justify-content: flex-start;
+    min-height: 44px;
+    overflow: visible;
     border-top: 0 !important;
   }
   .mobile-cards table[data-keep-table] { display: table; }
@@ -378,7 +381,45 @@
     min-width: 44px;
   }
   main [role="checkbox"],
-  main input[type="checkbox"] {
+  main input[type="checkbox"],
+  [role="dialog"] [role="checkbox"],
+  [role="dialog"] input[type="checkbox"],
+  label.touch-check {
+    position: relative;
+  }
+  /* Ô nhìn thấy giữ 14px; vùng bấm là ::before 44px (input thuần không có pseudo). */
+  main input[type="checkbox"],
+  [role="dialog"] input[type="checkbox"],
+  label.touch-check input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+    margin: 0;
+  }
+  main [role="checkbox"],
+  [role="dialog"] [role="checkbox"] {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+  }
+  main [role="checkbox"]::before,
+  [role="dialog"] [role="checkbox"]::before,
+  label.touch-check::before,
+  main [role="switch"]::before,
+  [role="dialog"] [role="switch"]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
+  main [role="switch"],
+  [role="dialog"] [role="switch"] {
     position: relative;
   }
   main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -386,20 +427,18 @@
   main [role="combobox"],
   [role="dialog"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   [role="dialog"] select,
+  [role="dialog"] [role="tab"],
   [role="dialog"] button:not([role="checkbox"]):not([role="switch"]) {
     min-height: 44px;
   }
-  main label:has(> [role="checkbox"]),
-  main label:has(> input[type="checkbox"]),
-  [role="dialog"] label:has(> [role="checkbox"]) {
+  main label:has(> [role="checkbox"]):not(.touch-check),
+  main label:has(> input[type="checkbox"]):not(.touch-check),
+  [role="dialog"] label:has(> [role="checkbox"]):not(.touch-check),
+  [role="dialog"] label:has(> input[type="checkbox"]):not(.touch-check) {
     min-height: 44px;
+    min-width: 44px;
     display: inline-flex;
     align-items: center;
-  }
-  main [role="checkbox"]::after {
-    content: "";
-    position: absolute;
-    inset: -12px;
   }
   main a.text-xs:not(.flex):not(.grid):not(.block),
   main a.text-sm:not(.flex):not(.grid):not(.block),
@@ -407,5 +446,35 @@
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+  }
+  [role="menuitem"],
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="option"] {
+    min-height: 44px;
+  }
+  body.has-install-banner main {
+    padding-bottom: calc(var(--tabbar-h) + 18rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+label.touch-check {
+  position: relative;
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.matrix-sticky {
+  box-shadow: 8px 0 12px -10px hsl(var(--brand-navy) / 0.35);
+}
+
+@media (min-width: 1024px) {
+  .matrix-sticky {
+    box-shadow: none;
   }
 }

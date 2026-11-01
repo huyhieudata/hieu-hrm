@@ -1,19 +1,12 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 
-import { LogoMark } from "@/components/brand/logo";
+import { BootSkeleton } from "@/components/layout/page-suspense";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 
 export const FullPageLoader = ({ label = "Đang tải không gian làm việc…" }: { label?: string }) => (
-  <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
-    <LogoMark className="h-11 w-11 animate-pulse rounded-[12px]" />
-    <p className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-      {label}
-    </p>
-  </div>
+  <BootSkeleton label={label} />
 );
 
 export const RequireAuth = ({ children }: { children: ReactNode }) => {

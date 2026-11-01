@@ -1,13 +1,33 @@
 import { lazy as reactLazy, type ComponentType, type ReactNode } from "react";
 
-// Ghi lại loader của mọi trang lazy để tải trước khi rảnh: chuyển trang sau đó không
-// còn bị Suspense hiện màn chờ toàn màn hình (cảm giác như tải lại).
+// Ghi loader theo đường dẫn để tải đúng chunk của URL hiện tại ngay khi bundle chạy
+// (song song với phiên đăng nhập), và tải các trang còn lại khi trình duyệt rảnh.
 const routeLoaders: Array<() => Promise<unknown>> = [];
+const routeEntries: Array<{ path: string; exact: boolean; load: () => Promise<unknown> }> = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const lazy = <T extends ComponentType<any>>(loader: () => Promise<{ default: T }>) => {
+const lazy = <T extends ComponentType<any>>(
+  path: string | string[],
+  loader: () => Promise<{ default: T }>,
+  exact = false,
+) => {
   routeLoaders.push(loader);
+  for (const item of Array.isArray(path) ? path : [path]) {
+    routeEntries.push({ path: item, exact, load: loader });
+  }
   return reactLazy(loader);
 };
+const routeMatches = (pathname: string, entry: (typeof routeEntries)[number]) =>
+  entry.exact
+    ? pathname === entry.path
+    : pathname === entry.path || pathname.startsWith(`${entry.path}/`);
+
+export const preloadCurrentRoute = (pathname = typeof window === "undefined" ? "/" : window.location.pathname) => {
+  const match = routeEntries
+    .filter((entry) => routeMatches(pathname, entry))
+    .sort((a, b) => b.path.length - a.path.length || Number(b.exact) - Number(a.exact))[0];
+  if (match) void match.load().catch(() => undefined);
+};
+
 export const preloadRoutes = async () => {
   // Không tranh băng thông với dữ liệu trang: bỏ qua khi tiết kiệm dữ liệu / mạng 2G,
   // và tải TUẦN TỰ từng chunk thay vì bắn 50 request cùng lúc.
@@ -27,81 +47,97 @@ import {
 import { PageSuspense } from "./components/layout/page-suspense";
 import NotFound from "./pages/NotFound";
 
-const Index = lazy(() => import("./pages/Index"));
-const Login = lazy(() => import("./pages/Login"));
-const Employees = lazy(() => import("./pages/Employees"));
-const Onboarding = lazy(() => import("./pages/Onboarding"));
-const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfile"));
-const Insurance = lazy(() => import("./pages/Insurance"));
-const CompanyPicker = lazy(() => import("./pages/CompanyPicker"));
-const JoinCompany = lazy(() => import("./pages/JoinCompany"));
-const OrgStructure = lazy(() => import("./pages/settings/OrgStructure"));
-const HomeWidgets = lazy(() => import("./pages/settings/HomeWidgets"));
+const Index = lazy("/", () => import("./pages/Index"), true);
+const Login = lazy("/login", () => import("./pages/Login"), true);
+const Employees = lazy("/employees", () => import("./pages/Employees"), true);
+const Onboarding = lazy("/hoi-nhap", () => import("./pages/Onboarding"));
+const EmployeeProfilePage = lazy("/employees", () => import("./pages/EmployeeProfile"));
+const Insurance = lazy("/bao-hiem", () => import("./pages/Insurance"));
+const CompanyPicker = lazy("/cong-ty", () => import("./pages/CompanyPicker"));
+const JoinCompany = lazy("/tham-gia", () => import("./pages/JoinCompany"));
+const OrgStructure = lazy("/cai-dat/co-cau-to-chuc", () => import("./pages/settings/OrgStructure"));
+const HomeWidgets = lazy("/cai-dat/widget-trang-chu", () => import("./pages/settings/HomeWidgets"));
 const OnboardingChecklist = lazy(
+  "/cai-dat/checklist-hoi-nhap",
   () => import("./pages/settings/OnboardingChecklist"),
 );
-const ContractTemplates = lazy(() => import("./pages/settings/ContractTemplates"));
+const ContractTemplates = lazy("/cai-dat/mau-hop-dong", () => import("./pages/settings/ContractTemplates"));
 const DocumentChecklist = lazy(
+  "/cai-dat/checklist-ho-so",
   () => import("./pages/settings/DocumentChecklist"),
 );
-const Headcount = lazy(() => import("./pages/planning/Headcount"));
-const CheckIn = lazy(() => import("./pages/attendance/CheckIn"));
-const Timesheet = lazy(() => import("./pages/attendance/Timesheet"));
-const Schedule = lazy(() => import("./pages/attendance/Schedule"));
-const Shifts = lazy(() => import("./pages/attendance/Shifts"));
+const Headcount = lazy("/hoach-dinh", () => import("./pages/planning/Headcount"));
+const CheckIn = lazy(["/cham-cong", "/toi/cham-cong"], () => import("./pages/attendance/CheckIn"));
+const Timesheet = lazy("/cham-cong/bang-cong", () => import("./pages/attendance/Timesheet"));
+const Schedule = lazy("/cham-cong/lich-lam-viec", () => import("./pages/attendance/Schedule"));
+const Shifts = lazy("/cai-dat/ca-lam-viec", () => import("./pages/attendance/Shifts"));
 const ShiftAssignments = lazy(
+  "/cham-cong/phan-ca",
   () => import("./pages/attendance/ShiftAssignments"),
 );
 const AttendanceSettings = lazy(
+  "/cai-dat/cham-cong",
   () => import("./pages/attendance/AttendanceSettings"),
 );
-const AttendanceDevices = lazy(() => import("./pages/attendance/Devices"));
-const AttendanceLog = lazy(() => import("./pages/attendance/AttendanceLog"));
-const EmployeeProfile = lazy(() => import("./pages/me/EmployeeProfile"));
-const EmployeeDevicesPage = lazy(() => import("./pages/me/EmployeeDevices"));
+const AttendanceDevices = lazy("/cai-dat/thiet-bi-cham-cong", () => import("./pages/attendance/Devices"));
+const AttendanceLog = lazy("/cham-cong/nhat-ky", () => import("./pages/attendance/AttendanceLog"));
+const EmployeeProfile = lazy(["/toi", "/toi/ho-so"], () => import("./pages/me/EmployeeProfile"));
+const EmployeeDevicesPage = lazy("/toi/thiet-bi", () => import("./pages/me/EmployeeDevices"));
 const EmployeeTimesheetPage = lazy(
+  "/toi/bang-cong",
   () => import("./pages/me/EmployeeTimesheet"),
 );
-const EmployeePayslip = lazy(() => import("./pages/me/EmployeePayslip"));
-const EmployeeNewsPage = lazy(() => import("./pages/me/EmployeeNews"));
-const MobilePreview = lazy(() => import("./pages/me/MobilePreview"));
-const Contracts = lazy(() => import("./pages/Contracts"));
-const Assets = lazy(() => import("./pages/Assets"));
-const News = lazy(() => import("./pages/News"));
+const EmployeePayslip = lazy("/toi/phieu-luong", () => import("./pages/me/EmployeePayslip"));
+const EmployeeNewsPage = lazy("/toi/tin-tuc", () => import("./pages/me/EmployeeNews"));
+const MobilePreview = lazy("/xem-truoc-nhan-vien", () => import("./pages/me/MobilePreview"));
+const Contracts = lazy("/hop-dong", () => import("./pages/Contracts"));
+const Assets = lazy("/tai-san", () => import("./pages/Assets"));
+const News = lazy("/tin-tuc", () => import("./pages/News"));
 const PayrollParameters = lazy(
+  "/cai-dat/tham-so-luong",
   () => import("@/pages/payroll/PayrollParameters"),
 );
 const EvaluationTemplates = lazy(
+  "/cai-dat/bieu-mau-danh-gia",
   () => import("@/pages/evaluations/EvaluationTemplates"),
 );
-const Payroll = lazy(() => import("./pages/payroll/Payroll"));
-const Workspaces = lazy(() => import("./pages/admin/Workspaces"));
-const ServicePlans = lazy(() => import("./pages/admin/ServicePlans"));
-const PermissionGroups = lazy(() => import("./pages/admin/PermissionGroups"));
-const Requests = lazy(() => import("./pages/requests/Requests"));
-const RequestTypes = lazy(() => import("./pages/requests/RequestTypes"));
-const LeavePolicies = lazy(() => import("./pages/requests/LeavePolicies"));
+const Payroll = lazy("/tinh-luong", () => import("./pages/payroll/Payroll"));
+const Workspaces = lazy("/cai-dat/he-thong/workspace", () => import("./pages/admin/Workspaces"));
+const ServicePlans = lazy("/cai-dat/he-thong/goi-dich-vu", () => import("./pages/admin/ServicePlans"));
+const PermissionGroups = lazy("/cai-dat/he-thong/phan-quyen", () => import("./pages/admin/PermissionGroups"));
+const Requests = lazy("/don-tu", () => import("./pages/requests/Requests"), true);
+const RequestTypes = lazy("/cai-dat/loai-don", () => import("./pages/requests/RequestTypes"));
+const LeavePolicies = lazy(
+  ["/nghi-phep", "/cai-dat/chinh-sach-phep"],
+  () => import("./pages/requests/LeavePolicies"),
+);
 const ApprovalWorkflow = lazy(
+  "/cai-dat/quy-trinh-duyet",
   () => import("./pages/requests/ApprovalWorkflow"),
 );
 const RecruitmentOverview = lazy(
+  "/tuyen-dung",
   () => import("./pages/recruitment/RecruitmentOverview"),
+  true,
 );
 const JobDescriptions = lazy(
+  "/tuyen-dung/mo-ta",
   () => import("./pages/recruitment/JobDescriptions"),
 );
-const Campaigns = lazy(() => import("./pages/recruitment/Campaigns"));
-const Candidates = lazy(() => import("./pages/recruitment/Candidates"));
+const Campaigns = lazy("/tuyen-dung/chien-dich", () => import("./pages/recruitment/Campaigns"));
+const Candidates = lazy("/tuyen-dung/ung-vien", () => import("./pages/recruitment/Candidates"), true);
 const CandidateProfile = lazy(
+  "/tuyen-dung/ung-vien",
   () => import("./pages/recruitment/CandidateProfile"),
 );
-const Interviews = lazy(() => import("./pages/recruitment/Interviews"));
+const Interviews = lazy("/tuyen-dung/lich-hen", () => import("./pages/recruitment/Interviews"));
 const PublicApplyForm = lazy(
+  "/ung-tuyen",
   () => import("./pages/recruitment/PublicApplyForm"),
 );
-const Members = lazy(() => import("./pages/Members"));
-const SettingsHome = lazy(() => import("./pages/settings/SettingsHome"));
-const EmailSettings = lazy(() => import("./pages/settings/email/EmailSettings"));
+const Members = lazy("/cai-dat/thanh-vien", () => import("./pages/Members"));
+const SettingsHome = lazy("/cai-dat", () => import("./pages/settings/SettingsHome"), true);
+const EmailSettings = lazy("/cai-dat/email", () => import("./pages/settings/email/EmailSettings"));
 
 const authenticated = (node: ReactNode) => <RequireAuth>{node}</RequireAuth>;
 
@@ -687,3 +723,5 @@ declare global {
 }
 
 window.__routers__ = routers;
+
+if (typeof window !== "undefined") preloadCurrentRoute();
