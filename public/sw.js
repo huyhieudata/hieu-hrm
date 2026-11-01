@@ -1,14 +1,8 @@
-const CACHE_NAME = "onhrm-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/onhrm.svg", "/icons/icon-192.png", "/icons/icon-512.png"];
+const CACHE_NAME = "onhrm-v2";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .catch(() => undefined)
-      .then(() => self.skipWaiting()),
-  );
+  // Không precache HTML: lần mở đầu trên mạng chậm không bị SW kéo thêm bản sao của trang.
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
@@ -21,7 +15,7 @@ self.addEventListener("activate", (event) => {
 });
 
 const isAsset = (pathname) =>
-  /\.(?:js|css|png|jpg|jpeg|svg|webp|woff2?|ico)$/i.test(pathname);
+  /\.(?:js|css|png|jpg|jpeg|svg|webp|woff2?|ico|webmanifest)$/i.test(pathname);
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
@@ -49,6 +43,7 @@ self.addEventListener("fetch", (event) => {
 
   if (!isAsset(url.pathname)) return;
 
+  // Có cache thì trả ngay, vẫn cập nhật nền. Lần đầu không cache thì đi mạng, không chặn bằng precache.
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request)

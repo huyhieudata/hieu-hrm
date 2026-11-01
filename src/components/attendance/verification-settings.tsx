@@ -212,7 +212,7 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
         {draft && (
           <div className="mt-3 space-y-2 rounded-lg border border-border p-3">
             <Input placeholder="Tên (VD: Văn phòng chính)" value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <Input placeholder="Vĩ độ" value={draft.latitude} onChange={(event) => setDraft({ ...draft, latitude: event.target.value })} />
               <Input placeholder="Kinh độ" value={draft.longitude} onChange={(event) => setDraft({ ...draft, longitude: event.target.value })} />
               <Input placeholder="Bán kính (m)" type="number" value={draft.radius_m} onChange={(event) => setDraft({ ...draft, radius_m: event.target.value })} />

@@ -16,7 +16,7 @@ export const SettingsNav = () => {
   const groups = useSettingsGroups();
   const linkCls = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] transition-colors",
+      "flex min-h-11 items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] transition-colors lg:min-h-0",
       isActive ? "bg-brand-navy text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground",
     );
   return (

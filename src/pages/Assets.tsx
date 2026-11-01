@@ -460,13 +460,15 @@ const Assets = () => {
                 <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   {canManage && (
                     <th className="w-[40px] px-2 py-2.5 text-center font-semibold">
-                      <input
-                        type="checkbox"
-                        aria-label="Chọn tất cả tài sản"
-                        className="h-3.5 w-3.5 accent-primary"
-                        checked={filtered.length > 0 && filtered.every((asset) => selected.includes(asset.id))}
-                        onChange={() => selectAll(filtered.map((asset) => asset.id))}
-                      />
+                      <label className="touch-check">
+                        <input
+                          type="checkbox"
+                          aria-label="Chọn tất cả tài sản"
+                          className="h-3.5 w-3.5 accent-primary"
+                          checked={filtered.length > 0 && filtered.every((asset) => selected.includes(asset.id))}
+                          onChange={() => selectAll(filtered.map((asset) => asset.id))}
+                        />
+                      </label>
                     </th>
                   )}
                   <th className="px-4 py-2.5 text-left font-semibold">Tài sản</th>
@@ -484,13 +486,15 @@ const Assets = () => {
                   <tr key={asset.id} className="border-t border-border/50 hover:bg-muted/20">
                     {canManage && (
                       <td className="px-2 py-2.5 text-center">
-                        <input
-                          type="checkbox"
-                          aria-label={`Chọn ${asset.name}`}
-                          className="h-3.5 w-3.5 accent-primary"
-                          checked={selected.includes(asset.id)}
-                          onChange={() => toggle(asset.id)}
-                        />
+                        <label className="touch-check">
+                          <input
+                            type="checkbox"
+                            aria-label={`Chọn ${asset.name}`}
+                            className="h-3.5 w-3.5 accent-primary"
+                            checked={selected.includes(asset.id)}
+                            onChange={() => toggle(asset.id)}
+                          />
+                        </label>
                       </td>
                     )}
                     <td className="px-4 py-2.5">

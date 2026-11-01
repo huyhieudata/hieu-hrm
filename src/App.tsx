@@ -9,10 +9,17 @@ import { InstallReporter } from "./components/pwa/install-reporter";
 import { preloadRoutes, routers } from "./router";
 
 if (typeof window !== "undefined") {
-  const schedule =
-    (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback ??
-    ((cb: () => void) => window.setTimeout(cb, 2500));
-  window.addEventListener("load", () => schedule(preloadRoutes), { once: true });
+  // Chunk của URL hiện tại đã được tải trong router. Các trang còn lại chờ lúc rảnh
+  // để không tranh băng thông với lần mở đầu (Safari không có requestIdleCallback).
+  window.addEventListener(
+    "load",
+    () => {
+      const start = () => preloadRoutes();
+      if (window.requestIdleCallback) window.requestIdleCallback(start, { timeout: 1500 });
+      else window.setTimeout(start, 1200);
+    },
+    { once: true },
+  );
 }
 import { AuthProvider } from "./lib/auth-provider";
 import { CompanyProvider } from "./lib/company-provider";

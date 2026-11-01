@@ -341,15 +341,18 @@ const Timesheet = () => {
         </Card>
       ) : (
         <Card className="overflow-hidden p-0">
-          <div className="scrollbar-slim overflow-x-auto">
-            <table data-keep-table className="w-full min-w-[1100px] border-collapse text-[11.5px]">
+          <p className="hidden items-center gap-1.5 border-b border-border/70 bg-primary-subtle px-3 py-2 text-[12px] font-medium text-primary-subtle-foreground touch:flex">
+            Vuốt ngang để xem các ngày tiếp theo. Cột nhân sự giữ cố định.
+          </p>
+          <div className="scrollbar-slim relative overflow-x-auto">
+            <table data-keep-table className="w-full min-w-[980px] border-collapse text-[12px] lg:min-w-[1100px] lg:text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
-                  <th className="sticky left-0 z-10 min-w-[210px] bg-muted/40 px-4 py-2.5 text-left font-semibold">
-                    Nhân sự
+                <tr className="bg-muted text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
+                  <th className="matrix-sticky sticky left-0 z-10 bg-muted px-2 py-2.5 text-left font-semibold lg:min-w-[210px] lg:px-4">
+                    <div className="w-[92px] lg:w-auto">Nhân sự</div>
                   </th>
                   {Array.from({ length: daysInMonth }, (_, index) => (
-                    <th key={index} className="w-[26px] px-0.5 py-2.5 text-center font-semibold">
+                    <th key={index} className="w-7 min-w-7 px-0.5 py-2.5 text-center text-[11px] font-semibold lg:w-[26px] lg:min-w-[26px]">
                       {index + 1}
                     </th>
                   ))}
@@ -362,18 +365,20 @@ const Timesheet = () => {
                 {filtered.map((employee) => {
                   const totals = totalsFor(employee.id);
                   return (
-                    <tr key={employee.id} className="border-t border-border/50 hover:bg-muted/20">
-                      <td className="sticky left-0 z-10 bg-card px-4 py-2">
-                        <p className="truncate text-[12px] font-medium text-foreground">{employee.full_name}</p>
-                        <p className="truncate text-[11px] text-muted-foreground">
-                          {employee.code}
-                          {employee.department ? ` · ${employee.department}` : ""}
-                        </p>
+                    <tr key={employee.id} className="group border-t border-border/50 hover:bg-muted/20">
+                      <td className="matrix-sticky sticky left-0 z-10 bg-card px-2 py-2 group-hover:bg-muted lg:px-4">
+                        <div className="w-[92px] lg:w-auto">
+                          <p className="truncate text-[12px] font-medium text-foreground">{employee.full_name}</p>
+                          <p className="truncate text-[11px] text-muted-foreground">
+                            {employee.code}
+                            {employee.department ? ` · ${employee.department}` : ""}
+                          </p>
+                        </div>
                       </td>
                       {Array.from({ length: daysInMonth }, (_, index) => {
                         const info = dayInfo(employee.id, index + 1);
                         return (
-                          <td key={index} className="px-0.5 py-2 text-center">
+                          <td key={index} className="w-7 min-w-7 px-0.5 py-2 text-center lg:w-[26px] lg:min-w-[26px]">
                             {info.symbol ? (
                               <span
                                 title={`${info.title} · ${formatCredit(info.credit)} công`}

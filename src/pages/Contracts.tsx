@@ -559,20 +559,22 @@ const Contracts = () => {
                 <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   {canManage && (
                     <th className="w-[40px] px-2 py-2.5 text-center font-semibold">
-                      <input
-                        type="checkbox"
-                        aria-label="Chọn tất cả hợp đồng"
-                        className="h-3.5 w-3.5 accent-primary"
-                        checked={
-                          filtered.length > 0 &&
-                          filtered.every((contract) =>
-                            selected.includes(contract.id),
-                          )
-                        }
-                        onChange={() =>
-                          selectAll(filtered.map((contract) => contract.id))
-                        }
-                      />
+                      <label className="touch-check">
+                        <input
+                          type="checkbox"
+                          aria-label="Chọn tất cả hợp đồng"
+                          className="h-3.5 w-3.5 accent-primary"
+                          checked={
+                            filtered.length > 0 &&
+                            filtered.every((contract) =>
+                              selected.includes(contract.id),
+                            )
+                          }
+                          onChange={() =>
+                            selectAll(filtered.map((contract) => contract.id))
+                          }
+                        />
+                      </label>
                     </th>
                   )}
                   <th className="px-4 py-2.5 text-left font-semibold">
@@ -606,13 +608,15 @@ const Contracts = () => {
                     >
                       {canManage && (
                         <td className="px-2 py-2.5 text-center">
-                          <input
-                            type="checkbox"
-                            aria-label={`Chọn hợp đồng ${contract.contract_no ?? ""}`}
-                            className="h-3.5 w-3.5 accent-primary"
-                            checked={selected.includes(contract.id)}
-                            onChange={() => toggle(contract.id)}
-                          />
+                          <label className="touch-check">
+                            <input
+                              type="checkbox"
+                              aria-label={`Chọn hợp đồng ${contract.contract_no ?? ""}`}
+                              className="h-3.5 w-3.5 accent-primary"
+                              checked={selected.includes(contract.id)}
+                              onChange={() => toggle(contract.id)}
+                            />
+                          </label>
                         </td>
                       )}
                       <td className="px-4 py-2.5">

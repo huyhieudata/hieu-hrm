@@ -574,13 +574,15 @@ const Requests = () => {
               <Card key={request.id} className="p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   {canManage && (
-                    <input
-                      type="checkbox"
-                      aria-label="Chọn đơn"
-                      className="mt-1 h-3.5 w-3.5 accent-primary"
-                      checked={selected.includes(request.id)}
-                      onChange={() => toggle(request.id)}
-                    />
+                    <label className="touch-check mt-1">
+                      <input
+                        type="checkbox"
+                        aria-label="Chọn đơn"
+                        className="h-3.5 w-3.5 accent-primary"
+                        checked={selected.includes(request.id)}
+                        onChange={() => toggle(request.id)}
+                      />
+                    </label>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

@@ -28,8 +28,11 @@ interface PrimaryTab {
   match: (pathname: string) => boolean;
 }
 
-const isRouteActive = (pathname: string, to: string) =>
-  to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
+const itemMatches = (pathname: string, item: NavItem) => {
+  if (!item.to) return false;
+  if (item.to === "/" || item.exact) return pathname === item.to;
+  return pathname === item.to || pathname.startsWith(`${item.to}/`);
+};
 
 export const MobileNav = () => {
   const { pathname } = useLocation();
@@ -84,6 +87,11 @@ export const MobileNav = () => {
   const navItems = groups
     .flatMap((group) => group.items)
     .filter((item): item is NavItem & { to: string } => Boolean(item.to));
+  // Chỉ một tile sáng: đường dẫn dài nhất khớp trang hiện tại (exact không nuốt /toi/*).
+  const activeTo =
+    navItems
+      .filter((item) => itemMatches(pathname, item))
+      .sort((a, b) => b.to.length - a.to.length)[0]?.to ?? null;
 
   const go = (to: string) => {
     setMoreOpen(false);
@@ -215,7 +223,7 @@ export const MobileNav = () => {
                     <div className="mt-2 grid grid-cols-3 gap-2">
                       {items.map((item) => {
                         const Icon = item.icon;
-                        const active = item.to ? isRouteActive(pathname, item.to) : false;
+                        const active = item.to === activeTo;
                         return (
                           <button
                             key={`${group.label}-${item.label}`}
@@ -266,7 +274,7 @@ export const MobileNav = () => {
                       navigate("/login", { replace: true });
                     }
                   }}
-                  className="flex h-8 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[11px] font-semibold text-destructive"
+                  className="flex min-h-11 items-center gap-1 rounded-full border border-border bg-card px-3 text-[12px] font-semibold text-destructive"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Đăng xuất
                 </button>

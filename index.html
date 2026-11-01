@@ -26,11 +26,22 @@
       if (themeDark) document.documentElement.classList.add("dark");
     } catch (e) {}
   </script>
+  <style>
+    html, body { margin: 0; background: hsl(213 50% 97%); color: hsl(217 65% 12%); }
+    html.dark, html.dark body { background: hsl(214 71% 9%); color: hsl(230 100% 96%); }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
+    rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet">
+    media="print"
+    onload="this.media='all'">
+  <noscript>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  </noscript>
   <title>ONHRM — Quản trị nhân sự</title>
   <meta name="description" content="ONHRM — nền tảng quản trị nhân sự hiện đại: hồ sơ, chấm công, nghỉ phép và bảng lương trong một nơi duy nhất." />
   <meta name="author" content="ONHRM" />

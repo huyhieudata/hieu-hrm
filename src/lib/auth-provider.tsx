@@ -114,6 +114,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      // Mở giao diện ngay khi đã có phiên. Hồ sơ tải nền, không chặn màn chờ.
+      setLoading(false);
       const nextUser = nextSession.user;
       // Deferred: calling the client inside this callback deadlocks the auth client.
       setTimeout(() => {
@@ -129,6 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       setSession(data.session);
       setUser(data.session.user);
+      setLoading(false);
       const restoredUser = data.session.user;
       setTimeout(() => {
         if (active) void loadProfile(restoredUser);
