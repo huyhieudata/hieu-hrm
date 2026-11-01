@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Áp dụng các migration MỚI (supabase/migrations/YYYYMMDDHHMMSS_ten.sql) lên Supabase
-# qua Management API. Bỏ qua file cũ dạng migration_* (không đuôi .sql, đã áp dụng).
+# qua Management API. File *_legacy.sql là schema gốc cũ (đã đăng ký sẵn trong schema_migrations).
 # Mỗi file chạy trong 1 transaction và được ghi vào supabase_migrations.schema_migrations;
 # file có version đã tồn tại trong bảng sẽ bị bỏ qua -> không bao giờ chạy lại.
 set -euo pipefail

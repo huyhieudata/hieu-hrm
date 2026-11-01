@@ -80,6 +80,8 @@ export const FLAG_LABELS: Record<string, string> = {
   out_of_zone_out: "Ra: ngoài vùng",
   unregistered_device: "Vào: thiết bị chưa đăng ký",
   unregistered_device_out: "Ra: thiết bị chưa đăng ký",
+  ua_changed: "Vào: trình duyệt khác lúc đăng ký máy",
+  ua_changed_out: "Ra: trình duyệt khác lúc đăng ký máy",
 };
 
 /* ------------------------------ Thiết bị ------------------------------ */

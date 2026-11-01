@@ -186,3 +186,9 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Email: bảng `email_templates`, `email_rules`, `email_queue` (dedupe_key unique), `email_logs`, `email_dispatch_config` (secret cron, không grant client). Trigger nghiệp vụ gọi `email_enqueue_event` và luôn nuốt lỗi; sự kiện theo ngày do `email_enqueue_daily` (pg_cron `email-tick` 10 phút) → Edge `send-queued-emails` (`--no-verify-jwt`, tự kiểm tra secret/JWT).
 - Gửi mail chỉ qua `supabase/functions/_shared/mailer.ts` (Brevo/SMTP, trả `NOT_CONFIGURED` nếu thiếu secret). Biến `{{ten_bien}}` luôn escape; HTML mẫu được sanitize cả client (DOMPurify) lẫn DB (`email_sanitize_html`).
 - Thêm sự kiện mới: thêm vào check `email_rules.event_key`, trigger/hàm daily, `EVENTS` trong `src/lib/email-automation.ts` và `SAMPLE_VARS`.
+
+## Thứ tự migration & chức danh (2026-11-01)
+- 168 file cũ `migration_YYYYMMDD_HHMMSSmmm` đã đổi tên thành `YYYYMMDDHHMMSS_legacy.sql` (sắp trước mọi file 2026110x khi dựng lại DB) và đã đăng ký sẵn version trong `supabase_migrations.schema_migrations` nên Action không chạy lại. Không tạo file thiếu đuôi `.sql` nữa.
+- `position_id` (FK department_positions) + trigger `sync_row_position(<cột text>)` trên employees, employee_contracts, employee_work_history, company_invites(job_title), candidate_offers, job_descriptions(title), onboarding_records, shift_assignments(scope_value khi scope_type='position'). Đổi tên chức danh tự cập nhật text.
+- `org_assert_valid(company, department, position)`: lỗi rõ khi không có trên sơ đồ (công ty đã có sơ đồ); "Khác…" được phép cho owner/admin/hr. Lời mời kiểm tra qua trigger `trg_validate_invite_org`.
+- `attendance_punch`: chặn ảnh đã dùng, ghi IP/user-agent từ `request.headers` vào punch_logs/records, cờ `ua_changed` khi trình duyệt khác lúc đăng ký thiết bị.
