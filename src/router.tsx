@@ -80,6 +80,8 @@ const AttendanceSettings = lazy(
   "/cai-dat/cham-cong",
   () => import("./pages/attendance/AttendanceSettings"),
 );
+const AttendanceQrDisplay = lazy("/cai-dat/ma-qr-cham-cong", () => import("./pages/attendance/AttendanceQrDisplay"));
+const EmployeeQrScanPage = lazy("/toi/quet-qr", () => import("./pages/me/EmployeeQrScan"));
 const AttendanceDevices = lazy("/cai-dat/thiet-bi-cham-cong", () => import("./pages/attendance/Devices"));
 const AttendanceLog = lazy("/cham-cong/nhat-ky", () => import("./pages/attendance/AttendanceLog"));
 const EmployeeProfile = lazy(["/toi", "/toi/ho-so"], () => import("./pages/me/EmployeeProfile"));
@@ -596,6 +598,25 @@ export const routers = [
     element: companyScoped(
       <PageSuspense>
         <EmployeeNewsPage />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/cai-dat/ma-qr-cham-cong",
+    name: "attendance-qr-display",
+    element: companyScoped(
+      <PageSuspense>
+        <AttendanceQrDisplay />
+      </PageSuspense>,
+      "attendance",
+    ),
+  },
+  {
+    path: "/toi/quet-qr",
+    name: "me-qr-scan",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeQrScanPage />
       </PageSuspense>,
     ),
   },

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Crosshair, Loader2, MapPin, Plus, Save, Trash2 } from "lucide-react";
+import { AlertTriangle, Crosshair, Loader2, MapPin, Plus, QrCode, Save, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -193,9 +194,14 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
             <p className="text-[11.5px] text-muted-foreground">Nhân viên phải đứng trong bán kính một địa điểm đang dùng mới chấm được.</p>
           </div>
           {canManage && !draft && (
-            <Button size="sm" variant="outline" className="h-8 gap-1 text-[11.5px]" onClick={() => setDraft({ ...emptyDraft })}>
-              <Plus className="h-3.5 w-3.5" /> Thêm
-            </Button>
+            <div className="flex gap-1.5">
+              <Button asChild size="sm" variant="outline" className="h-8 gap-1 text-[11.5px]">
+                <Link to="/cai-dat/ma-qr-cham-cong"><QrCode className="h-3.5 w-3.5" /> Mã QR</Link>
+              </Button>
+              <Button size="sm" variant="outline" className="h-8 gap-1 text-[11.5px]" onClick={() => setDraft({ ...emptyDraft })}>
+                <Plus className="h-3.5 w-3.5" /> Thêm
+              </Button>
+            </div>
           )}
         </div>
 
