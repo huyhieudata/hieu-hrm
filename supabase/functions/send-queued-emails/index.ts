@@ -4,9 +4,10 @@
 // Deploy với --no-verify-jwt (tự kiểm tra JWT/secret bên dưới).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { mailConfigured, renderTemplate, sendMail, wrapEmail } from "../_shared/mailer.ts";
+import { withCors } from "../_shared/cors.ts";
 
 const cors = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://hieu-hrm.vercel.app", // ghi đè bởi withCors
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 const json = (b: unknown, s = 200) =>
@@ -21,7 +22,7 @@ export const SAMPLE_VARS: Record<string, string> = {
   ly_do: "Việc gia đình", ghi_chu_duyet: "Đồng ý", so_lan_di_muon: "3", thang: "11/2026",
 };
 
-Deno.serve(async (req) => {
+Deno.serve(withCors(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
     const url = Deno.env.get("SUPABASE_URL")!;
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     }
 
     const { data: batch, error } = await admin.rpc("email_claim_batch", { p_limit: 50, p_company: company });
-    if (error) return json({ error: error.message }, 500);
+    if (error) { console.error("email_claim_batch", error); return json({ error: "Lỗi xử lý hàng đợi." }, 500); }
     let sent = 0, failed = 0;
     const configured = mailConfigured();
     for (const q of batch ?? []) {
@@ -90,4 +91,4 @@ Deno.serve(async (req) => {
   } catch (_e) {
     return json({ error: "Lỗi xử lý hàng đợi." }, 500);
   }
-});
+}));

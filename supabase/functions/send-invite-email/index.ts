@@ -6,9 +6,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import nodemailer from "npm:nodemailer@6.9.14";
 import { renderTemplate, wrapEmail, htmlToText } from "../_shared/mailer.ts";
+import { withCors } from "../_shared/cors.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://hieu-hrm.vercel.app", // ghi đè bởi withCors
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
@@ -33,7 +34,7 @@ const esc = (v: string) =>
       ]!,
   );
 
-Deno.serve(async (req) => {
+Deno.serve(withCors(async (req: Request) => {
   if (req.method === "OPTIONS")
     return new Response("ok", { headers: corsHeaders });
   try {
@@ -188,4 +189,4 @@ Deno.serve(async (req) => {
   } catch (_err) {
     return json({ error: "Không gửi được email." }, 500);
   }
-});
+}));
