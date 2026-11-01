@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Loader2, RotateCcw, Search, ShieldOff, Smartphone, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -112,7 +113,7 @@ const Devices = () => {
 
   const reset = async (device: EmployeeDevice) => {
     const employee = employeeMap.get(device.employee_id);
-    if (!window.confirm(`Đặt lại thiết bị cho ${employee?.full_name ?? "nhân viên"}? Mọi máy cũ bị thu hồi, nhân viên đăng ký lại máy mới.`)) return;
+    if (!(await confirmDialog(`Đặt lại thiết bị cho ${employee?.full_name ?? "nhân viên"}? Mọi máy cũ bị thu hồi, nhân viên đăng ký lại máy mới.`))) return;
     setBusy(device.id);
     try {
       await resetEmployeeDevices(device.employee_id);
@@ -160,6 +161,9 @@ const Devices = () => {
             total={installs.length}
             onlyMissing={onlyNoApp}
             onToggle={setOnlyNoApp}
+            missingNames={installs
+              .filter((row) => !row.installed)
+              .map((row) => (row.employee_id && employeeMap.get(row.employee_id)?.full_name) || "Chưa liên kết hồ sơ")}
           />
         </div>
       )}

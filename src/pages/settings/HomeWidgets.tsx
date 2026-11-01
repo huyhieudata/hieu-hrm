@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
@@ -113,7 +114,7 @@ const HomeWidgets = () => {
   const reset = async () => {
     if (
       !companyId ||
-      !window.confirm(`Khôi phục mặc định cho ${SURFACE_LABELS[surface]}?`)
+      !(await confirmDialog(`Khôi phục mặc định cho ${SURFACE_LABELS[surface]}?`))
     )
       return;
     setSaving(true);
@@ -191,8 +192,8 @@ const HomeWidgets = () => {
           <button
             key={key}
             type="button"
-            onClick={() => {
-              if (dirty && !window.confirm("Bỏ các thay đổi chưa lưu?")) return;
+            onClick={async () => {
+              if (dirty && !(await confirmDialog("Bỏ các thay đổi chưa lưu?"))) return;
               setSurface(key);
             }}
             className={cn(

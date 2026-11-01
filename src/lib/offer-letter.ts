@@ -1,3 +1,4 @@
+import { printViaFrame } from "@/lib/print-frame";
 import { toast } from "sonner";
 
 import { currency } from "@/lib/format";
@@ -132,15 +133,7 @@ ${offer.note ? `<div class="block"><h3>Ghi chú</h3><p>${escapeHtml(offer.note).
 
 export const printOfferLetter = (offer: CandidateOffer, candidate: Candidate, companyName: string) => {
   const html = buildOfferLetterHtml(offer, candidate, companyName);
-  const win = window.open("", "_blank", "width=900,height=1000");
-  if (!win) {
-    toast.error("Trình duyệt đã chặn cửa sổ in. Vui lòng cho phép popup.");
-    return;
-  }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  win.print();
+  printViaFrame(html);
 };
 
 export const downloadOfferLetter = (offer: CandidateOffer, candidate: Candidate, companyName: string) => {

@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FileText, Loader2, Plus, Printer, RotateCcw, Save, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -202,7 +203,7 @@ const ContractTemplates = () => {
                     className="h-9 text-destructive"
                     aria-label="Xoá mẫu"
                     onClick={async () => {
-                      if (!window.confirm(`Xoá mẫu "${row.name}"?`)) return;
+                      if (!(await confirmDialog(`Xoá mẫu "${row.name}"?`))) return;
                       try {
                         await deleteContractTemplate(row.id);
                         toast.success("Đã xoá mẫu");

@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { RefreshCw, ShieldAlert } from "lucide-react";
@@ -78,8 +79,8 @@ const AttendanceQrDisplay = () => {
           QR chỉ là điều kiện thêm. Nhân viên vẫn phải dùng thiết bị đã duyệt, đứng trong bán kính của chính điểm này và chụp ảnh (theo chính sách) mới chấm được.
         </p>
         {locationId && (
-          <Button variant="outline" className="gap-1.5" onClick={() => {
-            if (!window.confirm("Đổi khoá QR? Mọi mã cũ (kể cả ảnh chụp màn hình) sẽ vô hiệu ngay.")) return;
+          <Button variant="outline" className="gap-1.5" onClick={async () => {
+            if (!(await confirmDialog("Đổi khoá QR? Mọi mã cũ (kể cả ảnh chụp màn hình) sẽ vô hiệu ngay."))) return;
             rotateAttendanceQr(locationId).then(() => toast.success("Đã đổi khoá. Mã mới hiển thị ở lần làm mới tiếp theo.")).catch((e) => toast.error(getErrorMessage(e)));
           }}>
             <RefreshCw className="h-4 w-4" /> Đổi khoá QR

@@ -1,3 +1,4 @@
+import { documentDownloadName } from "@/lib/employee-records";
 import { useCallback, useEffect, useState } from "react";
 import { Download, ExternalLink, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -58,10 +59,10 @@ export const DocumentPreviewDialog = ({ document, open, onOpenChange }: Document
   const handleDownload = async () => {
     if (!document) return;
     try {
-      const downloadUrl = await getDocumentSignedUrl(document.file_path, document.name);
+      const downloadUrl = await getDocumentSignedUrl(document.file_path, documentDownloadName(document));
       const link = window.document.createElement("a");
       link.href = downloadUrl;
-      link.download = document.name;
+      link.download = documentDownloadName(document);
       window.document.body.appendChild(link);
       link.click();
       window.document.body.removeChild(link);

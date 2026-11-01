@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 // Tab "Đánh giá" trong hồ sơ nhân viên: phiếu thử việc/định kỳ theo biểu mẫu (mô-đun 4).
 // HR/admin (evaluations.*) chấm mọi nhân viên; quản lý chấm nhân viên mình quản lý;
 // nhân viên xem phiếu đã nộp của chính mình. Máy chủ kiểm tra lại toàn bộ (RLS + trigger).
@@ -543,7 +544,7 @@ export const EmployeeEvaluationsTab = ({
   };
 
   const handleDelete = async (row: EmployeeEvaluation) => {
-    if (!window.confirm("Xoá phiếu đánh giá này?")) return;
+    if (!(await confirmDialog("Xoá phiếu đánh giá này?"))) return;
     try {
       await deleteEmployeeEvaluation(row.id);
       toast.success("Đã xoá phiếu.");

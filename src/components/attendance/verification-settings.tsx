@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Crosshair, Loader2, MapPin, Plus, QrCode, Save, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -141,7 +142,7 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
   };
 
   const remove = async (location: AttendanceLocation) => {
-    if (!window.confirm(`Xoá địa điểm "${location.name}"?`)) return;
+    if (!(await confirmDialog(`Xoá địa điểm "${location.name}"?`))) return;
     try {
       await deleteLocation(location.id);
       await load();

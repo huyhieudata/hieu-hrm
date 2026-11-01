@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Eye, FileText, Search, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -82,7 +83,7 @@ const EmployeeDocuments = () => {
                 <Button size="icon" variant="ghost" className="h-11 w-11" aria-label="Tải về" onClick={() => open(d, true)}><Download className="h-4 w-4" /></Button>
                 {isHr && (
                   <Button size="icon" variant="ghost" className="h-11 w-11 text-destructive" aria-label="Xoá"
-                    onClick={() => { if (window.confirm(`Xoá "${d.title}"?`)) deleteDocument(d).then(load).catch((e) => toast.error(getErrorMessage(e))); }}>
+                    onClick={async () => { if ((await confirmDialog(`Xoá "${d.title}"?`))) deleteDocument(d).then(load).catch((e) => toast.error(getErrorMessage(e))); }}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}

@@ -1,3 +1,5 @@
+import { formatDate } from "@/lib/employee-records";
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -121,7 +123,7 @@ export default function PayrollParameters() {
   };
 
   const remove = async (row: PayrollParameter) => {
-    if (!window.confirm(`Xoá bộ tham số hiệu lực ${row.effective_date}?`)) return;
+    if (!(await confirmDialog(`Xoá bộ tham số hiệu lực ${formatDate(row.effective_date)}?`))) return;
     try {
       await deletePayrollParameter(row.id);
       await load();

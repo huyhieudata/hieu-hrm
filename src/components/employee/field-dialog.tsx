@@ -1,3 +1,4 @@
+import { validateEmailAddress, validatePhone } from "@/lib/field-defs";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
@@ -108,6 +109,8 @@ export const FieldDialog = ({
   const [createParent, setCreateParent] = useState("none");
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  // Bản ghi vừa tạo nhanh: thêm ngay vào danh sách chọn để tự chọn được, không chờ tải lại.
+  const [createdOptions, setCreatedOptions] = useState<Record<string, { value: string; label: string }[]>>({});
 
   const submitCreate = async () => {
     if (!createFor?.onCreate) return;
@@ -117,6 +120,10 @@ export const FieldDialog = ({
     setCreateError(null);
     try {
       const created = await createFor.onCreate({ name, parentId: createParent === "none" ? null : createParent }, values);
+      setCreatedOptions((prev) => ({
+        ...prev,
+        [createFor.name]: [...(prev[createFor.name] ?? []), { value: created, label: created }],
+      }));
       setField(createFor.name, created);
       toast.success(`Đã tạo “${created}”`);
       setCreateFor(null);
@@ -195,7 +202,10 @@ export const FieldDialog = ({
         nextErrors[field.name] = `${field.label} phải là số.`;
         continue;
       }
-      const invalid = raw && field.validate ? field.validate(raw, values) : null;
+      // Mặc định: SĐT/email kiểm như /toi/ho-so (tiếng Việt), kể cả khi trường không tự khai validate.
+      const validate =
+        field.validate ?? (field.type === "tel" ? validatePhone : field.type === "email" ? validateEmailAddress : undefined);
+      const invalid = raw && validate ? validate(raw, values) : null;
       if (invalid) nextErrors[field.name] = invalid;
     }
     setFieldErrors(nextErrors);
@@ -247,7 +257,7 @@ export const FieldDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[760px]">
-        <form onSubmit={handleSubmit}>
+        <form noValidate onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description && (
@@ -291,12 +301,18 @@ export const FieldDialog = ({
 
                         {field.type === "select" ? (
                           (() => {
-                            const opts =
+                            const baseOpts =
                               (field.dependsOn && field.optionsByValue
                                 ? (field.optionsByValue[
                                     values[field.dependsOn] ?? ""
                                   ] ?? field.options)
                                 : field.options) ?? [];
+                            const opts = [
+                              ...baseOpts,
+                              ...(createdOptions[field.name] ?? []).filter(
+                                (extra) => !baseOpts.some((option) => option.value === extra.value),
+                              ),
+                            ];
                             const current = values[field.name] ?? "";
                             const isLegacy =
                               !!current &&

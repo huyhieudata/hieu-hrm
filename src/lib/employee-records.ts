@@ -822,6 +822,34 @@ export const uploadEmployeeFile = async (input: {
   return path;
 };
 
+/** Định dạng tài liệu hồ sơ được phép (khớp bucket). */
+export const EMPLOYEE_DOCUMENT_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "webp", "doc", "docx", "xls", "xlsx"];
+
+/** Lỗi tiếng Việt nếu tệp không đúng định dạng, null nếu hợp lệ. */
+export const documentFileProblem = (file: File) => {
+  const ext = file.name.includes(".") ? file.name.split(".").pop()!.toLowerCase() : "";
+  if (!EMPLOYEE_DOCUMENT_EXTENSIONS.includes(ext))
+    return `Định dạng ${ext ? `.${ext}` : "này"} không được hỗ trợ. Chỉ nhận PDF, ảnh (JPG, PNG, WEBP), Word hoặc Excel.`;
+  return null;
+};
+
+/** Dịch lỗi Storage (mime, dung lượng, quyền) sang tiếng Việt. */
+export const translateStorageError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (/mime type|not supported|invalid_mime/i.test(message))
+    return "Định dạng tệp không được hỗ trợ. Chỉ nhận PDF, ảnh (JPG, PNG, WEBP), Word hoặc Excel.";
+  if (/exceeded the maximum|too large|payload/i.test(message)) return "Tệp quá lớn (tối đa 15MB).";
+  if (/row-level security|unauthorized|403/i.test(message)) return "Bạn không có quyền tải tài liệu cho nhân viên này.";
+  return message || "Không tải được tệp.";
+};
+
+/** Tên tải về giữ đuôi tệp gốc (lấy từ đường dẫn lưu trữ). */
+export const documentDownloadName = (doc: { name: string; file_path: string }) => {
+  const ext = doc.file_path.split(".").pop()?.toLowerCase();
+  if (!ext || ext.includes("/") || doc.name.toLowerCase().endsWith(`.${ext}`)) return doc.name;
+  return `${doc.name}.${ext}`;
+};
+
 export const getDocumentSignedUrl = async (filePath: string, downloadAs?: string) => {
   const { data, error } = await supabase.storage
     .from(EMPLOYEE_DOCUMENT_BUCKET)
