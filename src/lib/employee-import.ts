@@ -206,6 +206,8 @@ export interface ImportResult {
   errors: { line: number; message: string }[];
   /** Dòng vẫn được tạo nhưng phòng ban/chức danh không khớp sơ đồ tổ chức. */
   warnings: { line: number; message: string }[];
+  /** Hồ sơ vừa tạo có email — dùng để tự tạo tài khoản đăng nhập. */
+  createdIds?: string[];
 }
 
 export const importEmployees = async (
@@ -225,6 +227,7 @@ export const importEmployees = async (
   const errors: ImportResult["errors"] = [];
   const warnings: ImportResult["warnings"] = [];
   let created = 0;
+  const createdIds: string[] = [];
   const [departments, positions] = await Promise.all([
     listDepartments(companyId).catch(() => []),
     listDepartmentPositions(companyId).catch(() => []),
@@ -279,7 +282,7 @@ export const importEmployees = async (
     }
 
     try {
-      await createEmployee({
+      const newId = await createEmployee({
         company_id: companyId,
         code: row.code,
         full_name: row.full_name,
@@ -304,6 +307,7 @@ export const importEmployees = async (
       codes.add(row.code.toLowerCase());
       if (row.work_email) emails.add(row.work_email.toLowerCase());
       created += 1;
+      if (row.work_email && newId) createdIds.push(String(newId));
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Không tạo được hồ sơ.";
@@ -311,5 +315,5 @@ export const importEmployees = async (
     }
   }
 
-  return { created, errors, warnings };
+  return { created, errors, warnings, createdIds };
 };

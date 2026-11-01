@@ -1,6 +1,8 @@
 import { getErrorMessage } from "@/lib/utils";
 import { readXlsxFirstSheet } from "@/lib/xlsx-reader";
 import { useState } from "react";
+import { AccountResultsView } from "@/components/employee/account-dialog";
+import { MAX_ACCOUNT_ROWS, createEmployeeAccounts, type AccountResult } from "@/lib/employee-accounts";
 import {
   AlertCircle,
   CheckCircle2,
@@ -47,12 +49,14 @@ export const ImportEmployeesDialog = ({
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [accounts, setAccounts] = useState<AccountResult[]>([]);
 
   const reset = () => {
     setFileName(null);
     setRows([]);
     setError(null);
     setResult(null);
+    setAccounts([]);
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -63,6 +67,7 @@ export const ImportEmployeesDialog = ({
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
     setResult(null);
+    setAccounts([]);
     setError(null);
 
     const lower = file.name.toLowerCase();
@@ -97,6 +102,18 @@ export const ImportEmployeesDialog = ({
     try {
       const outcome = await importEmployees(companyId, rows);
       setResult(outcome);
+      // Hồ sơ có email → tự tạo tài khoản đăng nhập (quyền Nhân viên) + gửi mail tai_khoan_moi.
+      const ids = outcome.createdIds ?? [];
+      if (ids.length > 0) {
+        const all: AccountResult[] = [];
+        for (let i = 0; i < ids.length; i += MAX_ACCOUNT_ROWS) {
+          const chunk = ids.slice(i, i + MAX_ACCOUNT_ROWS).map((id) => ({ key: id, employee_id: id, role: "employee" }));
+          all.push(...(await createEmployeeAccounts(companyId, chunk).catch((e: unknown): AccountResult[] =>
+            chunk.map((c) => ({ key: c.key, employee_id: c.key, full_name: "", email: "", result: "error" as const,
+              message: e instanceof Error ? e.message : "Lỗi tạo tài khoản." })))));
+        }
+        setAccounts(all);
+      }
       if (outcome.created > 0) {
         toast.success(`Đã import ${outcome.created} nhân sự`, {
           description:
@@ -209,6 +226,15 @@ export const ImportEmployeesDialog = ({
             </div>
           )}
 
+          {accounts.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-[13px] font-semibold">Tài khoản đăng nhập (email hồ sơ = tên đăng nhập)</p>
+              <AccountResultsView
+                results={accounts}
+                onCleared={() => setAccounts((cur) => cur.map(({ temporary_password: _pw, ...rest }) => rest))}
+              />
+            </div>
+          )}
           {result && (
             <div className="space-y-2">
               <p

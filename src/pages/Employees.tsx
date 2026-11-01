@@ -44,7 +44,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SelectionBar } from "@/components/common/selection-bar";
-import { CreateAccountsDialog } from "@/components/employee/account-dialog";
+import { AccountResultsView, CreateAccountsDialog } from "@/components/employee/account-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { createEmployeeAccounts, type AccountResult } from "@/lib/employee-accounts";
+import { listPermissionGroups, type PermissionGroup } from "@/lib/permissions";
 import { useSelection } from "@/lib/use-selection";
 import {
   DropdownMenu,
@@ -167,6 +170,14 @@ const Employees = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<EmployeeRecord | null>(null);
   const [removal, setRemoval] = useState<EmployeeRecord | null>(null);
+  // Tạo hồ sơ → tự tạo tài khoản đăng nhập (email hồ sơ = tên đăng nhập) + gửi mail tai_khoan_moi.
+  const [accountOutcome, setAccountOutcome] = useState<{ results: AccountResult[]; goTo: string } | null>(null);
+  const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>([]);
+  const canProvision = role === "owner" || role === "admin" || role === "hr";
+  useEffect(() => {
+    if (!canProvision || !activeCompany?.id) return;
+    listPermissionGroups(activeCompany.id).then(setPermissionGroups).catch(() => setPermissionGroups([]));
+  }, [canProvision, activeCompany?.id]);
   const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
@@ -466,22 +477,60 @@ const Employees = () => {
       }
       if (editing) {
         await updateEmployee(editing.id, values);
+        // Đổi email ở hồ sơ KHÔNG tự đổi email đăng nhập (tránh khoá nhầm tài khoản) — cảnh báo rõ.
+        const oldLogin = String(editing.work_email || editing.personal_email || "").toLowerCase();
+        const newLogin = String(values.work_email || values.personal_email || "").toLowerCase();
+        if (editing.user_id && oldLogin && newLogin && oldLogin !== newLogin) {
+          toast.warning("Email hồ sơ đã đổi, email ĐĂNG NHẬP vẫn giữ nguyên", {
+            description: `Nhân viên vẫn đăng nhập bằng ${oldLogin}. Muốn đổi tên đăng nhập, liên hệ quản trị hệ thống.`,
+            duration: 12000,
+          });
+        }
         toast.success("Đã cập nhật hồ sơ nhân viên");
       } else {
         if (!companyId) throw new Error("Chưa chọn công ty.");
+        const { account_access: access, ...profileValues } = values;
         const createdId = await createEmployee({
-          ...values,
+          ...profileValues,
           company_id: companyId,
           created_by: user?.id ?? null,
         });
-        toast.success("Đã thêm nhân viên mới", {
-          description:
-            "Tiếp tục bổ sung quá trình công tác, lương và bảo hiểm trong hồ sơ 360°.",
-        });
         setFormOpen(false);
-        navigate(
-          `/employees/${createdId}${role === "owner" || role === "admin" || role === "hr" ? "?moi=1" : ""}`,
-        );
+        const goTo = `/employees/${createdId}${canProvision ? "?moi=1" : ""}`;
+        const loginEmail = String(values.work_email || values.personal_email || "").trim();
+        if (!canProvision) {
+          toast.success("Đã thêm nhân viên mới");
+          navigate(goTo);
+          return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) {
+          toast.warning("Đã tạo hồ sơ — CHƯA có tài khoản đăng nhập", {
+            description: "Hồ sơ chưa có email hợp lệ. Bổ sung email rồi bấm “Tạo tài khoản”.",
+            duration: 10000,
+          });
+          navigate(goTo);
+          return;
+        }
+        const accessValue = String(access || "role:employee");
+        const [kind, ref] = accessValue.split(":");
+        const results = await createEmployeeAccounts(companyId, [
+          kind === "group"
+            ? { key: createdId, employee_id: createdId, role: "employee", group_id: ref }
+            : { key: createdId, employee_id: createdId, role: ref || "employee" },
+        ]).catch((error: unknown): AccountResult[] => [
+          { key: createdId, employee_id: createdId, full_name: String(values.full_name ?? ""), email: loginEmail, result: "error", message: friendlyError(error) },
+        ]);
+        const r = results[0];
+        if (r?.result === "created" && r.mail_status === "sent") {
+          toast.success("Đã tạo hồ sơ + tài khoản và gửi email", { description: `Tên đăng nhập: ${r.email}` });
+          navigate(goTo);
+        } else if (r?.result === "linked" || r?.result === "exists") {
+          toast.success("Đã tạo hồ sơ và liên kết tài khoản sẵn có", { description: r.message });
+          navigate(goTo);
+        } else {
+          // Mail lỗi / chưa cấu hình / lỗi tạo: hiện kết quả rõ ràng (+ tải CSV một lần nếu có mật khẩu tạm).
+          setAccountOutcome({ results, goTo });
+        }
         return;
       }
       setFormOpen(false);
@@ -528,7 +577,7 @@ const Employees = () => {
   };
 
   const org = useOrgStructure();
-  const fields = withOrgFields(
+  const baseFields = withOrgFields(
     buildEmployeeFields(
       employees,
       editing?.id,
@@ -537,6 +586,27 @@ const Employees = () => {
     ),
     org,
   );
+  // Mục "Quyền" chỉ khi tạo mới và người tạo là owner/admin/hr; máy chủ kiểm tra lại (owner mới gán Quản trị).
+  const fields =
+    !editing && canProvision
+      ? [
+          ...baseFields,
+          {
+            name: "account_access",
+            label: "Quyền",
+            type: "select" as const,
+            section: "Tài khoản đăng nhập",
+            options: [
+              { value: "role:employee", label: "Nhân viên" },
+              { value: "role:manager", label: "Quản lý" },
+              { value: "role:hr", label: "Nhân sự" },
+              ...(role === "owner" ? [{ value: "role:admin", label: "Quản trị" }] : []),
+              ...permissionGroups.map((g) => ({ value: `group:${g.id}`, label: `Nhóm quyền: ${g.name}` })),
+            ],
+            helper: "Email hồ sơ là tên đăng nhập. Tạo hồ sơ xong hệ thống tự tạo tài khoản + gửi mật khẩu tạm qua email.",
+          },
+        ]
+      : baseFields;
 
   /** Dòng xuất Excel/PDF: ngày dạng dd/mm/yyyy, thiếu ngày vào làm → ngày bắt đầu HĐ đầu tiên. */
   const exportRows = () =>
@@ -1135,6 +1205,39 @@ const Employees = () => {
         />
       )}
 
+      <Dialog
+        open={Boolean(accountOutcome)}
+        onOpenChange={(open) => {
+          if (open || !accountOutcome) return;
+          const to = accountOutcome.goTo;
+          setAccountOutcome(null);
+          navigate(to);
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Đã tạo hồ sơ — kết quả tài khoản đăng nhập</DialogTitle>
+            <DialogDescription>
+              {accountOutcome?.results[0]?.mail_status === "NOT_CONFIGURED"
+                ? "Đã tạo tài khoản nhưng hệ thống CHƯA cấu hình gửi email."
+                : accountOutcome?.results[0]?.result === "error"
+                  ? "Chưa tạo được tài khoản. Có thể thử lại bằng nút “Tạo tài khoản” ở danh sách."
+                  : "Đã tạo tài khoản nhưng gửi email lỗi."}
+            </DialogDescription>
+          </DialogHeader>
+          {accountOutcome && (
+            <AccountResultsView
+              results={accountOutcome.results}
+              onCleared={() =>
+                setAccountOutcome((cur) =>
+                  cur ? { ...cur, results: cur.results.map(({ temporary_password: _pw, ...rest }) => rest) } : cur,
+                )
+              }
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <FieldDialog
         open={formOpen}
         onOpenChange={setFormOpen}
@@ -1157,6 +1260,7 @@ const Employees = () => {
             employment_type: "full_time",
             nationality: "Việt Nam",
             dependents_count: 0,
+            ...(canProvision ? { account_access: "role:employee" } : {}),
           }
         }
         submitLabel={editing ? "Lưu thay đổi" : "Tạo hồ sơ"}

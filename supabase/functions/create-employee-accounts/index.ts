@@ -34,7 +34,8 @@ const generatePassword = () => {
   }
 };
 
-type Row = { key: string; employee_id?: string; email?: string; full_name?: string };
+type Row = { key: string; employee_id?: string; email?: string; full_name?: string; role?: string; group_id?: string | null };
+const ASSIGNABLE_ROLES = ["employee", "manager", "hr", "admin"];
 type Result = {
   key: string;
   employee_id: string | null;
@@ -107,6 +108,21 @@ Deno.serve(async (req) => {
     const seen = new Set<string>();
     for (const [i, raw] of rows.entries()) {
       const row: Row = { ...raw, key: String(raw?.key ?? i) };
+      // Quyền gán khi tạo: kiểm tra phía server (owner mới gán admin; nhóm quyền phải thuộc công ty).
+      const role = typeof row.role === "string" && row.role ? row.role : "employee";
+      if (!ASSIGNABLE_ROLES.includes(role) || (role === "admin" && member.role !== "owner")) {
+        results.push({ key: row.key, employee_id: row.employee_id ?? null, full_name: row.full_name ?? "", email: row.email ?? "", result: "error",
+          message: role === "admin" ? "Chỉ Chủ sở hữu được gán quyền Quản trị." : "Quyền không hợp lệ." });
+        continue;
+      }
+      row.role = role;
+      if (row.group_id) {
+        const { data: grp } = await admin.from("permission_groups").select("id, company_id").eq("id", row.group_id).maybeSingle();
+        if (!grp || (grp.company_id && grp.company_id !== companyId)) {
+          results.push({ key: row.key, employee_id: row.employee_id ?? null, full_name: row.full_name ?? "", email: row.email ?? "", result: "error", message: "Nhóm quyền không thuộc công ty." });
+          continue;
+        }
+      }
       results.push(await createOne(ctx, row, seen));
     }
     return json({ results });
@@ -150,14 +166,23 @@ async function sendCredentials(ctx: Ctx, email: string, fullName: string, passwo
   return status;
 }
 
-async function ensureMembership(ctx: Ctx, userId: string, jobTitle: string | null) {
+async function ensureMembership(ctx: Ctx, userId: string, jobTitle: string | null, role = "employee") {
   const { data: existing } = await ctx.admin
     .from("company_members").select("id").eq("company_id", ctx.companyId).eq("user_id", userId).maybeSingle();
+  // Thành viên đã có: không tự đổi quyền (tránh hạ/nâng quyền ngoài ý muốn).
   if (existing) return;
   const { error } = await ctx.admin.from("company_members").insert({
-    company_id: ctx.companyId, user_id: userId, role: "employee", job_title: jobTitle, invited_by: ctx.actorId,
+    company_id: ctx.companyId, user_id: userId, role, job_title: jobTitle, invited_by: ctx.actorId,
   });
   if (error) throw new Error(`Không thêm được vào công ty: ${error.message}`);
+}
+
+async function applyGroup(ctx: Ctx, employeeId: string | null, groupId: string | null | undefined) {
+  if (!employeeId || !groupId) return;
+  await ctx.admin.from("employee_permissions").upsert(
+    { employee_id: employeeId, company_id: ctx.companyId, group_id: groupId, updated_at: new Date().toISOString() },
+    { onConflict: "employee_id" },
+  );
 }
 
 async function createOne(ctx: Ctx, row: Row, seen: Set<string>): Promise<Result> {
@@ -199,8 +224,9 @@ async function createOne(ctx: Ctx, row: Row, seen: Set<string>): Promise<Result>
     const { data: existingId } = await ctx.admin.rpc("find_auth_user_id_by_email", { p_email: r.email });
     if (existingId) {
       targetUserId = existingId as string;
-      await ensureMembership(ctx, targetUserId, null);
+      await ensureMembership(ctx, targetUserId, null, row.role);
       if (emp) await ctx.admin.from("employees").update({ user_id: targetUserId }).eq("id", emp.id).is("user_id", null);
+      await applyGroup(ctx, emp?.id ?? null, row.group_id);
       r.result = "linked";
       r.message = "Email đã có tài khoản — đã gắn vào hồ sơ, giữ nguyên mật khẩu của người dùng.";
       return r;
@@ -215,7 +241,8 @@ async function createOne(ctx: Ctx, row: Row, seen: Set<string>): Promise<Result>
     if (createError || !created.user) throw new Error(createError?.message ?? "Không tạo được tài khoản.");
     targetUserId = created.user.id;
     await ctx.admin.from("profiles").update({ must_change_password: true }).eq("id", targetUserId);
-    await ensureMembership(ctx, targetUserId, null);
+    await ensureMembership(ctx, targetUserId, null, row.role);
+    await applyGroup(ctx, emp?.id ?? null, row.group_id);
     if (emp) {
       const { error } = await ctx.admin.from("employees").update({ user_id: targetUserId }).eq("id", emp.id).is("user_id", null);
       if (error) throw new Error(`Đã tạo tài khoản nhưng chưa gắn được hồ sơ: ${error.message}`);
