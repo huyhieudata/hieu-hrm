@@ -3,6 +3,7 @@ import { FolderCog, Loader2, Newspaper, Pencil, Pin, Plus, Trash2 } from "lucide
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import EmployeeNews from "@/pages/me/EmployeeNews";
 import { PageHeader } from "@/components/common/page-header";
 import {
   AlertDialog,
@@ -606,4 +607,10 @@ const NewsPage = () => {
   );
 };
 
-export default NewsPage;
+const NewsEntry = () => {
+  const { role, canDo } = useCompany();
+  if (role === "employee" && !canDo("news", "create")) return <EmployeeNews />;
+  return <NewsPage />;
+};
+
+export default NewsEntry;

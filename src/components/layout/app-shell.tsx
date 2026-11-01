@@ -1,12 +1,16 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
+import { MobileShell } from "@/components/mobile/MobileShell";
+import { useCompany } from "@/lib/company-provider";
+import { cn } from "@/lib/utils";
+
 import { AppSidebar } from "./app-sidebar";
 import { AppTopbar } from "./app-topbar";
 import { MobileNav } from "./mobile-nav";
-import { cn } from "@/lib/utils";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
+  const { role } = useCompany();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
@@ -23,6 +27,8 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  if (role === "employee") return <MobileShell>{children}</MobileShell>;
 
   return (
     <div className="relative flex min-h-[100dvh] w-full bg-background">

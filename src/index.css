@@ -17,69 +17,133 @@
   }
 
   :root {
-    /* Surfaces */
-    --background: 214 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Surfaces — ONHRM v3 (navy #0e2d58, cam #fc600b) */
+    --background: 213 50% 97%;
+    --foreground: 217 65% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 217 65% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --overlay: 222 47% 11%;
+    --popover-foreground: 217 65% 12%;
+    --overlay: 217 65% 12%;
 
     /* Brand */
-    --brand-navy: 210 69% 23%;
-    --brand-orange: 25 95% 53%;
-    --primary: 221 83% 53%;
+    --brand-navy: 215 73% 20%;
+    --brand-orange: 21 98% 52%;
+    --primary: 215 73% 20%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 221 83% 45%;
-    --primary-active: 221 83% 38%;
-    --primary-subtle: 221 92% 96%;
-    --primary-subtle-foreground: 221 83% 36%;
+    --primary-hover: 215 64% 32%;
+    --primary-active: 215 73% 15%;
+    --primary-subtle: 214 47% 95%;
+    --primary-subtle-foreground: 215 73% 20%;
 
-    /* Neutrals */
+    /* Neutrals. Accent is the orange tint used for emphasis, not a second primary. */
     --secondary: 214 32% 96%;
-    --secondary-foreground: 222 47% 18%;
+    --secondary-foreground: 217 40% 18%;
     --muted: 214 32% 96%;
-    --muted-foreground: 215 19% 42%;
-    --accent: 221 92% 96%;
-    --accent-foreground: 221 83% 38%;
+    --muted-foreground: 215 18% 43%;
+    --accent: 21 100% 95%;
+    --accent-foreground: 21 98% 40%;
 
     /* Status */
-    --destructive: 0 72% 48%;
+    --destructive: 355 66% 50%;
     --destructive-foreground: 0 0% 100%;
-    --destructive-subtle: 0 86% 97%;
-    --success: 152 62% 33%;
+    --destructive-subtle: 355 80% 97%;
+    --success: 156 76% 30%;
     --success-foreground: 0 0% 100%;
-    --success-subtle: 152 62% 95%;
-    --warning: 27 92% 36%;
+    --success-subtle: 152 55% 94%;
+    --warning: 25 90% 40%;
     --warning-foreground: 0 0% 100%;
-    --warning-subtle: 36 100% 95%;
-    --info: 199 89% 36%;
+    --warning-subtle: 24 100% 95%;
+    --info: 214 52% 39%;
     --info-foreground: 0 0% 100%;
-    --info-subtle: 199 95% 96%;
+    --info-subtle: 214 47% 95%;
 
     /* Lines */
-    --border: 216 26% 91%;
-    --input: 216 26% 89%;
-    --ring: 221 83% 53%;
+    --border: 216 37% 92%;
+    --input: 216 32% 88%;
+    --ring: 215 73% 20%;
 
     /* Charts */
-    --chart-1: 221 83% 53%;
-    --chart-2: 258 84% 65%;
+    --chart-1: 215 73% 20%;
+    --chart-2: 21 98% 52%;
     --chart-3: 172 62% 40%;
     --chart-4: 32 95% 52%;
     --chart-5: 330 72% 58%;
 
+    /* Keep 1rem so admin radii (rounded-lg/md) stay as they are.
+       Employee cards use rounded-3xl (1.75rem) instead. */
     --radius: 1rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 40% 26%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-foreground: 217 40% 26%;
+    --sidebar-primary: 215 73% 20%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 221 92% 96%;
-    --sidebar-accent-foreground: 221 83% 36%;
-    --sidebar-border: 216 26% 92%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-accent: 214 47% 95%;
+    --sidebar-accent-foreground: 215 73% 20%;
+    --sidebar-border: 216 37% 92%;
+    --sidebar-ring: 215 73% 20%;
+
+    --glass-bg: 0 0% 100%;
+    --glass-border: 0 0% 100%;
+    --touch-min: 44px;
+    --tabbar-h: 64px;
+    --header-h: 56px;
+    --gradient-primary: linear-gradient(135deg, #0e2d58 0%, #1d4a84 100%);
+    --gradient-accent: linear-gradient(135deg, #fc600b 0%, #ff8a3d 100%);
+    --gradient-ok: linear-gradient(135deg, #0e2d58 0%, #12875a 100%);
+    --shadow-mobile: 0 8px 24px -12px rgb(14 45 88 / 0.25), 0 1px 2px rgb(15 23 42 / 0.04);
+    --shadow-glow: 0 14px 30px -10px rgb(14 45 88 / 0.6);
+  }
+
+  .dark {
+    --background: 214 71% 9%;
+    --foreground: 230 100% 96%;
+    --card: 226 40% 13%;
+    --card-foreground: 230 100% 96%;
+    --popover: 226 40% 13%;
+    --popover-foreground: 230 100% 96%;
+    --overlay: 214 71% 6%;
+    --brand-navy: 215 73% 20%;
+    --brand-orange: 21 98% 52%;
+    --primary: 216 57% 72%;
+    --primary-foreground: 214 71% 9%;
+    --primary-hover: 216 57% 78%;
+    --primary-active: 216 45% 64%;
+    --primary-subtle: 215 40% 18%;
+    --primary-subtle-foreground: 216 70% 82%;
+    --secondary: 222 28% 16%;
+    --secondary-foreground: 230 40% 92%;
+    --muted: 222 28% 16%;
+    --muted-foreground: 222 31% 68%;
+    --accent: 21 45% 16%;
+    --accent-foreground: 24 96% 72%;
+    --destructive: 355 70% 62%;
+    --destructive-foreground: 214 71% 9%;
+    --destructive-subtle: 355 40% 16%;
+    --success: 156 55% 52%;
+    --success-foreground: 214 71% 9%;
+    --success-subtle: 156 30% 16%;
+    --warning: 25 90% 62%;
+    --warning-foreground: 214 71% 9%;
+    --warning-subtle: 25 40% 16%;
+    --info: 214 60% 72%;
+    --info-foreground: 214 71% 9%;
+    --info-subtle: 214 35% 18%;
+    --border: 220 22% 22%;
+    --input: 220 22% 24%;
+    --ring: 216 57% 72%;
+    --chart-1: 216 57% 72%;
+    --chart-2: 21 98% 52%;
+    --sidebar-background: 226 40% 12%;
+    --sidebar-foreground: 230 40% 90%;
+    --sidebar-primary: 216 57% 72%;
+    --sidebar-primary-foreground: 214 71% 9%;
+    --sidebar-accent: 215 40% 18%;
+    --sidebar-accent-foreground: 216 70% 82%;
+    --sidebar-border: 220 22% 20%;
+    --sidebar-ring: 216 57% 72%;
+    --glass-bg: 226 40% 13%;
+    --glass-border: 0 0% 100%;
   }
 
   * {
@@ -164,6 +228,49 @@
   }
   .animation-delay-400 {
     animation-delay: 400ms;
+  }
+
+  .glass-bar {
+    background: hsl(var(--glass-bg) / 0.72);
+    border: 1px solid hsl(var(--glass-border) / 0.7);
+    backdrop-filter: blur(20px);
+  }
+
+  .shadow-mobile {
+    box-shadow: var(--shadow-mobile);
+  }
+
+  .shadow-glow-navy {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-gradient-accent {
+    background-image: var(--gradient-accent);
+  }
+
+  .bg-gradient-ok {
+    background-image: var(--gradient-ok);
+  }
+
+  .employee-canvas {
+    background:
+      radial-gradient(120% 60% at 100% 0%, #e4ecf7 0%, transparent 55%),
+      hsl(var(--background));
+  }
+
+  .dark .employee-canvas {
+    background:
+      radial-gradient(90% 40% at 100% 0%, rgb(252 96 11 / 0.08) 0%, transparent 50%),
+      hsl(var(--background));
+  }
+
+  .touch-target {
+    min-height: var(--touch-min);
+    min-width: var(--touch-min);
   }
 }
 

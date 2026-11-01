@@ -3,6 +3,7 @@ import { Check, Loader2, RotateCcw, Search, ShieldOff, Smartphone, Trash2, X } f
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import EmployeeDevices from "@/pages/me/EmployeeDevices";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -204,4 +205,10 @@ const Devices = () => {
   );
 };
 
-export default Devices;
+const DevicesPage = () => {
+  const { role } = useCompany();
+  if (role === "employee") return <EmployeeDevices />;
+  return <Devices />;
+};
+
+export default DevicesPage;

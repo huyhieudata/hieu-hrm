@@ -170,7 +170,7 @@ const RequestDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-[660px]">
+      <DialogContent className="max-h-[92dvh] overflow-y-auto rounded-t-3xl max-sm:bottom-0 max-sm:top-auto max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-b-none sm:max-w-[660px]">
         <DialogHeader>
           <DialogTitle>Tạo đơn</DialogTitle>
           <DialogDescription>Chọn nhóm đơn, lý do cụ thể và thời gian áp dụng.</DialogDescription>

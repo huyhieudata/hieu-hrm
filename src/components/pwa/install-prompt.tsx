@@ -64,6 +64,7 @@ export const InstallPrompt = () => {
     if (typeof window === "undefined") return;
     if (isStandalone() || readKey(INSTALL_DONE_KEY)) return;
     if (window.location.pathname.startsWith("/ung-tuyen")) return;
+    if (window.location.pathname.startsWith("/xem-truoc-nhan-vien")) return;
 
     const installParam = new URLSearchParams(window.location.search).get("install");
     const forceGuide = installParam === "guide" || installParam === "guide-ios";

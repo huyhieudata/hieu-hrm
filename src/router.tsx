@@ -9,7 +9,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Login = lazy(() => import("./pages/Login"));
 const Employees = lazy(() => import("./pages/Employees"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
-const EmployeeProfile = lazy(() => import("./pages/EmployeeProfile"));
+const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfile"));
 const Insurance = lazy(() => import("./pages/Insurance"));
 const CompanyPicker = lazy(() => import("./pages/CompanyPicker"));
 const JoinCompany = lazy(() => import("./pages/JoinCompany"));
@@ -25,6 +25,12 @@ const ShiftAssignments = lazy(() => import("./pages/attendance/ShiftAssignments"
 const AttendanceSettings = lazy(() => import("./pages/attendance/AttendanceSettings"));
 const AttendanceDevices = lazy(() => import("./pages/attendance/Devices"));
 const AttendanceLog = lazy(() => import("./pages/attendance/AttendanceLog"));
+const EmployeeProfile = lazy(() => import("./pages/me/EmployeeProfile"));
+const EmployeeDevicesPage = lazy(() => import("./pages/me/EmployeeDevices"));
+const EmployeeTimesheetPage = lazy(() => import("./pages/me/EmployeeTimesheet"));
+const EmployeePayslip = lazy(() => import("./pages/me/EmployeePayslip"));
+const EmployeeNewsPage = lazy(() => import("./pages/me/EmployeeNews"));
+const MobilePreview = lazy(() => import("./pages/me/MobilePreview"));
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Assets = lazy(() => import("./pages/Assets"));
 const News = lazy(() => import("./pages/News"));
@@ -59,6 +65,20 @@ const companyScoped = (node: ReactNode, moduleKey?: string) => (
 
 export const routers = [
   {
+    path: "/m",
+    name: "employee-start",
+    element: <Navigate to="/" replace />,
+  },
+  {
+    path: "/xem-truoc-nhan-vien",
+    name: "employee-mobile-preview",
+    element: (
+      <PageSuspense>
+        <MobilePreview />
+      </PageSuspense>
+    ),
+  },
+  {
     path: "/",
     name: "dashboard",
     element: companyScoped(
@@ -91,7 +111,7 @@ export const routers = [
     name: "employee-profile",
     element: companyScoped(
       <PageSuspense>
-        <EmployeeProfile />
+        <EmployeeProfilePage />
       </PageSuspense>,
       "employees",
     ),
@@ -371,6 +391,62 @@ export const routers = [
         <RequestTypes />
       </PageSuspense>,
       "requests",
+    ),
+  },
+  {
+    path: "/toi",
+    name: "me",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeProfile />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/toi/ho-so",
+    name: "me-profile",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeProfile infoOnly />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/toi/thiet-bi",
+    name: "me-devices",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeDevicesPage />
+      </PageSuspense>,
+      "attendance",
+    ),
+  },
+  {
+    path: "/toi/bang-cong",
+    name: "me-timesheet",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeTimesheetPage />
+      </PageSuspense>,
+      "attendance",
+    ),
+  },
+  {
+    path: "/toi/phieu-luong",
+    name: "me-payslip",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeePayslip />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/toi/tin-tuc",
+    name: "me-news",
+    element: companyScoped(
+      <PageSuspense>
+        <EmployeeNewsPage />
+      </PageSuspense>,
     ),
   },
   {

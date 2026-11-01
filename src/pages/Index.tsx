@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import EmployeeHome from "@/pages/me/EmployeeHome";
 import { PageHeader } from "@/components/common/page-header";
 import { StatCard } from "@/components/common/stat-card";
 import { AttendanceToday } from "@/components/dashboard/attendance-today";
@@ -46,7 +47,7 @@ const percentChange = (current: number, before: number | undefined) =>
 
 const secondLast = (values: number[]) => (values.length >= 2 ? values[values.length - 2] : undefined);
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const { profile, user } = useAuth();
   const { activeCompany, role, can, canDo } = useCompany();
   const navigate = useNavigate();
@@ -320,6 +321,12 @@ const Dashboard = () => {
       )}
     </AppShell>
   );
+};
+
+const Dashboard = () => {
+  const { role } = useCompany();
+  if (role === "employee") return <EmployeeHome />;
+  return <AdminDashboard />;
 };
 
 export default Dashboard;

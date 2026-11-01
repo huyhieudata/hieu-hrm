@@ -6,13 +6,26 @@
   <link href="/onhrm.svg" rel="icon" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-1170x2532.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-1179x2556.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-1290x2796.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/splash/iphone-750x1334.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <meta name="application-name" content="ONHRM">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="ONHRM">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e2d58" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#071629" media="(prefers-color-scheme: dark)" />
+  <script>
+    try {
+      var themeChoice = localStorage.getItem("onhrm.theme");
+      var themeDark = themeChoice === "dark" || (themeChoice === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      if (themeDark) document.documentElement.classList.add("dark");
+    } catch (e) {}
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -21,7 +34,7 @@
   <title>ONHRM — Quản trị nhân sự</title>
   <meta name="description" content="ONHRM — nền tảng quản trị nhân sự hiện đại: hồ sơ, chấm công, nghỉ phép và bảng lương trong một nơi duy nhất." />
   <meta name="author" content="ONHRM" />
-  <meta name="theme-color" content="#123a63" />
+  <meta name="theme-color" content="#0e2d58" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="ONHRM" />

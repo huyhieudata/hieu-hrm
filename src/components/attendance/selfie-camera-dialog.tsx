@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, RotateCcw } from "lucide-react";
 
+import { PermissionHelpSheet } from "@/components/attendance/PermissionHelpSheet";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { captureFrame } from "@/lib/attendance-verify";
@@ -71,54 +72,72 @@ export const SelfieCameraDialog = ({ open, title, onCancel, onConfirm }: Props) 
     }
   };
 
+  const denied = !!error && /cho phép|quyền|NotAllowed|camera/i.test(error);
+
   return (
-    <Dialog open={open} onOpenChange={(value) => !value && onCancel()}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>Nhìn thẳng vào camera, đủ sáng, rồi bấm Chụp.</DialogDescription>
-        </DialogHeader>
-        <div className="relative aspect-square overflow-hidden rounded-lg bg-black">
-          {shot ? (
-            <img src={shot.url} alt="Ảnh vừa chụp" className="h-full w-full object-cover" />
-          ) : (
-            <video
-              ref={videoRef}
-              playsInline
-              muted
-              onLoadedData={() => setReady(true)}
-              className="h-full w-full -scale-x-100 object-cover"
-            />
-          )}
-          {!shot && !ready && !error && (
-            <div className="absolute inset-0 flex items-center justify-center text-white/80">
-              <Loader2 className="h-5 w-5 animate-spin" />
-            </div>
-          )}
-        </div>
-        {error && <p className="text-[12px] text-destructive">{error}</p>}
-        <div className="flex gap-2">
-          {shot ? (
-            <>
-              <Button variant="outline" className="flex-1 gap-1.5" onClick={() => setShot(null)}>
-                <RotateCcw className="h-4 w-4" /> Chụp lại
-              </Button>
-              <Button className="flex-1" onClick={() => onConfirm(shot.blob)}>
-                Dùng ảnh này
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" className="flex-1" onClick={onCancel}>
-                Huỷ
-              </Button>
-              <Button className="flex-1 gap-1.5" disabled={!ready} onClick={() => void take()}>
-                <Camera className="h-4 w-4" /> Chụp
-              </Button>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={(value) => !value && onCancel()}>
+        <DialogContent className="max-w-sm max-sm:bottom-0 max-sm:top-auto max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-3xl">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>Đặt khuôn mặt vào khung, đủ sáng. Ảnh chụp trực tiếp từ camera trước.</DialogDescription>
+          </DialogHeader>
+          <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-[#0b1a33]">
+            {shot ? (
+              <img src={shot.url} alt="Ảnh vừa chụp" className="h-full w-full -scale-x-100 object-cover" />
+            ) : (
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                autoPlay
+                onLoadedData={() => setReady(true)}
+                className="h-full w-full -scale-x-100 object-cover"
+              />
+            )}
+            {!shot && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="h-[58%] w-[62%] rounded-[50%] border-[3px] border-white/85 shadow-[0_0_0_8px_rgba(14,45,88,.35)]" />
+              </div>
+            )}
+            {!shot && !ready && !error && (
+              <div className="absolute inset-0 flex items-center justify-center text-white/80">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            )}
+          </div>
+          <p className="text-center text-[12px] text-muted-foreground">Đặt khuôn mặt vào khung · đủ sáng · không chọn ảnh từ thư viện</p>
+          {error && !denied ? <p className="text-[12px] text-destructive">{error}</p> : null}
+          <div className="flex flex-col items-center gap-2">
+            {shot ? (
+              <div className="flex w-full gap-2">
+                <Button variant="outline" className="h-11 flex-1 gap-1.5 rounded-2xl" onClick={() => setShot(null)}>
+                  <RotateCcw className="h-4 w-4" /> Chụp lại
+                </Button>
+                <Button className="h-11 flex-1 rounded-2xl" onClick={() => onConfirm(shot.blob)}>
+                  Dùng ảnh này
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                aria-label="Chụp"
+                disabled={!ready}
+                onClick={() => void take()}
+                className="bg-gradient-primary flex h-16 w-16 items-center justify-center rounded-full p-1 disabled:opacity-50"
+              >
+                <span className="flex h-full w-full items-center justify-center rounded-full border-[3px] border-white/80 bg-white">
+                  <Camera className="h-5 w-5 text-primary" />
+                </span>
+              </button>
+            )}
+            <Button variant="ghost" className="h-11" onClick={onCancel}>
+              Huỷ
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <PermissionHelpSheet open={open && denied} kind="camera" onClose={onCancel} onRetry={onCancel} />
+    </>
   );
 };
