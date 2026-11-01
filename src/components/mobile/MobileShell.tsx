@@ -55,6 +55,7 @@ const screenMeta = (pathname: string): ScreenMeta => {
   if (pathname.startsWith("/toi/quet-qr")) return { title: "Quét QR chấm công", tab: "home", variant: "page", back: true };
   if (pathname.startsWith("/toi/khao-sat")) return { title: "Khảo sát", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/tai-lieu")) return { title: "Tài liệu", tab: "apps", variant: "page", back: true };
+  if (pathname.startsWith("/toi/danh-gia")) return { title: "Đánh giá của tôi", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/phieu-luong")) return { title: "Phiếu lương", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/ho-so")) return { title: "Thông tin cá nhân", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/thiet-bi") || pathname === "/cai-dat/thiet-bi-cham-cong")

@@ -1,7 +1,7 @@
 import { formatDate } from "@/lib/employee-records";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Moon, Smartphone, User, Wallet } from "lucide-react";
+import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Moon, Smartphone, User, Wallet , ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -29,6 +29,7 @@ const LINKS = [
   { to: "/toi/ho-so", label: "Thông tin cá nhân", icon: User },
   { to: "/toi/bang-cong", label: "Bảng công", icon: CalendarDays },
   { to: "/toi/phieu-luong", label: "Phiếu lương", icon: Wallet },
+  { to: "/toi/danh-gia", label: "Đánh giá của tôi", icon: ClipboardCheck },
   { to: "/toi/thiet-bi", label: "Thiết bị của tôi", icon: Smartphone },
 ] as const;
 
