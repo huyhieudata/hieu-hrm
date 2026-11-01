@@ -28,7 +28,6 @@ export const NewsPoster = ({ title, meta, tag = "Thông báo", to = "/toi/tin-tu
     {title ? (
       <article className="shadow-card-soft overflow-hidden rounded-[20px] bg-card">
         <div className="bg-home-header relative flex h-[112px] flex-col justify-between overflow-hidden p-4">
-          <span className="pointer-events-none absolute -bottom-12 -right-6 h-40 w-40 rounded-full border-[14px] border-brand-orange/15" />
           <span className="relative z-[1] inline-flex h-6 w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 text-[11px] font-semibold text-white">
             <Megaphone className="h-3.5 w-3.5" /> {tag}
           </span>

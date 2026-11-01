@@ -14,7 +14,7 @@ interface SegmentedProps {
 }
 
 export const Segmented = ({ options, value, onChange, label }: SegmentedProps) => (
-  <div className="flex gap-1 overflow-x-auto rounded-[14px] bg-secondary p-1" role="tablist" aria-label={label}>
+  <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-[14px] bg-secondary p-1" role="tablist" aria-label={label}>
     {options.map((option) => {
       const on = option.value === value;
       return (

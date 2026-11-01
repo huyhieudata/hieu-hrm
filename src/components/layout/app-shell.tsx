@@ -188,7 +188,7 @@ const AdminMobileShell = ({ children }: { children: ReactNode }) => {
         ref={mainRef}
         className={cn(
           "mobile-cards mx-auto w-full max-w-2xl px-3 pt-4",
-          hideTabs ? "pb-[calc(24px+env(safe-area-inset-bottom))]" : "pb-[calc(var(--tabbar-h)+var(--tabbar-bump)+24px+env(safe-area-inset-bottom))]",
+          hideTabs ? "pb-[calc(24px+env(safe-area-inset-bottom))]" : "pb-[calc(var(--tabbar-h)+var(--tabbar-bump)+40px+env(safe-area-inset-bottom))]",
         )}
       >
         <div key={pathname} className="animate-fade-up space-y-4">

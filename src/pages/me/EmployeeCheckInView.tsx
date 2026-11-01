@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -333,8 +333,7 @@ export const EmployeeCheckInView = ({
           )}
         </section>
         {!offDay && blocked ? (
-          <div className="fixed inset-x-0 bottom-[var(--fixed-bar-offset,0px)] z-40 border-t border-border bg-card px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
-            <div className="mx-auto flex max-w-md flex-col gap-2">
+          <FixedBottomBar>
               {deviceBlocked && device?.status !== "pending" ? (
                 <button type="button" onClick={() => navigate("/toi/thiet-bi")} className="flex h-12 items-center justify-center rounded-[14px] bg-brand-navy text-[15px] font-semibold text-white">
                   Đăng ký thiết bị
@@ -356,9 +355,7 @@ export const EmployeeCheckInView = ({
                 </button>
               ) : null}
               {hrNote ? <p className="text-center text-[12px] text-muted-foreground">Công ty chưa khai báo đầu mối HR trên ứng dụng. Nhờ quản lý chuyển giúp.</p> : null}
-              {noZones ? <p className="text-center text-[12px] text-destructive">Công ty chưa khai báo địa điểm chấm công.</p> : null}
-            </div>
-          </div>
+          </FixedBottomBar>
         ) : null}
         <PermissionHelpSheet
           open={geo.phase === "denied" && !helpDismissed}
@@ -555,3 +552,27 @@ const LiveClock = () => {
     </p>
   );
 };
+
+/** Fixed action bar above the tab bar (+safe area) with an in-flow spacer of the same measured height,
+ * so the end of the page never hides behind it. */
+function FixedBottomBar({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(180);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setHeight(el.getBoundingClientRect().height);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <>
+      <div aria-hidden style={{ height: `calc(${height + 16}px + var(--fixed-bar-offset, 0px))` }} />
+      <div ref={ref} className="fixed inset-x-0 bottom-[var(--fixed-bar-offset,0px)] z-40 border-t border-border bg-card px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+        <div className="mx-auto flex max-w-md flex-col gap-2">{children}</div>
+      </div>
+    </>
+  );
+}
