@@ -92,7 +92,7 @@ export const RequirePlatformAdmin = ({ children }: { children: ReactNode }) => {
 };
 
 /** Chặn trang thống nhất: toast + về trang chủ theo vai trò (Nhân viên ⇒ /toi, còn lại ⇒ /). */
-const DeniedRedirect = () => {
+export const DeniedRedirect = () => {
   const { role } = useCompany();
   useEffect(() => {
     toast.error("Bạn không có quyền truy cập trang này", { id: "no-access", duration: 6000 });
