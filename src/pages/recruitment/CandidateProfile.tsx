@@ -30,6 +30,8 @@ import { buildCandidateFields } from "@/components/recruitment/candidate-fields"
 import { CandidatePipeline } from "@/components/recruitment/pipeline-steps";
 import { CandidateStatusBadge } from "@/components/recruitment/status-badge";
 import { SendFormDialog } from "@/components/recruitment/send-form-dialog";
+import { TemplateEvaluationCard } from "@/components/recruitment/template-evaluation-card";
+import { TemplateEvaluationDialog } from "@/components/recruitment/template-evaluation-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +58,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { displayName, useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { currency } from "@/lib/format";
+import {
+  CANDIDATE_EVALUATION_KINDS,
+  canDeleteEvaluation as canDeleteEvaluationRow,
+  canEditEvaluation as canEditEvaluationRow,
+  listEvaluationCriteria,
+  listEvaluationTemplates,
+  saveCandidateEvaluation,
+  selectableTemplates,
+  type CandidateEvaluationDraft,
+  type EvaluationCriterion,
+  type EvaluationTemplate,
+} from "@/lib/evaluations";
 import { downloadOfferLetter, printOfferLetter } from "@/lib/offer-letter";
 import {
   CANDIDATE_SOURCE_LABELS,
@@ -114,12 +128,19 @@ const CandidateProfile = () => {
   const canManage = canManageModule("recruitment");
   // Khớp policy evaluations_delete: quyền xoá tuyển dụng, hoặc người chấm xoá phiếu nháp của mình.
   const canDeleteEvaluation = canDo("recruitment", "delete");
+  // BR-4.2: phiếu đã nộp chỉ người có recruitment.edit sửa được (khớp trigger máy chủ).
+  const canEditSubmittedEvaluation = canDo("recruitment", "edit");
   const authorName = displayName(profile, user?.email);
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [evaluations, setEvaluations] = useState<CandidateEvaluation[]>([]);
+  const [evaluationTemplates, setEvaluationTemplates] = useState<EvaluationTemplate[]>([]);
+  const [evaluationCriteria, setEvaluationCriteria] = useState<EvaluationCriterion[]>([]);
+  const [templateEvaluation, setTemplateEvaluation] = useState<{
+    evaluation: CandidateEvaluation | null;
+  } | null>(null);
   const [offers, setOffers] = useState<CandidateOffer[]>([]);
   const [comments, setComments] = useState<CandidateComment[]>([]);
   const [emails, setEmails] = useState<CandidateEmail[]>([]);
@@ -160,6 +181,8 @@ const CandidateProfile = () => {
         emailRows,
         applicationRows,
         onboardingRows,
+        templateRows,
+        criterionRows,
       ] = await Promise.all([
         getCandidate(id),
         listRows<Campaign>("recruitment_campaigns", companyId, "created_at"),
@@ -170,6 +193,8 @@ const CandidateProfile = () => {
         listRows<CandidateEmail>("candidate_emails", companyId, "sent_at"),
         listRows<CandidateApplication>("candidate_applications", companyId, "applied_at"),
         listRows<OnboardingRecord>("onboarding_records", companyId, "created_at"),
+        listEvaluationTemplates(companyId).catch(() => [] as EvaluationTemplate[]),
+        listEvaluationCriteria(companyId).catch(() => [] as EvaluationCriterion[]),
       ]);
 
       if (!candidateRow || candidateRow.company_id !== companyId) {
@@ -180,6 +205,8 @@ const CandidateProfile = () => {
       setCampaigns(campaignRows);
       setInterviews(interviewRows.filter((row) => row.candidate_id === candidateRow.id));
       setEvaluations(evaluationRows.filter((row) => row.candidate_id === candidateRow.id));
+      setEvaluationTemplates(templateRows);
+      setEvaluationCriteria(criterionRows);
       setOffers(offerRows.filter((row) => row.candidate_id === candidateRow.id));
       setComments(commentRows.filter((row) => row.candidate_id === candidateRow.id));
       setEmails(emailRows.filter((row) => row.candidate_id === candidateRow.id));
@@ -201,6 +228,15 @@ const CandidateProfile = () => {
 
   const campaignById = useMemo(() => new Map(campaigns.map((row) => [row.id, row])), [campaigns]);
   const latestOffer = offers[0] ?? null;
+  const templateById = useMemo(
+    () => new Map(evaluationTemplates.map((row) => [row.id, row])),
+    [evaluationTemplates],
+  );
+  const interviewById = useMemo(() => new Map(interviews.map((row) => [row.id, row])), [interviews]);
+  const usableTemplates = useMemo(
+    () => selectableTemplates(evaluationTemplates, CANDIDATE_EVALUATION_KINDS),
+    [evaluationTemplates],
+  );
 
   const editFields = useMemo(
     () => buildCandidateFields(campaigns).filter((field) => field.name !== "status"),
@@ -381,6 +417,23 @@ const CandidateProfile = () => {
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
+  };
+
+  const handleSaveTemplateEvaluation = async (draft: CandidateEvaluationDraft) => {
+    if (!candidate || !templateEvaluation) throw new Error("Không tìm thấy ứng viên.");
+    await saveCandidateEvaluation(
+      {
+        companyId: candidate.company_id,
+        candidateId: candidate.id,
+        reviewerId: user?.id ?? null,
+        reviewerName: authorName,
+        evaluationId: templateEvaluation.evaluation?.id ?? null,
+      },
+      draft,
+    );
+    toast.success(draft.status === "draft" ? "Đã lưu nháp phiếu đánh giá" : "Đã nộp phiếu đánh giá");
+    setTemplateEvaluation(null);
+    await load();
   };
 
   const handleSaveInterview = async (values: Record<string, string | number | null>) => {
@@ -597,7 +650,8 @@ const CandidateProfile = () => {
   }
 
   const campaign = candidate.campaign_id ? campaignById.get(candidate.campaign_id) ?? null : null;
-  const scored = evaluations.filter((item) => evaluationAverage(item) !== null);
+  const draftCount = evaluations.filter((item) => item.status === "draft").length;
+  const scored = evaluations.filter((item) => !item.template_id && evaluationAverage(item) !== null);
   const average = scored.length
     ? Math.round((scored.reduce((sum, item) => sum + (evaluationAverage(item) ?? 0), 0) / scored.length) * 10) / 10
     : null;
@@ -888,12 +942,32 @@ const CandidateProfile = () => {
         <TabsContent value="evaluations" className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-[12.5px] text-muted-foreground">
-              {evaluations.length} đánh giá · điểm trung bình {average ? average.toFixed(1) : "—"}/5
+              {evaluations.length} đánh giá
+              {draftCount > 0 ? ` (${draftCount} nháp)` : ""}
+              {average ? ` · điểm TB phiếu nhanh ${average.toFixed(1)}/5` : ""}
             </p>
-            <Button className="h-8 gap-1.5 text-[12px]" onClick={() => setEvaluationOpen(true)}>
-              <Plus className="h-3.5 w-3.5" /> Thêm đánh giá
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" className="h-8 gap-1.5 text-[12px]" onClick={() => setEvaluationOpen(true)}>
+                <Plus className="h-3.5 w-3.5" /> Đánh giá nhanh
+              </Button>
+              <Button
+                className="h-8 gap-1.5 text-[12px]"
+                disabled={usableTemplates.length === 0}
+                title={usableTemplates.length === 0 ? "Chưa có biểu mẫu đánh giá đang dùng" : undefined}
+                onClick={() => setTemplateEvaluation({ evaluation: null })}
+              >
+                <ClipboardCheck className="h-3.5 w-3.5" /> Chấm theo biểu mẫu
+              </Button>
+            </div>
           </div>
+          {usableTemplates.length === 0 && (
+            <p className="text-[11.5px] text-muted-foreground">
+              Chưa có biểu mẫu đánh giá đang dùng.{" "}
+              <Link to="/danh-gia/bieu-mau" className="font-medium text-primary hover:underline">
+                Tạo biểu mẫu
+              </Link>
+            </p>
+          )}
           {evaluations.length === 0 ? (
             <Card className="p-10 text-center">
               <Star className="mx-auto h-6 w-6 text-muted-foreground/70" />
@@ -903,6 +977,23 @@ const CandidateProfile = () => {
           ) : (
             <div className="grid gap-3 lg:grid-cols-2">
               {evaluations.map((evaluation) => {
+                if (evaluation.template_id) {
+                  return (
+                    <TemplateEvaluationCard
+                      key={evaluation.id}
+                      evaluation={evaluation}
+                      template={templateById.get(evaluation.template_id) ?? null}
+                      interview={evaluation.interview_id ? interviewById.get(evaluation.interview_id) ?? null : null}
+                      canEdit={canEditEvaluationRow(evaluation, user?.id, canEditSubmittedEvaluation)}
+                      canDelete={canDeleteEvaluationRow(evaluation, user?.id, canDeleteEvaluation)}
+                      onOpen={() => setTemplateEvaluation({ evaluation })}
+                      onDelete={() => {
+                        setPendingDelete(evaluation);
+                        setDeleteKind("evaluation");
+                      }}
+                    />
+                  );
+                }
                 const score = evaluationAverage(evaluation);
                 return (
                   <Card key={evaluation.id} className="space-y-2.5 p-4">
@@ -925,7 +1016,7 @@ const CandidateProfile = () => {
                         >
                           {EVALUATION_RECOMMENDATION_LABELS[evaluation.recommendation] ?? evaluation.recommendation}
                         </Badge>
-                        {(canDeleteEvaluation || (evaluation.reviewer_id === user?.id && evaluation.status === "draft")) && (
+                        {canDeleteEvaluationRow(evaluation, user?.id, canDeleteEvaluation) && (
                           <Button
                             variant="ghost"
                             size="icon-sm"
@@ -1325,6 +1416,21 @@ const CandidateProfile = () => {
         initial={{ recommendation: "hold" }}
         submitLabel="Lưu đánh giá"
         onSubmit={handleSaveEvaluation}
+      />
+
+      <TemplateEvaluationDialog
+        open={!!templateEvaluation}
+        onOpenChange={(open) => !open && setTemplateEvaluation(null)}
+        templates={usableTemplates}
+        allTemplates={evaluationTemplates}
+        criteria={evaluationCriteria}
+        interviews={interviews}
+        evaluation={templateEvaluation?.evaluation ?? null}
+        readOnly={
+          !!templateEvaluation?.evaluation &&
+          !canEditEvaluationRow(templateEvaluation.evaluation, user?.id, canEditSubmittedEvaluation)
+        }
+        onSave={handleSaveTemplateEvaluation}
       />
 
       <FieldDialog
