@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileSpreadsheet, Loader2 } from "lucide-react";
+import { AlertTriangle, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -27,7 +28,15 @@ interface Report {
   by_tenure: Bucket[];
   by_age: Bucket[];
   leave_reasons: Bucket[];
+  missing_total?: number;
+  missing_profiles?: { id: string; full_name: string; code: string | null; missing: string[] }[];
 }
+
+const MISSING_LABELS: Record<string, string> = {
+  hire_date: "ngày vào làm",
+  gender: "giới tính",
+  date_of_birth: "ngày sinh",
+};
 
 const TYPE_LABELS: Record<string, string> = {
   full_time: "Toàn thời gian",
@@ -144,6 +153,33 @@ const WorkforceReport = () => {
       </div>
       {data && (
         <>
+          {(data.missing_total ?? 0) > 0 && (
+            <Card className="mb-4 border-warning/40 bg-warning/5 p-4">
+              <p className="flex items-center gap-1.5 text-[13px] font-semibold">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                {data.missing_total} hồ sơ thiếu ngày vào làm/giới tính/ngày sinh
+              </p>
+              <p className="mt-1 text-[12px] text-muted-foreground">
+                Hồ sơ thiếu ngày vào làm đang được tính vào nhân sự đầu kỳ; thiếu giới tính/ngày sinh được xếp vào "Chưa rõ". Bổ sung để số liệu chính xác.
+              </p>
+              <ul className="mt-2 max-h-56 space-y-1 overflow-y-auto text-[12px]">
+                {(data.missing_profiles ?? []).map((p) => (
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-2">
+                    <span>
+                      <span className="font-medium">{p.full_name}</span>
+                      {p.code ? ` · ${p.code}` : ""} — thiếu {p.missing.map((m) => MISSING_LABELS[m] ?? m).join(", ")}
+                    </span>
+                    <Link to={`/employees/${p.id}`} className="text-primary underline-offset-2 hover:underline">
+                      Sửa hồ sơ
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {(data.missing_total ?? 0) > (data.missing_profiles?.length ?? 0) && (
+                <p className="mt-1 text-[11.5px] text-muted-foreground">Chỉ hiển thị 200 hồ sơ đầu tiên.</p>
+              )}
+            </Card>
+          )}
           <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5">
             {stats.map((s) => (
               <Card key={s.label} className="p-4">
