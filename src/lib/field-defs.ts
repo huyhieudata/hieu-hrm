@@ -27,12 +27,21 @@ export interface FieldDef {
   section?: string;
   hint?: string;
   /** Trả về thông báo lỗi nếu giá trị (đã trim, khác rỗng) không hợp lệ. */
-  validate?: (value: string) => string | null;
+  validate?: (value: string, values: Record<string, string>) => string | null;
 }
 
 /** CCCD gắn chip: đúng 12 chữ số. */
 export const validateNationalId = (value: string) =>
   /^\d{12}$/.test(value.trim()) ? null : "Số CCCD phải gồm đúng 12 chữ số.";
+
+/** SĐT Việt Nam: 10 số bắt đầu bằng 0, hoặc +84 + 9 số (cho phép khoảng trắng, dấu chấm, gạch). */
+export const validatePhone = (value: string) =>
+  /^(0\d{9}|\+84\d{9})$/.test(value.replace(/[\s.-]/g, ""))
+    ? null
+    : "Số điện thoại không hợp lệ (10 số bắt đầu bằng 0, hoặc +84…).";
+
+export const validateEmailAddress = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim()) ? null : "Email không hợp lệ. Ví dụ: ten@congty.vn";
 
 /** MST cá nhân: 10 hoặc 13 chữ số (cho phép gạch nối 10-3). */
 export const validateTaxCode = (value: string) =>

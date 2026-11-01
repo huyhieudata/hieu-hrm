@@ -10,6 +10,8 @@ import {
   Plus,
   Search,
   Trash2,
+  Printer,
+  Files,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -71,6 +73,7 @@ import { todayIso } from "@/lib/attendance";
 import {
   ContractAppendicesPanel,
   ContractExportButtons,
+  runContractExport,
   ContractLegalWarnings,
 } from "@/components/contracts/contract-extras";
 import { contractLegalWarnings } from "@/lib/contract-docs";
@@ -712,7 +715,7 @@ const Contracts = () => {
                         </Badge>
                       </td>
                       <td className="px-2 py-2.5 text-right">
-                        {canManage && (
+                        {(
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -725,8 +728,28 @@ const Contracts = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="w-[190px]"
+                              className="w-[200px]"
                             >
+                              <DropdownMenuItem
+                                className="gap-2 text-[12.5px]"
+                                onSelect={() => void runContractExport(contract, activeCompany?.name ?? "", "word")}
+                              >
+                                <FileDown className="h-3.5 w-3.5" /> Xuất Word
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2 text-[12.5px]"
+                                onSelect={() => void runContractExport(contract, activeCompany?.name ?? "", "pdf")}
+                              >
+                                <Printer className="h-3.5 w-3.5" /> In / PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2 text-[12.5px]"
+                                onSelect={() => setDetailContract(contract)}
+                              >
+                                <Files className="h-3.5 w-3.5" /> Phụ lục hợp đồng
+                              </DropdownMenuItem>
+                              {canManage && (
+                              <>
                               <DropdownMenuItem
                                 className="gap-2 text-[12.5px]"
                                 onSelect={() => {
@@ -742,6 +765,8 @@ const Contracts = () => {
                               >
                                 <Trash2 className="h-3.5 w-3.5" /> Xoá hợp đồng
                               </DropdownMenuItem>
+                              </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}

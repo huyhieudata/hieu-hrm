@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { noticeIfSlow } from "./net-retry";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Profile {
@@ -35,6 +36,8 @@ interface AuthContextValue {
     password: string;
     fullName: string;
   }) => Promise<{ needsConfirmation: boolean }>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (patch: Partial<Pick<Profile, "full_name" | "phone" | "job_title">>) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -134,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }, 0);
     });
 
-    void supabase.auth.getSession().then(({ data }) => {
+    void noticeIfSlow(supabase.auth.getSession()).then(({ data }) => {
       if (!active) return;
       if (!data.session) {
         setLoading(false);
@@ -174,6 +177,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { needsConfirmation: !data.session };
   }, []);
 
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/dat-lai-mat-khau`,
+    });
+    if (error) throw new Error(describeAuthError(error));
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw new Error(describeAuthError(error));
+  }, []);
+
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(describeAuthError(error));
@@ -208,11 +223,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       loading,
       signIn,
       signUp,
+      requestPasswordReset,
+      updatePassword,
       signOut,
       updateProfile,
       refreshProfile,
     }),
-    [loading, profile, refreshProfile, session, signIn, signOut, signUp, updateProfile, user],
+    [loading, profile, refreshProfile, requestPasswordReset, session, signIn, signOut, signUp, updatePassword, updateProfile, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

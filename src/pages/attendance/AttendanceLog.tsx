@@ -208,8 +208,8 @@ const AttendanceLog = () => {
                       {ATTENDANCE_STATUS_LABELS[record.status] ?? record.status}
                     </Badge>
                     {isLegacyAttendance(record) && (
-                      <Badge variant="outline" title="Bản ghi không có ảnh, GPS hay thiết bị — nhập tay hoặc dữ liệu cũ">
-                        Nhập tay/cũ
+                      <Badge variant="outline" title="Bản ghi không có ảnh, GPS hay thiết bị — nhập tay hoặc không có bằng chứng">
+                        Nhập tay/không có bằng chứng
                       </Badge>
                     )}
                     {flags.map((flag) => (

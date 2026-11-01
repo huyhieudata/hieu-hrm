@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileText, Loader2, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
+import { FileText, Loader2, Plus, Printer, RotateCcw, Save, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { SettingsShell } from "@/components/settings/settings-shell";
@@ -80,13 +81,20 @@ const ContractTemplates = () => {
   return (
     <SettingsShell
       title="Mẫu hợp đồng lao động"
-      description="Mẫu dùng khi Xuất Word / In PDF hợp đồng. Không có mẫu riêng ⇒ dùng mẫu mặc định theo BLLĐ 2019."
+      description="Mẫu dùng khi Xuất Word / In PDF hợp đồng (vào Hợp đồng → menu “…” của từng dòng, hoặc tab Công tác & hợp đồng trong hồ sơ). Không có mẫu riêng ⇒ dùng mẫu mặc định theo BLLĐ 2019."
       actions={
-        canEdit && !draft && (
-          <Button className="h-9 gap-1.5 text-[12.5px]" onClick={() => setDraft(blank())}>
-            <Plus className="h-4 w-4" /> Thêm mẫu
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="h-9 gap-1.5 text-[12.5px]">
+            <Link to="/hop-dong">
+              <Printer className="h-4 w-4" /> Xuất Word / In PDF · Phụ lục
+            </Link>
           </Button>
-        )
+          {canEdit && !draft && (
+            <Button className="h-9 gap-1.5 text-[12.5px]" onClick={() => setDraft(blank())}>
+              <Plus className="h-4 w-4" /> Thêm mẫu
+            </Button>
+          )}
+        </div>
       }
     >
       {draft ? (

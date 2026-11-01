@@ -24,3 +24,8 @@ Chưa làm / ghi chú:
 - Loại đơn mặc định có dấu cho mọi công ty + trigger công ty mới; "Phep" → "Nghỉ phép".
 - Chấm công cũ → nhãn "Nhập tay/cũ".
 - Định biên mặc định năm hiện tại; cột Vào làm lấy HĐ đầu tiên nếu thiếu; PDF ngang + ngày/điện thoại; import .xlsx; bỏ nút Đóng trùng ở import; lỗi theo ô ở Thêm nhân viên; sửa menu "..." ; nhãn ô quyền; xác nhận Thu hồi lời mời; dialog lý do từ chối.
+
+## 01/11/2026 — Sửa danh sách lỗi Tester 2 (A1–C6)
+- A: Quên mật khẩu + trang /dat-lai-mat-khau; lỗi hiện dưới từng ô, xác nhận mật khẩu khi đăng ký; Action tự thêm redirect URL vào Auth allow-list.
+- B: withRetry/noticeIfSlow ("Đang kết nối lại…"), prefetch quyền song song memberships; Chấm công tải song song + lọc theo nhân viên phía DB.
+- C1 kiểm tra SĐT/email/CCCD/MST (client + RPC submit_employee_change_request). C2 dịch lỗi DB sang tiếng Việt, chặn ngày hết hạn < ngày cấp. C3 Xuất Word/PDF/Phụ lục cho mọi dòng hợp đồng + tab hồ sơ + link từ Mẫu hợp đồng. C4 tên chính sách nghỉ trống, xác nhận trước khi tạo kỳ lương. C5 nhãn "Nhập tay/không có bằng chứng" chỉ khi không có IP/UA. C6 Định biên mặc định năm hiện tại, "Thêm năm" tạo nháp.

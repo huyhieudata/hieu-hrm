@@ -49,6 +49,7 @@ import NotFound from "./pages/NotFound";
 
 const Index = lazy("/", () => import("./pages/Index"), true);
 const Login = lazy("/login", () => import("./pages/Login"), true);
+const ResetPassword = lazy("/dat-lai-mat-khau", () => import("./pages/ResetPassword"));
 const Employees = lazy("/employees", () => import("./pages/Employees"), true);
 const Onboarding = lazy("/hoi-nhap", () => import("./pages/Onboarding"));
 const EmployeeProfilePage = lazy("/employees", () => import("./pages/EmployeeProfile"));
@@ -183,6 +184,15 @@ export const routers = [
     element: (
       <PageSuspense>
         <Login />
+      </PageSuspense>
+    ),
+  },
+  {
+    path: "/dat-lai-mat-khau",
+    name: "reset-password",
+    element: (
+      <PageSuspense>
+        <ResetPassword />
       </PageSuspense>
     ),
   },

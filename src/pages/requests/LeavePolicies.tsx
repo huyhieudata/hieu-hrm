@@ -338,7 +338,7 @@ const LeavePolicies = () => {
       });
     } else {
       setDraft({
-        name: "Chính sách phép năm",
+        name: "",
         year: String(year),
         carry_over_max: "5",
         prorate_by_hire_date: true,

@@ -1,3 +1,5 @@
+import { useCompany } from "@/lib/company-provider";
+import { ContractRowDocActions } from "@/components/contracts/contract-extras";
 import { useOrgStructure, withOrgFields } from "@/lib/use-org-structure";
 import {
   Award,
@@ -211,6 +213,7 @@ const contractFields: FieldDef[] = [
 
 export const ContractsTab = ({ employeeId, canManage }: TabProps) => {
   const org = useOrgStructure();
+  const { activeCompany } = useCompany();
   return (
     <RecordsTab<ContractRecord>
       table="employee_contracts"
@@ -261,6 +264,14 @@ export const ContractsTab = ({ employeeId, canManage }: TabProps) => {
             >
               {CONTRACT_STATUS_LABELS[row.status] ?? row.status}
             </Badge>
+          ),
+        },
+        {
+          key: "docs",
+          label: "Văn bản",
+          width: "210px",
+          render: (row) => (
+            <ContractRowDocActions contract={row} companyName={activeCompany?.name ?? ""} canManage={canManage} />
           ),
         },
       ]}
@@ -729,7 +740,16 @@ const certificateFields: FieldDef[] = [
   { name: "issuer", label: "Đơn vị cấp" },
   { name: "certificate_no", label: "Số hiệu" },
   { name: "issue_date", label: "Ngày cấp", type: "date" },
-  { name: "expiry_date", label: "Ngày hết hạn", type: "date", hint: "Bỏ trống nếu không thời hạn." },
+  {
+    name: "expiry_date",
+    label: "Ngày hết hạn",
+    type: "date",
+    hint: "Bỏ trống nếu không thời hạn.",
+    validate: (value, values) => {
+      const issued = (values.issue_date ?? "").trim();
+      return issued && value < issued ? "Ngày hết hạn phải sau ngày cấp." : null;
+    },
+  },
   { name: "note", label: "Ghi chú", type: "textarea" },
 ];
 

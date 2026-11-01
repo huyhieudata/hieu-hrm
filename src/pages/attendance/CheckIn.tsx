@@ -101,34 +101,29 @@ const CheckIn = ({ personal = false }: { personal?: boolean }) => {
     if (!companyId || !user?.id) return;
     setLoading(true);
     try {
-      const employee = await findMyEmployee(companyId, user.id);
-      setMe(employee);
-      const [shiftRows, assignmentRows, policyRow, locationRows, info, hash] = await Promise.all([
+      // Mọi truy vấn chạy song song; chỉ phần cần employee.id chờ hồ sơ (đã cache 60s).
+      const employeePromise = findMyEmployee(companyId, user.id);
+      const [employee, shiftRows, assignmentRows, policyRow, locationRows, info, hash, devices, rows] = await Promise.all([
+        employeePromise,
         listRows<WorkShift>("work_shifts", companyId, "start_time", true),
         listRows<ShiftAssignment>("shift_assignments", companyId, "created_at"),
         getPolicy(companyId),
         listLocations(companyId),
         describeDevice(),
         getDeviceHash(),
+        employeePromise.then((emp) => (emp ? listMyDevices(emp.id) : [])),
+        employeePromise.then((emp) =>
+          emp ? listRecordsBetween(companyId, monthStart, today, emp.id) : ([] as AttendanceRecord[]),
+        ),
       ]);
+      setMe(employee);
       setShifts(shiftRows);
       setAssignments(assignmentRows);
       setPolicy(policyRow);
       setActiveLocationCount(locationRows.filter((location) => location.active).length);
       setDeviceName(info.suggestedName);
-      if (employee) {
-        const devices = await listMyDevices(employee.id);
-        setDevice(devices.find((item) => item.device_hash === hash) ?? null);
-      } else {
-        setDevice(null);
-      }
-
-      if (employee) {
-        const rows = await listRecordsBetween(companyId, monthStart, today);
-        setRecords(rows.filter((record) => record.employee_id === employee.id));
-      } else {
-        setRecords([]);
-      }
+      setDevice(employee ? devices.find((item) => item.device_hash === hash) ?? null : null);
+      setRecords(rows);
     } catch (error) {
       toast.error("Không tải được dữ liệu chấm công", { description: getErrorMessage(error) });
     } finally {
