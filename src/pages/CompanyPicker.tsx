@@ -1,4 +1,3 @@
-import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Check, Loader2, LogOut, Plus, ShieldCheck, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -22,50 +21,10 @@ import { ROLE_BADGE, ROLE_LABELS } from "@/lib/roles";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const industries = [
-  "Công nghệ thông tin",
-  "Tài chính - Ngân hàng",
-  "Bán lẻ - Thương mại",
-  "Sản xuất",
-  "Giáo dục",
-  "Y tế",
-  "Dịch vụ",
-  "Khác",
-];
-
-const sizes = ["1 - 10 nhân sự", "11 - 50 nhân sự", "51 - 200 nhân sự", "201 - 500 nhân sự", "Trên 500 nhân sự"];
-
 const CompanyPicker = () => {
   const navigate = useNavigate();
   const { profile, user, signOut } = useAuth();
-  const { memberships, activeMembership, setActiveCompany, createCompany, loading } = useCompany();
-
-  const [name, setName] = useState("");
-  const [industry, setIndustry] = useState(industries[0]);
-  const [size, setSize] = useState(sizes[1]);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const onCreate = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-
-    if (name.trim().length < 2) {
-      setError("Tên công ty cần ít nhất 2 ký tự.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await createCompany({ name, industry, companySize: size });
-      toast.success("Đã tạo công ty", { description: `${name.trim()} đã sẵn sàng để mời đội ngũ.` });
-      navigate("/");
-    } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Không tạo được công ty.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const { memberships, activeMembership, setActiveCompany, loading } = useCompany();
 
   const onSignOut = async () => {
     await signOut();
@@ -186,63 +145,9 @@ const CompanyPicker = () => {
               </div>
             </div>
 
-            <form className="mt-4 space-y-3.5" onSubmit={onCreate}>
-              <div className="space-y-1.5">
-                <Label htmlFor="company-name" className="text-[12.5px]">
-                  Tên công ty
-                </Label>
-                <Input
-                  id="company-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Công ty TNHH An Phát"
-                  className="h-10"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-[12.5px]">Lĩnh vực</Label>
-                <Select value={industry} onValueChange={setIndustry}>
-                  <SelectTrigger className="h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {industries.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-[12.5px]">Quy mô nhân sự</Label>
-                <Select value={size} onValueChange={setSize}>
-                  <SelectTrigger className="h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sizes.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {error && (
-                <p className="rounded-md border border-destructive/25 bg-destructive-subtle px-3 py-2 text-[11.5px] leading-5 text-destructive">
-                  {error}
-                </p>
-              )}
-
-              <Button type="submit" className="w-full gap-2" disabled={submitting}>
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}
-                {submitting ? "Đang tạo…" : "Tạo công ty"}
-              </Button>
-            </form>
+            <Button className="mt-4 w-full gap-2" onClick={() => navigate("/bat-dau")}>
+              <Building2 className="h-4 w-4" /> Tạo công ty (3 bước)
+            </Button>
 
             <div className="mt-4 space-y-2 rounded-md border border-dashed border-border bg-muted/40 p-3">
               <p className="flex items-start gap-2 text-[11.5px] leading-5 text-muted-foreground">

@@ -57,6 +57,7 @@ const Onboarding = lazy("/hoi-nhap", () => import("./pages/Onboarding"));
 const EmployeeProfilePage = lazy("/employees", () => import("./pages/EmployeeProfile"));
 const Insurance = lazy("/bao-hiem", () => import("./pages/Insurance"));
 const CompanyPicker = lazy("/cong-ty", () => import("./pages/CompanyPicker"));
+const SetupWizard = lazy("/bat-dau", () => import("./pages/onboarding-wizard/SetupWizard"));
 const JoinCompany = lazy("/tham-gia", () => import("./pages/JoinCompany"));
 const OrgStructure = lazy("/cai-dat/co-cau-to-chuc", () => import("./pages/settings/OrgStructure"));
 const HomeWidgets = lazy("/cai-dat/widget-trang-chu", () => import("./pages/settings/HomeWidgets"));
@@ -744,6 +745,15 @@ export const routers = [
       <PageSuspense>
         <PublicApplyForm />
       </PageSuspense>
+    ),
+  },
+  {
+    path: "/bat-dau",
+    name: "setup-wizard",
+    element: authenticated(
+      <PageSuspense>
+        <SetupWizard />
+      </PageSuspense>,
     ),
   },
   {
