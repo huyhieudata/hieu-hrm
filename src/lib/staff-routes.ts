@@ -6,6 +6,11 @@ const STAFF_PREFIXES: { prefix: string; module: string | null }[] = [
   { prefix: "/employees", module: "employees" },
   { prefix: "/cham-cong", module: "attendance" },
   { prefix: "/cai-dat", module: null },
+  { prefix: "/tai-san", module: "assets" },
+  { prefix: "/hop-dong", module: "contracts" },
+  { prefix: "/bao-hiem", module: "insurance" },
+  { prefix: "/tinh-luong", module: "payroll" },
+  { prefix: "/tuyen-dung", module: "recruitment" },
 ];
 
 export const isStaffPath = (path: string) =>

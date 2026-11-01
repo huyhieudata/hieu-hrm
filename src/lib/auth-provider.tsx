@@ -1,3 +1,4 @@
+import { clearQueryCache } from "@/lib/query-cache";
 /* eslint-disable react-refresh/only-export-components */
 import type { Session, User } from "@supabase/supabase-js";
 import {
@@ -190,9 +191,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw new Error(describeAuthError(error));
+    // Đăng xuất LOCAL ngay (không chờ mạng/khoá): giới hạn 1.5s, sau đó tự xoá mọi token + cache
+    // và nạp lại hẳn trang /login để không còn state/phiên cũ trong bộ nhớ.
+    await Promise.race([
+      supabase.auth.signOut({ scope: "local" }).catch(() => undefined),
+      new Promise((resolve) => window.setTimeout(resolve, 1500)),
+    ]);
     setProfile(null);
+    clearQueryCache();
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+      try {
+        Object.keys(storage)
+          .filter((key) => key.startsWith("sb-") || key.includes("supabase") || key.includes("auth-token"))
+          .forEach((key) => storage.removeItem(key));
+      } catch {
+        /* storage bị chặn */
+      }
+    }
+    window.location.replace("/login");
   }, []);
 
   const updateProfile = useCallback<AuthContextValue["updateProfile"]>(

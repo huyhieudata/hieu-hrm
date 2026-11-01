@@ -29,7 +29,7 @@ interface AppTile {
 
 const EmployeeApps = () => {
   const mode = useDeviceMode();
-  const { role, loading, canDo } = useCompany();
+  const { role, loading, canDo, canManageModule } = useCompany();
   const [query, setQuery] = useState("");
   const tiles = useMemo(() => {
     const mine: AppTile[] = [
@@ -50,11 +50,11 @@ const EmployeeApps = () => {
       { label: "Tài liệu", to: "/toi/tai-lieu", icon: FolderOpen, group: "apps" },
     ];
     if (canDo("employees", "view") && role !== "employee") apps.push({ label: "Danh bạ", to: "/employees", icon: Users, group: "apps" });
-    if (canDo("assets", "view")) apps.push({ label: "Tài sản", to: "/tai-san", icon: FolderOpen, group: "apps" });
-    if (canDo("insurance", "view")) apps.push({ label: "Bảo hiểm", to: "/bao-hiem", icon: Shield, group: "apps" });
+    if (canManageModule("assets")) apps.push({ label: "Tài sản", to: "/tai-san", icon: FolderOpen, group: "apps" });
+    if (canManageModule("insurance")) apps.push({ label: "Bảo hiểm", to: "/bao-hiem", icon: Shield, group: "apps" });
     if (canDo("news", "view")) apps.push({ label: "Bảng tin", to: "/tin-tuc", icon: Megaphone, group: "apps" });
     return [...mine, ...apps];
-  }, [canDo]);
+  }, [canDo, canManageModule, role]);
 
   if (mode !== "mobile") return <Navigate to="/" replace />;
   if (!loading && role && role !== "employee") return <Navigate to="/" replace />;
