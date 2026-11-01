@@ -33,6 +33,7 @@ const READ_RPCS = new Set([
   "peek_company_invite",
   "peek_candidate_form",
   "log_activity",
+  "my_payslips",
 ]);
 
 export const isWriteRequest = (url: string, method: string) => {

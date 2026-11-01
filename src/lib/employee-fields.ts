@@ -190,10 +190,14 @@ export const buildEmployeeFields = (
     {
       name: "concurrent_positions",
       label: "Vị trí kiêm nhiệm",
-      placeholder: "Trưởng phòng Kỹ thuật; Phụ trách an toàn thông tin",
+      type: "multiselect",
+      options: (positionOptionsByDepartment
+        ? Array.from(new Set(Object.values(positionOptionsByDepartment).flat().map((option) => option.value)))
+        : []
+      ).map((title) => ({ value: title, label: title })),
       section: "Công việc",
       span: 2,
-      hint: "Nhập một hoặc nhiều vị trí, cách nhau bằng dấu chấm phẩy.",
+      hint: "Chọn một hoặc nhiều vị trí trên sơ đồ tổ chức.",
     },
     {
       name: "work_location",
