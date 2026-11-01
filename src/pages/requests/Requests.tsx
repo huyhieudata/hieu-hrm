@@ -63,6 +63,7 @@ import {
   cancelApprovedRequest,
   listRequestTypes,
   listRequests,
+  overtimeSummary,
   REQUEST_SESSION_LABELS,
   REQUEST_STATUS_LABELS,
   requestStatusTone,
@@ -645,6 +646,7 @@ const Requests = () => {
                       {type?.deduct_leave && (
                         <Badge variant="info">Trừ {request.leave_days || 0} ngày phép</Badge>
                       )}
+                      {type?.category === "overtime" && <Badge variant="info">{overtimeSummary(request)}</Badge>}
                       <Badge variant={requestStatusTone(request.status)}>
                         {REQUEST_STATUS_LABELS[request.status] ?? request.status}
                       </Badge>
