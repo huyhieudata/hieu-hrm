@@ -124,6 +124,20 @@ export interface AttendanceRecord {
   shift_id: string | null;
   status: string;
   note: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  accuracy_m?: number | null;
+  latitude_out?: number | null;
+  longitude_out?: number | null;
+  accuracy_out_m?: number | null;
+  distance_m?: number | null;
+  distance_out_m?: number | null;
+  photo_path?: string | null;
+  photo_out_path?: string | null;
+  device_id?: string | null;
+  device_out_id?: string | null;
+  location_id?: string | null;
+  flags?: string[] | null;
 }
 
 type AttendanceTable = "work_shifts" | "attendance_settings" | "shift_assignments" | "attendance_records";

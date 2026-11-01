@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, MapPin, MoreHorizontal, Pencil, Plus, Settings2, Smartphone, Trash2, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
+import { VerificationSettings } from "@/components/attendance/verification-settings";
 import { FieldDialog, type FieldDef } from "@/components/employee/field-dialog";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/common/page-header";
@@ -171,6 +172,8 @@ const AttendanceSettings = () => {
           )
         }
       />
+
+      {companyId && <VerificationSettings companyId={companyId} canManage={canManage} />}
 
       {loading ? (
         <Card className="flex items-center justify-center gap-2 p-16 text-[12.5px] text-muted-foreground">

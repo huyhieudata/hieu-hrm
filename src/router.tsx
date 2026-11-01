@@ -23,6 +23,8 @@ const Schedule = lazy(() => import("./pages/attendance/Schedule"));
 const Shifts = lazy(() => import("./pages/attendance/Shifts"));
 const ShiftAssignments = lazy(() => import("./pages/attendance/ShiftAssignments"));
 const AttendanceSettings = lazy(() => import("./pages/attendance/AttendanceSettings"));
+const AttendanceDevices = lazy(() => import("./pages/attendance/Devices"));
+const AttendanceLog = lazy(() => import("./pages/attendance/AttendanceLog"));
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Assets = lazy(() => import("./pages/Assets"));
 const News = lazy(() => import("./pages/News"));
@@ -369,6 +371,26 @@ export const routers = [
         <RequestTypes />
       </PageSuspense>,
       "requests",
+    ),
+  },
+  {
+    path: "/cham-cong/thiet-bi",
+    name: "attendance-devices",
+    element: companyScoped(
+      <PageSuspense>
+        <AttendanceDevices />
+      </PageSuspense>,
+      "attendance",
+    ),
+  },
+  {
+    path: "/cham-cong/nhat-ky",
+    name: "attendance-log",
+    element: companyScoped(
+      <PageSuspense>
+        <AttendanceLog />
+      </PageSuspense>,
+      "attendance",
     ),
   },
   {

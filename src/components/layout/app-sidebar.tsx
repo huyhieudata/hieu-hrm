@@ -40,6 +40,8 @@ import {
   PackagePlus,
   KeyRound,
   Laptop,
+  MapPinned,
+  Smartphone,
 } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
@@ -135,6 +137,8 @@ export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }
         canDo("attendance", "view") && { label: "Lịch làm việc", to: "/cham-cong/lich-lam-viec", icon: CalendarDays },
         canManageModule("shifts") && { label: "Ca làm việc", to: "/cham-cong/ca-lam-viec", icon: Clock },
         canManageModule("shifts") && { label: "Phân ca", to: "/cham-cong/phan-ca", icon: CalendarRange },
+        canManageModule("attendance") && { label: "Chi tiết chấm công", to: "/cham-cong/nhat-ky", icon: MapPinned },
+        canManageModule("attendance") && { label: "Thiết bị chấm công", to: "/cham-cong/thiet-bi", icon: Smartphone },
         canManageModule("attendance") && { label: "Cài đặt chấm công", to: "/cham-cong/cai-dat", icon: Settings2 },
       ].filter(Boolean) as NavItem[],
     },

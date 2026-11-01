@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileDown, FileSpreadsheet, Loader2, Search } from "lucide-react";
+import { FileDown, FileSpreadsheet,
+  MapPinned, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -20,6 +22,7 @@ import {
   type AttendanceRecord,
   type WorkShift,
 } from "@/lib/attendance";
+import { todayIso as todayIsoForLink } from "@/lib/attendance";
 import {
   listDates,
   listRequests,
@@ -43,7 +46,7 @@ const REMOTE_SYMBOL = "X";
 const currentMonth = currentMonthIso;
 
 const Timesheet = () => {
-  const { activeCompany } = useCompany();
+  const { activeCompany, canManageModule } = useCompany();
   const companyId = activeCompany?.id ?? null;
 
   const [month, setMonth] = useState(currentMonth());
@@ -266,6 +269,13 @@ const Timesheet = () => {
         description="Bảng công chi tiết theo tháng; đơn nghỉ phép, làm từ xa và sửa chấm công đã duyệt được cập nhật vào bảng."
         actions={
           <>
+            {canManageModule("attendance") && (
+              <Button asChild variant="outline" className="h-9 gap-1.5 text-[12.5px]">
+                <Link to={`/cham-cong/nhat-ky?from=${month}-01&to=${todayIsoForLink().startsWith(month) ? todayIsoForLink() : `${month}-28`}`}>
+                  <MapPinned className="h-3.5 w-3.5" /> Chi tiết ảnh/GPS
+                </Link>
+              </Button>
+            )}
             <Button
               variant="outline"
               className="h-9 gap-1.5 text-[12.5px]"

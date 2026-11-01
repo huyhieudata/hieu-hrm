@@ -156,3 +156,10 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Thuế TNCN, giảm trừ gia cảnh, lương cơ sở, tỷ lệ/trần BH nằm trong bảng `payroll_parameters` theo `effective_date` (bản ghi đầy đủ). `company_id null` = mặc định hệ thống (chỉ đổi bằng migration khi luật đổi); kế toán thêm bộ riêng công ty ở `/tinh-luong/tham-so` (quyền payroll.manage).
 - SQL: `payroll_params(ngày, company)` + các hàm `payroll_*(…, company)`; trigger `validate_payroll_item` dùng tham số của công ty. Giao diện: `loadPayrollParameters(companyId)` → `applyPayrollParameters` trước khi tính. Hằng số trong `payroll-calc.ts` chỉ là mặc định dự phòng, phải khớp bản ghi hệ thống.
 - Chấm phiếu theo biểu mẫu (bước 2): hồ sơ ứng viên → tab Đánh giá → "Chấm theo biểu mẫu" (`src/components/recruitment/template-evaluation-dialog.tsx`, thẻ hiển thị `template-evaluation-card.tsx`, lưu qua `saveCandidateEvaluation` trong `src/lib/evaluations.ts`). Chỉ biểu mẫu đang dùng, bản mới nhất, loại phỏng vấn/thử việc/định kỳ (`selectableTemplates`, `CANDIDATE_EVALUATION_KINDS`). Quyền hiển thị dùng `canEditEvaluation`/`canDeleteEvaluation` (khớp trigger + policy). Kịch bản kiểm tra trên DB: `scripts/evaluation-scoring-dryrun.sql` (tự rollback).
+
+## Chấm công xác thực (ảnh + GPS + thiết bị)
+- Bản ghi `attendance_records` chỉ được tạo/sửa qua RPC `attendance_punch` (nhân viên) hoặc bởi người quản lý (`can_manage_employee`); trigger `guard_attendance_changes` chặn ghi tay.
+- Cấu hình: `attendance_policies` (1 dòng/công ty), vùng chấm: `attendance_locations`, thiết bị: `employee_devices` (đăng ký qua `register_attendance_device`, duyệt qua `review_attendance_device`, đổi máy: `reset_employee_devices`), lần bị từ chối: `attendance_punch_logs`.
+- Ảnh selfie: bucket riêng `attendance-photos`, đường dẫn `company_id/employee_id/*.jpg`, xem bằng signed URL.
+- Client: `src/lib/attendance-verify.ts`; trang `/cham-cong/thiet-bi`, `/cham-cong/nhat-ky`; cấu hình nằm ở `/cham-cong/cai-dat`.
+- Kiểm thử SQL: `scripts/attendance-punch-dryrun.sql` (luôn rollback).

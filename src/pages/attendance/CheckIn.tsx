@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  Camera,
   CalendarClock,
   Clock,
   Loader2,
@@ -17,7 +18,8 @@ import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MyDeviceCard } from "@/components/attendance/my-device-card";
+import { SelfieCameraDialog } from "@/components/attendance/selfie-camera-dialog";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { getErrorMessage } from "@/lib/utils";
@@ -25,7 +27,6 @@ import {
   ATTENDANCE_METHOD_LABELS,
   ATTENDANCE_STATUS_LABELS,
   checkinWindows,
-  createRow,
   currentMonthIso,
   dayCredit,
   findMyEmployee,
@@ -37,13 +38,25 @@ import {
   shiftRange,
   shiftWindowLabel,
   todayIso,
-  updateRow,
   type AttendanceRecord,
-  type AttendanceSetting,
   type ShiftAssignment,
   type WorkShift,
 } from "@/lib/attendance";
 import type { EmployeeRecord } from "@/lib/employee-records";
+import {
+  FLAG_LABELS,
+  describeDevice,
+  getDeviceHash,
+  getGpsFix,
+  getPolicy,
+  isMobileDevice,
+  listMyDevices,
+  punchAttendance,
+  uploadAttendancePhoto,
+  type AttendancePolicy,
+  type EmployeeDevice,
+  type GpsFix,
+} from "@/lib/attendance-verify";
 
 const methodIcon = (method: string | null) => {
   if (method === "wifi") return Wifi;
@@ -68,9 +81,12 @@ const CheckIn = () => {
   const [me, setMe] = useState<EmployeeRecord | null>(null);
   const [shifts, setShifts] = useState<WorkShift[]>([]);
   const [assignments, setAssignments] = useState<ShiftAssignment[]>([]);
-  const [settings, setSettings] = useState<AttendanceSetting[]>([]);
+  const [policy, setPolicy] = useState<AttendancePolicy | null>(null);
+  const [device, setDevice] = useState<EmployeeDevice | null>(null);
+  const [deviceName, setDeviceName] = useState("");
+  const [camera, setCamera] = useState<{ session: string; action: "in" | "out"; gps: GpsFix | null } | null>(null);
+  const [step, setStep] = useState<string | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
-  const [method, setMethod] = useState("phone");
   const [loading, setLoading] = useState(true);
   const [busySession, setBusySession] = useState<string | null>(null);
 
@@ -83,14 +99,23 @@ const CheckIn = () => {
     try {
       const employee = await findMyEmployee(companyId, user.id);
       setMe(employee);
-      const [shiftRows, assignmentRows, settingRows] = await Promise.all([
+      const [shiftRows, assignmentRows, policyRow, info, hash] = await Promise.all([
         listRows<WorkShift>("work_shifts", companyId, "start_time", true),
         listRows<ShiftAssignment>("shift_assignments", companyId, "created_at"),
-        listRows<AttendanceSetting>("attendance_settings", companyId, "created_at"),
+        getPolicy(companyId),
+        describeDevice(),
+        getDeviceHash(),
       ]);
       setShifts(shiftRows);
       setAssignments(assignmentRows);
-      setSettings(settingRows.filter((row) => row.active));
+      setPolicy(policyRow);
+      setDeviceName(info.suggestedName);
+      if (employee) {
+        const devices = await listMyDevices(employee.id);
+        setDevice(devices.find((item) => item.device_hash === hash) ?? null);
+      } else {
+        setDevice(null);
+      }
 
       if (employee) {
         const rows = await listRecordsBetween(companyId, monthStart, today);
@@ -118,24 +143,6 @@ const CheckIn = () => {
     () => records.filter((record) => record.work_date === today),
     [records, today],
   );
-
-  const allowedMethods = useMemo(() => {
-    const relevant = settings.find(
-      (setting) =>
-        (setting.scope_type === "employee" && setting.scope_value === me?.code) ||
-        (setting.scope_type === "position" && setting.scope_value === me?.position) ||
-        (setting.scope_type === "department" && setting.scope_value === me?.department) ||
-        setting.scope_type === "company",
-    );
-    const methods = relevant?.methods?.length ? relevant.methods : ["phone"];
-    return methods;
-  }, [me?.code, me?.department, me?.position, settings]);
-
-  useEffect(() => {
-    if (allowedMethods.length > 0 && !allowedMethods.includes(method)) {
-      setMethod(allowedMethods[0]);
-    }
-  }, [allowedMethods, method]);
 
   const sessionRows = useMemo<SessionRow[]>(() => {
     if (!myShift) return [{ session: "morning", label: "Cả ngày", windowLabel: "Chưa phân ca" }];
@@ -181,67 +188,77 @@ const CheckIn = () => {
     return new Date() > shiftEnd && todayRecords.some((record) => record.check_in && !record.check_out);
   }, [myShift, today, todayRecords]);
 
-  const handlePunch = async (session: string, action: "in" | "out") => {
+  const finishPunch = async (session: string, action: "in" | "out", gps: GpsFix | null, photo: Blob | null) => {
     if (!me || !companyId) return;
-    const existing = todayRecords.find((record) => record.session === session);
     setBusySession(session);
     try {
-      if (action === "in") {
-        if (existing?.check_in) {
-          toast.error("Buổi này bạn đã chấm công vào rồi.");
-          return;
-        }
-        const now = new Date();
-        const window = myShift ? checkinWindows(myShift, today).find((item) => item.session === session) ?? null : null;
-
-        if (myShift && !window) {
-          toast.error("Ca làm việc không có khung chấm công cho buổi này.");
-          return;
-        }
-        if (window && (now < window.from || now > window.to)) {
-          toast.error("Ngoài khung giờ chấm công hợp lệ", {
-            description: `Buổi này chỉ ghi nhận từ ${window.from.toLocaleTimeString("vi-VN", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })} đến ${window.to.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}.`,
-          });
-          return;
-        }
-
-        await createRow("attendance_records", {
-          company_id: companyId,
-          employee_id: me.id,
-          work_date: today,
-          session,
-          check_in: now.toISOString(),
-          method,
-          shift_id: myShift?.id ?? null,
-          status: window && now > window.lateAfter ? "late" : "on_time",
-        });
-        toast.success("Đã chấm công vào", {
-          description: `${formatTime(now.toISOString())} · ${ATTENDANCE_METHOD_LABELS[method] ?? method}`,
-        });
-      } else {
-        if (!existing?.check_in) return;
-        const now = new Date();
-        const outStatus =
-          myShift && now < shiftRange(myShift, today).end
-            ? existing.status === "late"
-              ? "late"
-              : "early_leave"
-            : existing.status;
-        await updateRow("attendance_records", existing.id, {
-          check_out: now.toISOString(),
-          status: outStatus,
-        });
-        toast.success("Đã chấm công ra", { description: formatTime(now.toISOString()) });
+      let photoPath: string | null = null;
+      if (photo) {
+        setStep("Đang tải ảnh lên…");
+        photoPath = await uploadAttendancePhoto(companyId, me.id, photo);
       }
+      setStep("Đang xác thực…");
+      const result = await punchAttendance({ companyId, action, session, gps, photoPath });
+      if (result.ok === false) {
+        toast.error("Chấm công bị từ chối", { description: result.reason });
+        return;
+      }
+      const record = result.record as { check_in?: string; check_out?: string; flags?: string[] };
+      const flags = (record.flags ?? []).map((flag) => FLAG_LABELS[flag] ?? flag);
+      const at = action === "in" ? record.check_in : record.check_out;
+      toast.success(action === "in" ? "Đã chấm công vào" : "Đã chấm công ra", {
+        description: [formatTime(at ?? null), ...flags].join(" · "),
+      });
       await load();
     } catch (error) {
       toast.error("Không chấm công được", { description: getErrorMessage(error) });
     } finally {
       setBusySession(null);
+      setStep(null);
     }
+  };
+
+  const handlePunch = async (session: string, action: "in" | "out") => {
+    if (!me || !companyId || !policy) return;
+    const existing = todayRecords.find((record) => record.session === session);
+    if (action === "in" && existing?.check_in) {
+      toast.error("Buổi này bạn đã chấm công vào rồi.");
+      return;
+    }
+    if (action === "out" && !existing?.check_in) return;
+    if (policy.require_device && device?.status !== "approved") {
+      toast.error("Thiết bị chưa được duyệt", {
+        description: "Chỉ điện thoại đã đăng ký và được HR duyệt mới chấm công được. Xem mục Thiết bị này bên dưới.",
+      });
+      return;
+    }
+    setBusySession(session);
+    let gps: GpsFix | null = null;
+    try {
+      setStep("Đang lấy vị trí GPS…");
+      gps = await getGpsFix();
+      if (policy.require_gps && gps.accuracy > policy.max_accuracy_m) {
+        toast.error("GPS chưa đủ chính xác", {
+          description: `Sai số ±${Math.round(gps.accuracy)} m (cần ≤ ${policy.max_accuracy_m} m). Bật định vị chính xác, ra chỗ thoáng rồi thử lại.`,
+        });
+        setBusySession(null);
+        setStep(null);
+        return;
+      }
+    } catch (error) {
+      if (policy.require_gps) {
+        toast.error("Không lấy được vị trí", { description: getErrorMessage(error) });
+        setBusySession(null);
+        setStep(null);
+        return;
+      }
+    }
+    setStep(null);
+    if (policy.require_photo) {
+      setCamera({ session, action, gps });
+      return;
+    }
+    await finishPunch(session, action, gps, null);
   };
 
   const short = (value: string | null | undefined) => (value ? value.slice(0, 5) : "—");
@@ -258,7 +275,7 @@ const CheckIn = () => {
       <PageHeader
         eyebrow="Chấm công"
         title="Chấm công"
-        description="Chấm công vào/ra theo từng buổi bằng GPS, Wi-Fi hoặc điện thoại; xem lịch sử chấm công trong tháng."
+        description="Chấm công vào/ra theo từng buổi bằng ảnh selfie, vị trí GPS và điện thoại đã đăng ký; xem lịch sử trong tháng."
       />
 
       {loading ? (
@@ -391,21 +408,41 @@ const CheckIn = () => {
                 })}
               </div>
 
-              <div className="mt-4 space-y-2">
-                <p className="text-[11.5px] font-medium text-foreground">Hình thức chấm công</p>
-                <Select value={method} onValueChange={setMethod}>
-                  <SelectTrigger className="h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allowedMethods.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {ATTENDANCE_METHOD_LABELS[item] ?? item}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {step && (
+                <p className="mt-3 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> {step}
+                </p>
+              )}
+
+              {policy && (
+                <div className="mt-3 flex flex-wrap gap-1.5 text-[10.5px]">
+                  <Badge variant={policy.require_photo ? "subtle" : "muted"} className="gap-1">
+                    <Camera className="h-3 w-3" /> {policy.require_photo ? "Bắt buộc ảnh" : "Không cần ảnh"}
+                  </Badge>
+                  <Badge variant={policy.require_gps ? "subtle" : "muted"} className="gap-1">
+                    <MapPin className="h-3 w-3" /> {policy.require_gps ? "Bắt buộc GPS" : "GPS tuỳ chọn"}
+                  </Badge>
+                  <Badge variant={policy.require_device ? "subtle" : "muted"} className="gap-1">
+                    <Smartphone className="h-3 w-3" /> {policy.require_device ? "Thiết bị đã duyệt" : "Mọi thiết bị"}
+                  </Badge>
+                </div>
+              )}
+
+              {policy && !isMobileDevice() && policy.require_device && (
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Bạn đang dùng máy tính. Nên đăng ký và chấm công bằng điện thoại cá nhân.
+                </p>
+              )}
+
+              {companyId && policy && (
+                <MyDeviceCard
+                  companyId={companyId}
+                  device={device}
+                  required={policy.require_device}
+                  suggestedName={deviceName}
+                  onChanged={() => void load()}
+                />
+              )}
 
               {myShift && (
                 <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-[10.5px] text-muted-foreground">
@@ -475,6 +512,19 @@ const CheckIn = () => {
           </div>
         </div>
       )}
+      <SelfieCameraDialog
+        open={!!camera}
+        title={camera?.action === "out" ? "Chụp ảnh chấm công ra" : "Chụp ảnh chấm công vào"}
+        onCancel={() => {
+          setCamera(null);
+          setBusySession(null);
+        }}
+        onConfirm={(photo) => {
+          const current = camera;
+          setCamera(null);
+          if (current) void finishPunch(current.session, current.action, current.gps, photo);
+        }}
+      />
     </AppShell>
   );
 };
