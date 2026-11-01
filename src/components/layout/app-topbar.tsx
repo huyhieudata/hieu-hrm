@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Bell,
@@ -30,6 +30,7 @@ import { displayName, useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { ROLE_LABELS } from "@/lib/roles";
 import { NotificationBell } from "@/components/layout/notification-bell";
+import { MfaDialog, useMfaReminder } from "@/components/auth/mfa";
 
 const routeMeta: Record<string, { group: string; label: string }> = {
   "/": { group: "Không gian làm việc", label: "Bảng điều khiển" },
@@ -92,6 +93,9 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
   const { activeCompany, role } = useCompany();
   const [pwOpen, setPwOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+  const [mfaOpen, setMfaOpen] = useState(false);
+  const openMfa = useCallback(() => setMfaOpen(true), []);
+  useMfaReminder(openMfa);
   const searchRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -226,6 +230,9 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
               <DropdownMenuItem className="gap-2.5" onSelect={() => setPwOpen(true)}>
                 <KeyRound className="h-4 w-4" /> Đổi mật khẩu
               </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2.5" onSelect={() => setMfaOpen(true)}>
+                <KeyRound className="h-4 w-4" /> Xác thực 2 lớp
+              </DropdownMenuItem>
               <DropdownMenuItem className="gap-2.5" onSelect={() => setNotifyOpen(true)}>
                 <BellRing className="h-4 w-4" /> Cài đặt thông báo
               </DropdownMenuItem>
@@ -241,6 +248,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
         </div>
       </div>
       <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} email={user?.email} />
+      <MfaDialog open={mfaOpen} onOpenChange={setMfaOpen} />
       <NotificationSettingsDialog open={notifyOpen} onOpenChange={setNotifyOpen} userId={user?.id} />
     </header>
   );

@@ -37,6 +37,7 @@ await patch("templates", Object.fromEntries(Object.keys(subj).flatMap((k) => [
   [`mailer_subjects_${k}`, subj[k]], [`mailer_templates_${k}_content`, tpl(k)]])));
 await patch("session", { jwt_exp: 3600, refresh_token_rotation_enabled: true, security_refresh_token_reuse_interval: 10 });
 await patch("mfa", { mfa_totp_enroll_enabled: true, mfa_totp_verify_enabled: true });
+await patch("password_min", { password_min_length: 8 });
 await patch("password_hibp", { password_hibp_enabled: true });
 if (process.env.AUTH_SMTP_PASS && process.env.AUTH_SMTP_USER) {
   await patch("smtp", {

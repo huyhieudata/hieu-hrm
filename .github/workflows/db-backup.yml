@@ -1,0 +1,44 @@
+name: DB backup (SEC-13)
+# Sao lưu pg_dump hằng đêm, mã hoá AES-256 (gpg), lưu thành artifact 14 ngày.
+# Cần 2 secret do anh Hiệu tự thêm (Settings → Secrets → Actions):
+#   SUPABASE_DB_URL     – chuỗi kết nối Postgres (Supabase → Connect → Session pooler), KHÔNG commit vào repo
+#   BACKUP_PASSPHRASE   – mật khẩu mã hoá bản sao lưu, cất ở nơi riêng (mất là không giải mã được)
+# Chưa có secret ⇒ job bỏ qua, không lỗi.
+on:
+  schedule:
+    - cron: "30 19 * * *" # 02:30 giờ VN
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kiểm tra secret
+        id: chk
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASS" ]; then echo "Thiếu SUPABASE_DB_URL/BACKUP_PASSPHRASE – bỏ qua"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Cài pg_dump 17
+        if: steps.chk.outputs.skip != '1'
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump + mã hoá (không in chuỗi kết nối)
+        if: steps.chk.outputs.skip != '1'
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          f="hrm-$(date -u +%Y%m%dT%H%MZ).dump"
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" -Fc --no-owner --no-privileges \
+            -n public -n auth -n storage -f "$f"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" --symmetric --cipher-algo AES256 -o "$f.gpg" "$f"
+          rm -f "$f"; ls -la "$f.gpg"; echo "FILE=$f.gpg" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        if: steps.chk.outputs.skip != '1'
+        with: { name: db-backup, path: "${{ env.FILE }}", retention-days: 14 }

@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { fetchMustChangePassword } from "@/lib/employee-accounts";
 import { ForcePasswordChange } from "@/components/auth/force-password-change";
+import { MfaGate } from "@/components/auth/mfa";
 
 export const FullPageLoader = ({ label = "Đang tải không gian làm việc…" }: { label?: string }) => (
   <BootSkeleton label={label} />
@@ -40,7 +41,7 @@ export const RequireAuth = ({ children }: { children: ReactNode }) => {
   if (mustChange?.value && userId)
     return <ForcePasswordChange onDone={() => setMustChange({ id: userId, value: false })} />;
 
-  return <>{children}</>;
+  return <MfaGate>{children}</MfaGate>;
 };
 
 export const RequireCompany = ({ children }: { children: ReactNode }) => {

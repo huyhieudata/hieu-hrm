@@ -139,7 +139,7 @@ const ResetPassword = () => {
           </div>
         ) : (
           <form className="mt-4 space-y-4" onSubmit={onSubmit} noValidate>
-            <p className="text-[13px] text-muted-foreground">Nhập mật khẩu mới (tối thiểu 6 ký tự).</p>
+            <p className="text-[13px] text-muted-foreground">Nhập mật khẩu mới (tối thiểu 8 ký tự, có chữ và số).</p>
             {field("password", "Mật khẩu mới", password, setPassword)}
             {field("confirm", "Xác nhận mật khẩu", confirm, setConfirm)}
             {error && (
