@@ -1,0 +1,46 @@
+name: Supabase auth config
+on:
+  workflow_dispatch:
+    inputs:
+      mode: { description: "check | apply", default: "check", required: true }
+      smtp_test_to: { description: "Gửi 1 mail thử qua SMTP Auth tới địa chỉ này (để trống = chỉ kiểm tra đăng nhập)", default: "" }
+permissions: { contents: read }
+env:
+  PROJECT_REF: yrdcsbjlvgycipzpogbv
+jobs:
+  auth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Kiểm tra đăng nhập SMTP (không in mật khẩu)
+        env:
+          AUTH_SMTP_HOST: ${{ secrets.AUTH_SMTP_HOST }}
+          AUTH_SMTP_PORT: ${{ secrets.AUTH_SMTP_PORT }}
+          AUTH_SMTP_USER: ${{ secrets.AUTH_SMTP_USER }}
+          AUTH_SMTP_PASS: ${{ secrets.AUTH_SMTP_PASS }}
+          TEST_TO: ${{ inputs.smtp_test_to }}
+        run: |
+          python3 - <<'PY'
+          import os, smtplib, ssl
+          from email.message import EmailMessage
+          h=os.environ.get('AUTH_SMTP_HOST'); u=os.environ.get('AUTH_SMTP_USER'); p=os.environ.get('AUTH_SMTP_PASS')
+          if not (h and u and p): print('Thiếu secret AUTH_SMTP_* – bỏ qua'); raise SystemExit(0)
+          s=smtplib.SMTP(h,int(os.environ.get('AUTH_SMTP_PORT') or 587),timeout=30); s.starttls(context=ssl.create_default_context()); s.login(u,p); print('SMTP login OK:', u)
+          to=os.environ.get('TEST_TO')
+          if to:
+            m=EmailMessage(); m['From']=f'ONHRM <{u}>'; m['To']=to; m['Subject']='ONHRM – thư thử cấu hình SMTP'
+            m.set_content('Thư thử cấu hình SMTP cho Supabase Auth.'); m.add_alternative(open('supabase/templates/recovery.html').read(),subtype='html')
+            s.send_message(m); print('Đã gửi 1 thư thử')
+          s.quit()
+          PY
+      - name: Cấu hình Auth
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          AUTH_SMTP_HOST: ${{ secrets.AUTH_SMTP_HOST }}
+          AUTH_SMTP_PORT: ${{ secrets.AUTH_SMTP_PORT }}
+          AUTH_SMTP_USER: ${{ secrets.AUTH_SMTP_USER }}
+          AUTH_SMTP_PASS: ${{ secrets.AUTH_SMTP_PASS }}
+        run: node scripts/supabase-auth-config.mjs
