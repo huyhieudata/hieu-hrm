@@ -22,6 +22,7 @@ import {
   FileText,
   CalendarClock,
   UserPlus,
+  LayoutGrid,
   Network,
   ListChecks,
   HeartPulse,
@@ -80,30 +81,71 @@ interface AppSidebarProps {
 }
 
 interface NavBuilderArgs {
-  canDo: (moduleKey: string, action: "view" | "create" | "edit" | "delete") => boolean;
+  canDo: (
+    moduleKey: string,
+    action: "view" | "create" | "edit" | "delete",
+  ) => boolean;
   canManageModule: (moduleKey: string) => boolean;
   isPlatformAdmin: boolean;
   role: Role | null;
 }
 
-export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }: NavBuilderArgs) => {
+export const buildNavGroups = ({
+  canDo,
+  canManageModule,
+  isPlatformAdmin,
+  role,
+}: NavBuilderArgs) => {
   const groups: { label: string; items: NavItem[] }[] = [
     {
       label: "Tổng quan",
       items: [
-        { label: "Bảng điều khiển", to: "/", icon: LayoutDashboard, exact: true },
-        canDo("news", "view") && { label: "Tin nội bộ", to: "/tin-tuc", icon: Newspaper },
+        {
+          label: "Bảng điều khiển",
+          to: "/",
+          icon: LayoutDashboard,
+          exact: true,
+        },
+        canDo("news", "view") && {
+          label: "Tin nội bộ",
+          to: "/tin-tuc",
+          icon: Newspaper,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
       label: "Quản lý nhân sự",
       items: [
-        canDo("onboarding", "view") && { label: "Hội nhập", to: "/hoi-nhap", icon: UserPlus },
-        canDo("employees", "view") && { label: "Hồ sơ nhân viên", to: "/employees", icon: Users },
-        canManageModule("leave") && { label: "Nghỉ phép", to: "/nghi-phep", icon: CalendarDays },
-        canDo("contracts", "view") && { label: "Hợp đồng", to: "/hop-dong", icon: FileSignature },
-        canDo("assets", "view") && { label: "Tài sản", to: "/tai-san", icon: Laptop },
-        canDo("insurance", "view") && { label: "Bảo hiểm", to: "/bao-hiem", icon: HeartPulse },
+        canDo("onboarding", "view") && {
+          label: "Hội nhập",
+          to: "/hoi-nhap",
+          icon: UserPlus,
+        },
+        canDo("employees", "view") && {
+          label: "Hồ sơ nhân viên",
+          to: "/employees",
+          icon: Users,
+        },
+        canManageModule("leave") && {
+          label: "Nghỉ phép",
+          to: "/nghi-phep",
+          icon: CalendarDays,
+        },
+        canDo("contracts", "view") && {
+          label: "Hợp đồng",
+          to: "/hop-dong",
+          icon: FileSignature,
+        },
+        canDo("assets", "view") && {
+          label: "Tài sản",
+          to: "/tai-san",
+          icon: Laptop,
+        },
+        canDo("insurance", "view") && {
+          label: "Bảo hiểm",
+          to: "/bao-hiem",
+          icon: HeartPulse,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
@@ -115,39 +157,113 @@ export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }
           icon: Briefcase,
           exact: true,
         },
-        canDo("recruitment", "view") && { label: "Mô tả công việc", to: "/tuyen-dung/mo-ta", icon: FileText },
-        canDo("recruitment", "view") && { label: "Chiến dịch", to: "/tuyen-dung/chien-dich", icon: Megaphone },
-        canDo("recruitment", "view") && { label: "Ứng viên", to: "/tuyen-dung/ung-vien", icon: Users },
-        canDo("recruitment", "view") && { label: "Lịch hẹn phỏng vấn", to: "/tuyen-dung/lich-hen", icon: CalendarClock },
-        canDo("evaluations", "view") && { label: "Biểu mẫu đánh giá", to: "/danh-gia/bieu-mau", icon: ClipboardCheck },
+        canDo("recruitment", "view") && {
+          label: "Mô tả công việc",
+          to: "/tuyen-dung/mo-ta",
+          icon: FileText,
+        },
+        canDo("recruitment", "view") && {
+          label: "Chiến dịch",
+          to: "/tuyen-dung/chien-dich",
+          icon: Megaphone,
+        },
+        canDo("recruitment", "view") && {
+          label: "Ứng viên",
+          to: "/tuyen-dung/ung-vien",
+          icon: Users,
+        },
+        canDo("recruitment", "view") && {
+          label: "Lịch hẹn phỏng vấn",
+          to: "/tuyen-dung/lich-hen",
+          icon: CalendarClock,
+        },
+        canDo("evaluations", "view") && {
+          label: "Biểu mẫu đánh giá",
+          to: "/danh-gia/bieu-mau",
+          icon: ClipboardCheck,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
       label: "Tính lương",
       items: [
-        canDo("payroll", "view") && { label: "Kỳ lương", to: "/tinh-luong", icon: Calculator },
-        canDo("payroll", "view") && { label: "Tham số lương", to: "/tinh-luong/tham-so", icon: Calculator },
+        canDo("payroll", "view") && {
+          label: "Kỳ lương",
+          to: "/tinh-luong",
+          icon: Calculator,
+        },
+        canDo("payroll", "view") && {
+          label: "Tham số lương",
+          to: "/tinh-luong/tham-so",
+          icon: Calculator,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
       label: "Chấm công",
       items: [
-        canDo("attendance", "view") && { label: "Chấm công", to: "/cham-cong", icon: Fingerprint, exact: true },
-        canDo("attendance", "view") && { label: "Bảng công", to: "/cham-cong/bang-cong", icon: Table2 },
-        canDo("attendance", "view") && { label: "Lịch làm việc", to: "/cham-cong/lich-lam-viec", icon: CalendarDays },
-        canManageModule("shifts") && { label: "Ca làm việc", to: "/cham-cong/ca-lam-viec", icon: Clock },
-        canManageModule("shifts") && { label: "Phân ca", to: "/cham-cong/phan-ca", icon: CalendarRange },
-        canManageModule("attendance") && { label: "Chi tiết chấm công", to: "/cham-cong/nhat-ky", icon: MapPinned },
-        canManageModule("attendance") && { label: "Thiết bị chấm công", to: "/cham-cong/thiet-bi", icon: Smartphone },
-        canManageModule("attendance") && { label: "Cài đặt chấm công", to: "/cham-cong/cai-dat", icon: Settings2 },
+        canDo("attendance", "view") && {
+          label: "Chấm công",
+          to: "/cham-cong",
+          icon: Fingerprint,
+          exact: true,
+        },
+        canDo("attendance", "view") && {
+          label: "Bảng công",
+          to: "/cham-cong/bang-cong",
+          icon: Table2,
+        },
+        canDo("attendance", "view") && {
+          label: "Lịch làm việc",
+          to: "/cham-cong/lich-lam-viec",
+          icon: CalendarDays,
+        },
+        canManageModule("shifts") && {
+          label: "Ca làm việc",
+          to: "/cham-cong/ca-lam-viec",
+          icon: Clock,
+        },
+        canManageModule("shifts") && {
+          label: "Phân ca",
+          to: "/cham-cong/phan-ca",
+          icon: CalendarRange,
+        },
+        canManageModule("attendance") && {
+          label: "Chi tiết chấm công",
+          to: "/cham-cong/nhat-ky",
+          icon: MapPinned,
+        },
+        canManageModule("attendance") && {
+          label: "Thiết bị chấm công",
+          to: "/cham-cong/thiet-bi",
+          icon: Smartphone,
+        },
+        canManageModule("attendance") && {
+          label: "Cài đặt chấm công",
+          to: "/cham-cong/cai-dat",
+          icon: Settings2,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
       label: "Đơn từ",
       items: [
-        canDo("requests", "view") && { label: "Danh sách đơn", to: "/don-tu", icon: FileText, exact: true },
-        canManageModule("requests") && { label: "Loại đơn", to: "/don-tu/loai-don", icon: FileCog },
-        canManageModule("requests") && { label: "Quy trình duyệt", to: "/don-tu/quy-trinh-duyet", icon: GitBranch },
+        canDo("requests", "view") && {
+          label: "Danh sách đơn",
+          to: "/don-tu",
+          icon: FileText,
+          exact: true,
+        },
+        canManageModule("requests") && {
+          label: "Loại đơn",
+          to: "/don-tu/loai-don",
+          icon: FileCog,
+        },
+        canManageModule("requests") && {
+          label: "Quy trình duyệt",
+          to: "/don-tu/quy-trinh-duyet",
+          icon: GitBranch,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
@@ -163,24 +279,58 @@ export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }
     {
       label: "Cài đặt",
       items: [
-        canDo("settings", "view") && { label: "Cơ cấu tổ chức", to: "/cai-dat/co-cau-to-chuc", icon: Network },
+        canDo("settings", "view") && {
+          label: "Widget trang chủ",
+          to: "/cai-dat/widget-trang-chu",
+          icon: LayoutGrid,
+        },
+        canDo("settings", "view") && {
+          label: "Cơ cấu tổ chức",
+          to: "/cai-dat/co-cau-to-chuc",
+          icon: Network,
+        },
         canDo("members", "view") &&
-          role !== "employee" && { label: "Thành viên & quyền", to: "/thanh-vien", icon: ShieldCheck },
+          role !== "employee" && {
+            label: "Thành viên & quyền",
+            to: "/thanh-vien",
+            icon: ShieldCheck,
+          },
       ].filter(Boolean) as NavItem[],
     },
     {
       label: "Cài đặt check list",
       items: [
-        canDo("settings", "view") && { label: "Checklist hội nhập", to: "/cai-dat/checklist-hoi-nhap", icon: ListChecks },
-        canDo("settings", "view") && { label: "Checklist hồ sơ", to: "/cai-dat/checklist-ho-so", icon: FolderOpen },
+        canDo("settings", "view") && {
+          label: "Checklist hội nhập",
+          to: "/cai-dat/checklist-hoi-nhap",
+          icon: ListChecks,
+        },
+        canDo("settings", "view") && {
+          label: "Checklist hồ sơ",
+          to: "/cai-dat/checklist-ho-so",
+          icon: FolderOpen,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
       label: "Quản trị hệ thống",
       items: [
-        isPlatformAdmin && { label: "Workspace", to: "/quan-tri", icon: ServerCog, exact: true },
-        isPlatformAdmin && { label: "Gói dịch vụ", to: "/quan-tri/goi-dich-vu", icon: PackagePlus },
-        isPlatformAdmin && { label: "Phân quyền", to: "/quan-tri/phan-quyen", icon: KeyRound },
+        isPlatformAdmin && {
+          label: "Workspace",
+          to: "/quan-tri",
+          icon: ServerCog,
+          exact: true,
+        },
+        isPlatformAdmin && {
+          label: "Gói dịch vụ",
+          to: "/quan-tri/goi-dich-vu",
+          icon: PackagePlus,
+        },
+        isPlatformAdmin && {
+          label: "Phân quyền",
+          to: "/quan-tri/phan-quyen",
+          icon: KeyRound,
+        },
       ].filter(Boolean) as NavItem[],
     },
     {
@@ -199,14 +349,26 @@ export const AppSidebar = ({
 }: AppSidebarProps) => {
   const navigate = useNavigate();
   const { profile, user, signOut } = useAuth();
-  const { activeCompany, memberships, setActiveCompany, role, can, canDo, canManageModule } = useCompany();
+  const {
+    activeCompany,
+    memberships,
+    setActiveCompany,
+    role,
+    can,
+    canDo,
+    canManageModule,
+  } = useCompany();
   const { isPlatformAdmin } = usePlatformAdmin();
   const isCollapsed = collapsed && !mobile;
 
   const name = displayName(profile, user?.email);
 
-  const groups = buildNavGroups({ canDo, canManageModule, isPlatformAdmin, role });
-
+  const groups = buildNavGroups({
+    canDo,
+    canManageModule,
+    isPlatformAdmin,
+    role,
+  });
 
   const handleSignOut = async () => {
     await signOut();
@@ -281,7 +443,8 @@ export const AppSidebar = ({
                       {activeCompany?.name ?? "Chưa chọn công ty"}
                     </span>
                     <span className="block truncate text-[11px] text-muted-foreground">
-                      {activeCompany?.industry ?? (role ? ROLE_LABELS[role] : "Chưa có vai trò")}
+                      {activeCompany?.industry ??
+                        (role ? ROLE_LABELS[role] : "Chưa có vai trò")}
                     </span>
                   </span>
                   <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
@@ -311,14 +474,22 @@ export const AppSidebar = ({
                     {ROLE_LABELS[membership.role]}
                   </span>
                 </span>
-                {membership.company_id === activeCompany?.id && <Check className="h-3.5 w-3.5 text-primary" />}
+                {membership.company_id === activeCompany?.id && (
+                  <Check className="h-3.5 w-3.5 text-primary" />
+                )}
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2.5 text-[12.5px]" onSelect={() => navigate("/cong-ty")}>
+            <DropdownMenuItem
+              className="gap-2.5 text-[12.5px]"
+              onSelect={() => navigate("/cong-ty")}
+            >
               <Building2 className="h-4 w-4" /> Danh sách công ty
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2.5 text-[12.5px]" onSelect={() => navigate("/cong-ty")}>
+            <DropdownMenuItem
+              className="gap-2.5 text-[12.5px]"
+              onSelect={() => navigate("/cong-ty")}
+            >
               <Plus className="h-4 w-4" /> Tạo công ty mới
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -339,8 +510,13 @@ export const AppSidebar = ({
                   const Icon = item.icon;
                   const content = (
                     <>
-                      <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.9} />
-                      {!isCollapsed && <span className="truncate">{item.label}</span>}
+                      <Icon
+                        className="h-[17px] w-[17px] shrink-0"
+                        strokeWidth={1.9}
+                      />
+                      {!isCollapsed && (
+                        <span className="truncate">{item.label}</span>
+                      )}
                       {!isCollapsed && item.badge && (
                         <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                           {item.badge}
@@ -422,7 +598,9 @@ export const AppSidebar = ({
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12.5px] font-semibold text-foreground">{name}</p>
+              <p className="truncate text-[12.5px] font-semibold text-foreground">
+                {name}
+              </p>
               <p className="truncate text-[11px] text-muted-foreground">
                 {role ? ROLE_LABELS[role] : "Chưa có công ty"}
               </p>

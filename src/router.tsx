@@ -1,7 +1,11 @@
 import { lazy, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 
-import { RequireAuth, RequireCompany, RequireModule } from "./components/auth/route-guards";
+import {
+  RequireAuth,
+  RequireCompany,
+  RequireModule,
+} from "./components/auth/route-guards";
 import { PageSuspense } from "./components/layout/page-suspense";
 import NotFound from "./pages/NotFound";
 
@@ -14,28 +18,43 @@ const Insurance = lazy(() => import("./pages/Insurance"));
 const CompanyPicker = lazy(() => import("./pages/CompanyPicker"));
 const JoinCompany = lazy(() => import("./pages/JoinCompany"));
 const OrgStructure = lazy(() => import("./pages/settings/OrgStructure"));
-const OnboardingChecklist = lazy(() => import("./pages/settings/OnboardingChecklist"));
-const DocumentChecklist = lazy(() => import("./pages/settings/DocumentChecklist"));
+const HomeWidgets = lazy(() => import("./pages/settings/HomeWidgets"));
+const OnboardingChecklist = lazy(
+  () => import("./pages/settings/OnboardingChecklist"),
+);
+const DocumentChecklist = lazy(
+  () => import("./pages/settings/DocumentChecklist"),
+);
 const Headcount = lazy(() => import("./pages/planning/Headcount"));
 const CheckIn = lazy(() => import("./pages/attendance/CheckIn"));
 const Timesheet = lazy(() => import("./pages/attendance/Timesheet"));
 const Schedule = lazy(() => import("./pages/attendance/Schedule"));
 const Shifts = lazy(() => import("./pages/attendance/Shifts"));
-const ShiftAssignments = lazy(() => import("./pages/attendance/ShiftAssignments"));
-const AttendanceSettings = lazy(() => import("./pages/attendance/AttendanceSettings"));
+const ShiftAssignments = lazy(
+  () => import("./pages/attendance/ShiftAssignments"),
+);
+const AttendanceSettings = lazy(
+  () => import("./pages/attendance/AttendanceSettings"),
+);
 const AttendanceDevices = lazy(() => import("./pages/attendance/Devices"));
 const AttendanceLog = lazy(() => import("./pages/attendance/AttendanceLog"));
 const EmployeeProfile = lazy(() => import("./pages/me/EmployeeProfile"));
 const EmployeeDevicesPage = lazy(() => import("./pages/me/EmployeeDevices"));
-const EmployeeTimesheetPage = lazy(() => import("./pages/me/EmployeeTimesheet"));
+const EmployeeTimesheetPage = lazy(
+  () => import("./pages/me/EmployeeTimesheet"),
+);
 const EmployeePayslip = lazy(() => import("./pages/me/EmployeePayslip"));
 const EmployeeNewsPage = lazy(() => import("./pages/me/EmployeeNews"));
 const MobilePreview = lazy(() => import("./pages/me/MobilePreview"));
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Assets = lazy(() => import("./pages/Assets"));
 const News = lazy(() => import("./pages/News"));
-const PayrollParameters = lazy(() => import("@/pages/payroll/PayrollParameters"));
-const EvaluationTemplates = lazy(() => import("@/pages/evaluations/EvaluationTemplates"));
+const PayrollParameters = lazy(
+  () => import("@/pages/payroll/PayrollParameters"),
+);
+const EvaluationTemplates = lazy(
+  () => import("@/pages/evaluations/EvaluationTemplates"),
+);
 const Payroll = lazy(() => import("./pages/payroll/Payroll"));
 const Workspaces = lazy(() => import("./pages/admin/Workspaces"));
 const ServicePlans = lazy(() => import("./pages/admin/ServicePlans"));
@@ -43,14 +62,24 @@ const PermissionGroups = lazy(() => import("./pages/admin/PermissionGroups"));
 const Requests = lazy(() => import("./pages/requests/Requests"));
 const RequestTypes = lazy(() => import("./pages/requests/RequestTypes"));
 const LeavePolicies = lazy(() => import("./pages/requests/LeavePolicies"));
-const ApprovalWorkflow = lazy(() => import("./pages/requests/ApprovalWorkflow"));
-const RecruitmentOverview = lazy(() => import("./pages/recruitment/RecruitmentOverview"));
-const JobDescriptions = lazy(() => import("./pages/recruitment/JobDescriptions"));
+const ApprovalWorkflow = lazy(
+  () => import("./pages/requests/ApprovalWorkflow"),
+);
+const RecruitmentOverview = lazy(
+  () => import("./pages/recruitment/RecruitmentOverview"),
+);
+const JobDescriptions = lazy(
+  () => import("./pages/recruitment/JobDescriptions"),
+);
 const Campaigns = lazy(() => import("./pages/recruitment/Campaigns"));
 const Candidates = lazy(() => import("./pages/recruitment/Candidates"));
-const CandidateProfile = lazy(() => import("./pages/recruitment/CandidateProfile"));
+const CandidateProfile = lazy(
+  () => import("./pages/recruitment/CandidateProfile"),
+);
 const Interviews = lazy(() => import("./pages/recruitment/Interviews"));
-const PublicApplyForm = lazy(() => import("./pages/recruitment/PublicApplyForm"));
+const PublicApplyForm = lazy(
+  () => import("./pages/recruitment/PublicApplyForm"),
+);
 const Members = lazy(() => import("./pages/Members"));
 
 const authenticated = (node: ReactNode) => <RequireAuth>{node}</RequireAuth>;
@@ -58,7 +87,11 @@ const authenticated = (node: ReactNode) => <RequireAuth>{node}</RequireAuth>;
 const companyScoped = (node: ReactNode, moduleKey?: string) => (
   <RequireAuth>
     <RequireCompany>
-      {moduleKey ? <RequireModule moduleKey={moduleKey}>{node}</RequireModule> : node}
+      {moduleKey ? (
+        <RequireModule moduleKey={moduleKey}>{node}</RequireModule>
+      ) : (
+        node
+      )}
     </RequireCompany>
   </RequireAuth>
 );
@@ -497,6 +530,16 @@ export const routers = [
         <Members />
       </PageSuspense>,
       "members",
+    ),
+  },
+  {
+    path: "/cai-dat/widget-trang-chu",
+    name: "home-widgets",
+    element: companyScoped(
+      <PageSuspense>
+        <HomeWidgets />
+      </PageSuspense>,
+      "settings",
     ),
   },
   {
