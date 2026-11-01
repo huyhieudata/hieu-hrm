@@ -13,6 +13,10 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { listHomeNews, type NewsPost } from "@/lib/news";
+import {
+  loadAppInstallStatus,
+  type AppInstallStatus,
+} from "@/lib/app-installs";
 import type {
   HomeSummary,
   WidgetAudience,
@@ -20,7 +24,7 @@ import type {
   WidgetSize,
   WidgetSurface,
 } from "@/lib/home-widgets";
-import { Metric, WidgetEmpty, WidgetFrame } from "./widget-frame";
+import { Metric, WidgetEmpty, WidgetError, WidgetFrame } from "./widget-frame";
 
 export interface WidgetProps {
   surface: WidgetSurface;
@@ -668,6 +672,60 @@ const DepartmentsWidget = ({ surface, summary }: WidgetProps) => {
   );
 };
 
+const AppInstallsWidget = ({ surface, companyId, audience }: WidgetProps) => {
+  const [rows, setRows] = useState<AppInstallStatus[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    setError(null);
+    loadAppInstallStatus(companyId)
+      .then((data) => alive && setRows(data))
+      .catch(
+        (err: unknown) =>
+          alive && setError(err instanceof Error ? err.message : "Lỗi"),
+      );
+    return () => {
+      alive = false;
+    };
+  }, [companyId, nonce]);
+  if (audience === "employee") return null;
+  const installed = rows?.filter((r) => r.installed).length ?? 0;
+  const total = rows?.length ?? 0;
+  const pct = total ? Math.round((installed / total) * 100) : 0;
+  return (
+    <WidgetFrame
+      surface={surface}
+      emoji="📲"
+      title="Tỷ lệ cài app"
+      subtitle="Đã mở app đã cài ít nhất 1 lần"
+      to="/members"
+      linkLabel="Chi tiết"
+    >
+      {error ? (
+        <WidgetError message={error} onRetry={() => setNonce((n) => n + 1)} />
+      ) : !rows ? (
+        <div className="h-16 animate-pulse rounded-lg bg-muted" />
+      ) : total === 0 ? (
+        <WidgetEmpty text="Chưa có thành viên." />
+      ) : (
+        <div>
+          <p className="font-display text-[28px] font-extrabold">
+            {installed}/{total}{" "}
+            <span className="text-[14px] text-muted-foreground">({pct}%)</span>
+          </p>
+          <div className="mt-2 h-2 rounded-full bg-muted">
+            <div
+              className="h-2 rounded-full bg-gradient-to-r from-[#0e2d58] to-[#f47b20]"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </WidgetFrame>
+  );
+};
+
 export const WIDGET_COMPONENTS: Record<
   WidgetKey,
   (props: WidgetProps) => ReactElement | null
@@ -683,4 +741,5 @@ export const WIDGET_COMPONENTS: Record<
   contracts_expiring: ContractsWidget,
   interviews: InterviewsWidget,
   departments: DepartmentsWidget,
+  app_installs: AppInstallsWidget,
 };

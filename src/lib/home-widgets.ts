@@ -34,7 +34,8 @@ export type WidgetKey =
   | "contracts_expiring"
   | "quick_links"
   | "interviews"
-  | "departments";
+  | "departments"
+  | "app_installs";
 
 export interface WidgetDefinition {
   key: WidgetKey;
@@ -142,6 +143,16 @@ export const WIDGET_LIBRARY: WidgetDefinition[] = [
     managersOnly: true,
   },
 ];
+
+WIDGET_LIBRARY.push({
+  key: "app_installs",
+  label: "Tỷ lệ cài app",
+  description: "Bao nhiêu người đã cài và mở app ONHRM trên thiết bị.",
+  emoji: "📲",
+  defaultSize: "sm",
+  audiences: ["admin", "manager"],
+  managersOnly: true,
+});
 
 export const WIDGET_BY_KEY = new Map(
   WIDGET_LIBRARY.map((item) => [item.key, item]),

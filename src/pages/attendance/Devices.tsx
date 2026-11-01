@@ -20,6 +20,8 @@ import {
   type EmployeeDevice,
 } from "@/lib/attendance-verify";
 import { getErrorMessage } from "@/lib/utils";
+import { AppInstallCell, AppInstallSummary } from "@/components/pwa/app-install-cell";
+import { loadAppInstallStatus, type AppInstallStatus } from "@/lib/app-installs";
 
 const tone = (status: DeviceStatus) =>
   status === "approved" ? "success" : status === "pending" ? "warning" : "destructive";
@@ -38,6 +40,8 @@ const Devices = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [installs, setInstalls] = useState<AppInstallStatus[]>([]);
+  const [onlyNoApp, setOnlyNoApp] = useState(false);
 
   const load = useCallback(async () => {
     if (!companyId) return;
@@ -46,6 +50,9 @@ const Devices = () => {
       const [deviceRows, employeeRows] = await Promise.all([listCompanyDevices(companyId), listEmployees(companyId)]);
       setDevices(deviceRows);
       setEmployees(employeeRows);
+      void loadAppInstallStatus(companyId)
+        .then(setInstalls)
+        .catch(() => setInstalls([]));
     } catch (error) {
       toast.error("Không tải được thiết bị", { description: getErrorMessage(error) });
     } finally {
@@ -59,19 +66,25 @@ const Devices = () => {
 
   const employeeMap = useMemo(() => new Map(employees.map((employee) => [employee.id, employee])), [employees]);
 
+  const installByEmployee = useMemo(
+    () => new Map(installs.filter((row) => row.employee_id).map((row) => [row.employee_id as string, row])),
+    [installs],
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return devices.filter((device) => {
       const inTab =
         tab === "pending" ? device.status === "pending" : tab === "approved" ? device.status === "approved" : !["pending", "approved"].includes(device.status);
       if (!inTab) return false;
+      if (onlyNoApp && installByEmployee.get(device.employee_id)?.installed !== false) return false;
       if (!q) return true;
       const employee = employeeMap.get(device.employee_id);
       return [employee?.full_name, employee?.code, device.device_name, device.model].some((value) =>
         value?.toLowerCase().includes(q),
       );
     });
-  }, [devices, employeeMap, query, tab]);
+  }, [devices, employeeMap, query, tab, onlyNoApp, installByEmployee]);
 
   const counts = useMemo(
     () => ({
@@ -140,6 +153,17 @@ const Devices = () => {
         </label>
       </Card>
 
+      {installs.length > 0 && (
+        <div className="mt-4">
+          <AppInstallSummary
+            installed={installs.filter((row) => row.installed).length}
+            total={installs.length}
+            onlyMissing={onlyNoApp}
+            onToggle={setOnlyNoApp}
+          />
+        </div>
+      )}
+
       {loading ? (
         <Card className="mt-4 flex items-center justify-center gap-2 p-16 text-[12.5px] text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Đang tải…
@@ -168,6 +192,7 @@ const Devices = () => {
                     Gửi {formatDateTime(device.created_at)} · Dùng gần nhất {formatDateTime(device.last_used_at)}
                   </p>
                 </div>
+                <AppInstallCell status={installByEmployee.get(device.employee_id)} />
                 <Badge variant={tone(device.status)}>{DEVICE_STATUS_LABELS[device.status]}</Badge>
                 {canEdit && (
                   <div className="flex flex-wrap gap-1.5">

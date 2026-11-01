@@ -39,6 +39,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { AppInstallCell, AppInstallSummary } from "@/components/pwa/app-install-cell";
+import { loadAppInstallStatus, type AppInstallStatus } from "@/lib/app-installs";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -107,6 +109,8 @@ const formatDate = (value: string) =>
   new Date(value).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 const Members = () => {
+  const [installs, setInstalls] = useState<Map<string, AppInstallStatus>>(new Map());
+  const [onlyNoApp, setOnlyNoApp] = useState(false);
   const { user } = useAuth();
   const { activeCompany, role, can, canDo, canManageModule, refreshPermissions } = useCompany();
   const companyId = activeCompany?.id ?? null;
@@ -167,6 +171,9 @@ const Members = () => {
         supabase.from("company_role_permissions").select("company_id, role, permissions").eq("company_id", companyId),
         listPermissionGroups(companyId),
       ]);
+      void loadAppInstallStatus(companyId)
+        .then((rows) => setInstalls(new Map(rows.map((row) => [row.user_id, row]))))
+        .catch(() => setInstalls(new Map()));
 
       if (memberResult.error) throw memberResult.error;
       const memberRows = (memberResult.data ?? []) as MemberRow[];
@@ -440,6 +447,14 @@ const Members = () => {
         </Card>
       ) : tab === "members" ? (
         <div className="space-y-3">
+          {installs.size > 0 && (
+            <AppInstallSummary
+              installed={members.filter((m) => installs.get(m.user_id)?.installed).length}
+              total={members.filter((m) => installs.has(m.user_id)).length}
+              onlyMissing={onlyNoApp}
+              onToggle={setOnlyNoApp}
+            />
+          )}
           <Card className="overflow-hidden p-0">
             <div className="scrollbar-slim overflow-x-auto">
               <table className="w-full min-w-[920px] border-collapse text-[11.5px]">
@@ -448,12 +463,15 @@ const Members = () => {
                     <th className="px-4 py-2.5 text-left font-semibold">Thành viên</th>
                     <th className="px-3 py-2.5 text-left font-semibold">Hồ sơ nhân sự</th>
                     <th className="px-3 py-2.5 text-left font-semibold">Vai trò</th>
+                    <th className="px-3 py-2.5 text-left font-semibold">Đã cài app</th>
                     <th className="px-3 py-2.5 text-right font-semibold">Tham gia</th>
                     <th className="w-[150px] px-3 py-2.5 text-right font-semibold">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {members.map((member) => {
+                  {members
+                    .filter((member) => !onlyNoApp || (installs.has(member.user_id) && !installs.get(member.user_id)?.installed))
+                    .map((member) => {
                     const profile = profiles[member.user_id];
                     const employee = employeeByUser.get(member.user_id);
                     return (
@@ -497,6 +515,9 @@ const Members = () => {
                               </SelectContent>
                             </Select>
                           )}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <AppInstallCell status={installs.get(member.user_id)} />
                         </td>
                         <td className="px-3 py-2.5 text-right text-[11px] text-muted-foreground">
                           {formatDate(member.joined_at)}
