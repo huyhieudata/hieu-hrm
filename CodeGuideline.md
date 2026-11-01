@@ -169,3 +169,14 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Dữ liệu: một RPC `home_dashboard_summary(p_company)` (SECURITY DEFINER, phạm vi theo vai trò: manager = phòng ban mình, employee = bản thân). Bản tin lấy client-side qua RLS.
 - Thêm widget mới: thêm key vào `WIDGET_LIBRARY` (src/lib/home-widgets.ts), component vào `WIDGET_COMPONENTS` (src/components/home-widgets/widgets.tsx), dữ liệu (nếu cần) vào RPC summary. Widget mới tự xuất hiện ở trạng thái tắt với công ty đã tuỳ chỉnh.
 - Mỗi widget phải có trạng thái loading/empty/error (WidgetSkeleton/WidgetEmpty/WidgetError).
+
+## Phòng ban / chức danh — luôn lấy từ sơ đồ tổ chức
+- KHÔNG dùng `DEPARTMENTS` cứng hay Input tự do. Dùng `useOrgStructure()` (src/lib/use-org-structure.ts).
+- FieldDialog: `withOrgFields(fields, org)` hoặc `...orgFieldDefs(org)`; form tự viết: `<DepartmentSelect/>`, `<PositionSelect department=…/>`, `<OrgEmptyHint/>` (src/components/org/org-selects.tsx).
+- Lưu TÊN vào cột text; trigger `sync_row_department` / `sync_employee_department` tự gán `department_id`.
+- "Khác (nhập tay)" chỉ hiện cho owner/admin/HR. Gợi ý quản lý: `org.managerOf(tên)` qua `onFieldChange`.
+
+## Theo dõi cài app & Mời nhân viên
+- Cài app chỉ ghi nhận khi người dùng mở app đã cài (standalone) hoặc sự kiện `appinstalled`; iOS standalone là thiết bị riêng.
+- Mời nhân viên qua RPC `invite_employee` (không insert trực tiếp); email qua edge function `send-invite-email`, fallback sao chép link/mailto.
+- Migration: version 14 số phải DUY NHẤT — `git pull` trước khi đặt tên.
