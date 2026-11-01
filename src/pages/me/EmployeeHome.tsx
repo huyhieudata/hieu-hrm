@@ -40,7 +40,7 @@ import {
 } from "@/lib/attendance";
 import { useCompany } from "@/lib/company-provider";
 import { isVisibleOnHome, listNewsPosts, type NewsPost } from "@/lib/news";
-import { isIosDevice, isStandalone } from "@/lib/pwa";
+import { getDeferredInstall, isIosDevice, isStandalone } from "@/lib/pwa";
 import { getErrorMessage } from "@/lib/utils";
 
 const greetingFor = (date: Date) =>
@@ -232,7 +232,7 @@ const DesktopEmployeeHome = () => {
       {!isStandalone() ? (
         <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("onhrm:install"))} className="bg-gradient-primary w-full rounded-3xl px-4 py-3 text-left text-white shadow-glow">
           <p className="text-[14px] font-extrabold">Thêm ONHRM ra màn hình chính</p>
-          <p className="mt-0.5 text-[12px] text-white/80">{isIosDevice() ? "Chia sẻ › Thêm vào Màn hình chính" : "Cài như ứng dụng, mở nhanh khi vào ca"}</p>
+          <p className="mt-0.5 text-[12px] text-white/80">{isIosDevice() ? "Safari: Chia sẻ › Thêm vào MH chính" : getDeferredInstall() ? "Cài như ứng dụng, mở nhanh khi vào ca" : "Chrome: ⋮ › Cài đặt ứng dụng (Thêm vào MH chính)"}</p>
         </button>
       ) : null}
     </AppShell>

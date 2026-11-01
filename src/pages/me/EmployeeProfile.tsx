@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/employee-records";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Moon, Smartphone, User, Wallet } from "lucide-react";
@@ -62,7 +63,7 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
         ["Chức danh", me?.position],
         ["Điện thoại", me?.phone],
         ["Email", me?.work_email || profile?.email || user?.email],
-        ["Ngày vào", me?.hire_date],
+        ["Ngày vào", me?.hire_date ? formatDate(me.hire_date) : null],
         ["Thường trú", me?.permanent_address],
         ["Tạm trú", me?.current_address],
         ["Liên hệ khẩn cấp", [me?.emergency_contact_name, me?.emergency_contact_phone].filter(Boolean).join(" · ")],

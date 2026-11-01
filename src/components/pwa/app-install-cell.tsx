@@ -39,6 +39,8 @@ interface SummaryProps {
   total: number;
   onlyMissing: boolean;
   onToggle: (value: boolean) => void;
+  /** Tên người chưa cài app — hiện khi bật lọc "Chưa cài app". */
+  missingNames?: string[];
 }
 
 export const AppInstallSummary = ({
@@ -46,6 +48,7 @@ export const AppInstallSummary = ({
   total,
   onlyMissing,
   onToggle,
+  missingNames,
 }: SummaryProps) => {
   const pct = total ? Math.round((installed / total) * 100) : 0;
   return (
@@ -72,6 +75,17 @@ export const AppInstallSummary = ({
       <span className="text-[11px] text-muted-foreground">
         Chỉ ghi nhận khi người dùng đã mở app đã cài ít nhất 1 lần.
       </span>
+      {onlyMissing && missingNames && (
+        <div className="basis-full border-t border-border/60 pt-2">
+          {missingNames.length === 0 ? (
+            <span className="text-muted-foreground">Mọi người đều đã cài app.</span>
+          ) : (
+            <p>
+              <b>Chưa cài:</b> {missingNames.join(", ")}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

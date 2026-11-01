@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -73,7 +74,7 @@ const EmployeeDevices = () => {
   };
 
   const cancel = async (device: EmployeeDevice) => {
-    if (!window.confirm(`Huỷ yêu cầu đăng ký "${device.device_name || "thiết bị"}"?`)) return;
+    if (!(await confirmDialog(`Huỷ yêu cầu đăng ký "${device.device_name || "thiết bị"}"?`))) return;
     setBusy(true);
     try {
       await cancelMyDevice(device.id);

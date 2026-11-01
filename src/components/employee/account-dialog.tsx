@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useEffect, useRef, useState } from "react";
 import { Download, FileUp, KeyRound, Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
@@ -130,8 +131,8 @@ export const CreateAccountsDialog = ({
   return (
     <Dialog
       open={open}
-      onOpenChange={(next) => {
-        if (!next && hasPasswords && !window.confirm("Còn mật khẩu tạm chưa tải CSV. Đóng sẽ mất mật khẩu này. Vẫn đóng?")) return;
+      onOpenChange={async (next) => {
+        if (!next && hasPasswords && !(await confirmDialog("Còn mật khẩu tạm chưa tải CSV. Đóng sẽ mất mật khẩu này. Vẫn đóng?"))) return;
         onOpenChange(next);
       }}
     >
@@ -269,8 +270,8 @@ export const AccountStatusBar = ({
         targets={[{ id: employee.id, full_name: employee.full_name, email }]}
         onDone={onChanged}
       />
-      <Dialog open={!!resetResults} onOpenChange={(o) => {
-        if (!o && resetResults?.some((r) => r.temporary_password) && !window.confirm("Chưa tải CSV mật khẩu tạm. Vẫn đóng?")) return;
+      <Dialog open={!!resetResults} onOpenChange={async (o) => {
+        if (!o && resetResults?.some((r) => r.temporary_password) && !(await confirmDialog("Chưa tải CSV mật khẩu tạm. Vẫn đóng?"))) return;
         if (!o) setResetResults(null);
       }}>
         <DialogContent className="max-w-xl">

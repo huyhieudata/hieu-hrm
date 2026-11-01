@@ -160,7 +160,11 @@ export const InstallPrompt = () => {
     ) {
       // Tự hiện chỉ trên điện thoại/máy tính bảng (cảm ứng). Máy tính có chuột cài qua menu.
       timer = window.setTimeout(() => {
-        if (!isStandalone() && !onHiddenPath()) setOpen(true);
+        if (!isStandalone() && !onHiddenPath()) {
+          // Trình duyệt không bắn beforeinstallprompt (iOS, Android chưa đủ điều kiện) ⇒ hiện luôn hướng dẫn tay.
+          if (!getDeferredInstall()) setInstructions(true);
+          setOpen(true);
+        }
       }, 1500);
     }
 

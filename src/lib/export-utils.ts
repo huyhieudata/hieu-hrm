@@ -1,3 +1,4 @@
+import { printViaFrame } from "@/lib/print-frame";
 import { toast } from "sonner";
 
 const escapeHtml = (value: unknown) =>
@@ -76,13 +77,5 @@ export const exportPdf = (
 <footer>${rows.length} dòng · ONHRM</footer>
 </body></html>`;
 
-  const win = window.open("", "_blank", "width=1080,height=900");
-  if (!win) {
-    toast.error("Trình duyệt đã chặn cửa sổ xuất PDF. Vui lòng cho phép popup.");
-    return;
-  }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  win.print();
+  printViaFrame(html);
 };

@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { Copy, Pencil, Play, Plus, RefreshCw, Send, Trash2 } from "lucide-react";
@@ -88,7 +89,7 @@ const TemplatesTab = ({ companyId }: { companyId: string }) => {
                   <Button size="icon" variant="ghost" className="h-10 w-10" aria-label="Nhân bản" onClick={() => duplicate(t)}><Copy className="h-4 w-4" /></Button>
                   <Button size="icon" variant="ghost" className="h-10 w-10" aria-label="Gửi thử cho tôi" onClick={() => void testSend(t)}><Send className="h-4 w-4" /></Button>
                   <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive" aria-label="Xoá" onClick={async () => {
-                    if (!window.confirm(`Xoá mẫu "${t.name}"? Luồng đang dùng mẫu này sẽ không gửi.`)) return;
+                    if (!(await confirmDialog(`Xoá mẫu "${t.name}"? Luồng đang dùng mẫu này sẽ không gửi.`))) return;
                     try { await deleteTemplate(t.id); void load(); } catch (e) { toast.error(getErrorMessage(e)); }
                   }}><Trash2 className="h-4 w-4" /></Button>
                 </td>
@@ -216,7 +217,7 @@ const RulesTab = ({ companyId }: { companyId: string }) => {
                 {csv(r.conditions.departments) && ` · PB: ${csv(r.conditions.departments)}`}{csv(r.conditions.positions) && ` · CD: ${csv(r.conditions.positions)}`}</p>
               <div className="mt-2 flex justify-end gap-1">
                 <Button size="sm" variant="ghost" className="h-10" onClick={() => setEdit(r)}><Pencil className="mr-1 h-4 w-4" />Sửa</Button>
-                <Button size="sm" variant="ghost" className="h-10 text-destructive" onClick={async () => { if (window.confirm("Xoá luồng này?")) { try { await deleteRule(r.id); void load(); } catch (e) { toast.error(getErrorMessage(e)); } } }}><Trash2 className="mr-1 h-4 w-4" />Xoá</Button>
+                <Button size="sm" variant="ghost" className="h-10 text-destructive" onClick={async () => { if ((await confirmDialog("Xoá luồng này?"))) { try { await deleteRule(r.id); void load(); } catch (e) { toast.error(getErrorMessage(e)); } } }}><Trash2 className="mr-1 h-4 w-4" />Xoá</Button>
               </div>
             </div>
           );

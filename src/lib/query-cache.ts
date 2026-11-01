@@ -48,6 +48,9 @@ export const isWriteRequest = (url: string, method: string) => {
 export const cachingFetch: typeof fetch = (input, init) => {
   const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
   const method = init?.method ?? (typeof input === "object" && "method" in input ? input.method : "GET");
-  if (isWriteRequest(url, method)) clearQueryCache();
-  return fetch(input, init);
+  if (!isWriteRequest(url, method)) return fetch(input, init);
+  clearQueryCache();
+  // Xoá lần nữa khi ghi XONG: bỏ mọi lượt đọc chen vào lúc đang ghi (có thể đã cache dữ liệu cũ)
+  // ⇒ danh sách tải lại ngay sau khi lưu, không cần F5.
+  return fetch(input, init).finally(clearQueryCache);
 };

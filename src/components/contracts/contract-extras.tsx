@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, FileDown, FileText, Info, Loader2, Plus, Printer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -152,7 +153,7 @@ export const ContractAppendicesPanel = ({
   }, [load]);
 
   const remove = async (row: ContractAppendixRecord) => {
-    if (!window.confirm(`Xoá phụ lục ${row.appendix_no ?? ""}?`)) return;
+    if (!(await confirmDialog(`Xoá phụ lục ${row.appendix_no ?? ""}?`))) return;
     try {
       await deleteContractAppendix(row.id);
       toast.success("Đã xoá phụ lục");

@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { installVietnameseValidation } from "@/lib/vi-validation";
 import "./setup";
 import { bootstrapGeneratedSiteAnalytics } from "./analytics.ts";
 import App from "./App.tsx";
@@ -19,6 +20,8 @@ if (!container) {
 
 bootstrapGeneratedSiteAnalytics();
 registerServiceWorker();
+
+installVietnameseValidation();
 
 createRoot(container, { onCaughtError: reportCaughtError }).render(
   <ErrorBoundary FallbackComponent={ErrorFallback}>

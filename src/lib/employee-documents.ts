@@ -1,3 +1,4 @@
+import { printViaFrame } from "@/lib/print-frame";
 import { toast } from "sonner";
 
 import { DEPENDENT_RELATION_LABELS } from "@/lib/employee-records";
@@ -103,15 +104,7 @@ const signatures = (left: string, right: string, hintLeft = "(Ký, ghi rõ họ 
   </div>`;
 
 export const printHtml = (html: string) => {
-  const win = window.open("", "_blank", "width=960,height=1024");
-  if (!win) {
-    toast.error("Trình duyệt đã chặn cửa sổ in. Vui lòng cho phép popup.");
-    return;
-  }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  win.print();
+  printViaFrame(html);
 };
 
 export const downloadHtml = (html: string, filename: string) => {

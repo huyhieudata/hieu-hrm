@@ -1,3 +1,4 @@
+import { documentDownloadName, documentFileProblem, translateStorageError } from "@/lib/employee-records";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle2,
@@ -143,6 +144,12 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
 
   const handleFileChange = (file: File | undefined) => {
     if (!file) return;
+    const problem = documentFileProblem(file);
+    if (problem) {
+      toast.error("Không tải được tệp", { description: problem });
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     if (file.size > EMPLOYEE_DOCUMENT_MAX_BYTES) {
       toast.error("Tệp quá lớn", { description: "Giới hạn 15MB mỗi tệp." });
       return;
@@ -179,8 +186,9 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
       setPreset(null);
       await load();
     } catch (uploadError) {
-      const message = uploadError instanceof Error ? uploadError.message : "Không tải được tệp.";
-      setError(message.includes("row-level security") ? "Bạn không có quyền tải tài liệu cho nhân viên này." : message);
+      const message = translateStorageError(uploadError);
+      setError(message);
+      toast.error("Không tải được tệp", { description: message });
     } finally {
       setUploading(false);
     }
@@ -189,10 +197,10 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
   const handleDownload = async (documentRecord: DocumentRecord) => {
     setDownloadingId(documentRecord.id);
     try {
-      const url = await getDocumentSignedUrl(documentRecord.file_path, documentRecord.name);
+      const url = await getDocumentSignedUrl(documentRecord.file_path, documentDownloadName(documentRecord));
       const link = window.document.createElement("a");
       link.href = url;
-      link.download = documentRecord.name;
+      link.download = documentDownloadName(documentRecord);
       window.document.body.appendChild(link);
       link.click();
       window.document.body.removeChild(link);

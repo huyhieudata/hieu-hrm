@@ -435,6 +435,9 @@ const Members = () => {
               total={members.filter((m) => installs.has(m.user_id)).length}
               onlyMissing={onlyNoApp}
               onToggle={setOnlyNoApp}
+              missingNames={members
+                .filter((m) => installs.has(m.user_id) && !installs.get(m.user_id)?.installed)
+                .map((m) => profiles[m.user_id]?.full_name ?? profiles[m.user_id]?.email ?? "Thành viên")}
             />
           )}
           <Card className="overflow-hidden p-0">
