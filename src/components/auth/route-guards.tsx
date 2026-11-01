@@ -1,3 +1,4 @@
+import { canEnterStaffPath } from "@/lib/staff-routes";
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
@@ -47,6 +48,15 @@ export const RequireCompany = ({ children }: { children: ReactNode }) => {
   if (loading) return <FullPageLoader label="Đang mở công ty của bạn…" />;
   if (memberships.length === 0) return <Navigate to="/cong-ty" replace />;
 
+  return <>{children}</>;
+};
+
+/** Chặn vai trò Nhân viên vào khu quản trị (/employees, /cham-cong, /cai-dat…) ⇒ về /toi. */
+export const RequireStaffPath = ({ children }: { children: ReactNode }) => {
+  const { role, canManageModule, loading } = useCompany();
+  const { pathname } = useLocation();
+  if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
+  if (!canEnterStaffPath(pathname, role, canManageModule)) return <Navigate to="/toi" replace />;
   return <>{children}</>;
 };
 

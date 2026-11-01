@@ -6,12 +6,15 @@ import {
   Building2,
   ChevronDown,
   Command,
+  KeyRound,
+  BellRing,
   LogOut,
   Menu,
   Search,
   ShieldCheck,
 } from "lucide-react";
 
+import { ChangePasswordDialog, NotificationSettingsDialog } from "@/components/mobile/AccountSettings";
 import { Avatar } from "@/components/common/avatar";
 import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -86,6 +89,8 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
   const navigate = useNavigate();
   const { profile, user, signOut } = useAuth();
   const { activeCompany, role } = useCompany();
+  const [pwOpen, setPwOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -239,6 +244,12 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
               >
                 <Download className="h-4 w-4" /> Cài ứng dụng ONHRM
               </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2.5" onSelect={() => setPwOpen(true)}>
+                <KeyRound className="h-4 w-4" /> Đổi mật khẩu
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2.5" onSelect={() => setNotifyOpen(true)}>
+                <BellRing className="h-4 w-4" /> Cài đặt thông báo
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="gap-2.5 text-destructive focus:bg-destructive-subtle focus:text-destructive"
@@ -250,6 +261,8 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
           </DropdownMenu>
         </div>
       </div>
+      <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} email={user?.email} />
+      <NotificationSettingsDialog open={notifyOpen} onOpenChange={setNotifyOpen} userId={user?.id} />
     </header>
   );
 };

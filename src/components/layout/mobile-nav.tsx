@@ -20,6 +20,7 @@ import { useCompany } from "@/lib/company-provider";
 import { usePlatformAdmin } from "@/lib/platform";
 import { isStandalone } from "@/lib/pwa";
 import { cn } from "@/lib/utils";
+import { canEnterStaffPath } from "@/lib/staff-routes";
 
 interface PrimaryTab {
   to: string;
@@ -80,8 +81,8 @@ export const MobileNav = () => {
     if (canDo("requests", "view"))
       tabs.push({ to: "/don-tu", label: "Duyệt đơn", icon: FileText, match: (path) => path.startsWith("/don-tu") });
     tabs.push({ to: "/tin-tuc", label: "Thông báo", icon: Bell, match: (path) => path.startsWith("/tin-tuc") });
-    return tabs;
-  }, [canDo]);
+    return tabs.filter((tab) => canEnterStaffPath(tab.to, role, canManageModule));
+  }, [canDo, canManageModule, role]);
 
   const name = displayName(profile, user?.email);
   const navItems = groups

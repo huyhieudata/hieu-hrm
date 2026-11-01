@@ -43,6 +43,7 @@ import {
   RequireAuth,
   RequireCompany,
   RequireModule,
+  RequireStaffPath,
 } from "./components/auth/route-guards";
 import { PageSuspense } from "./components/layout/page-suspense";
 import NotFound from "./pages/NotFound";
@@ -151,11 +152,13 @@ const authenticated = (node: ReactNode) => <RequireAuth>{node}</RequireAuth>;
 const companyScoped = (node: ReactNode, moduleKey?: string) => (
   <RequireAuth>
     <RequireCompany>
-      {moduleKey ? (
-        <RequireModule moduleKey={moduleKey}>{node}</RequireModule>
-      ) : (
-        node
-      )}
+      <RequireStaffPath>
+        {moduleKey ? (
+          <RequireModule moduleKey={moduleKey}>{node}</RequireModule>
+        ) : (
+          node
+        )}
+      </RequireStaffPath>
     </RequireCompany>
   </RequireAuth>
 );
@@ -222,6 +225,8 @@ export const routers = [
       "employees",
     ),
   },
+  { path: "/khao-sat", name: "surveys-alias", element: <Navigate to="/toi/khao-sat" replace /> },
+  { path: "/tai-lieu", name: "documents-alias", element: <Navigate to="/toi/tai-lieu" replace /> },
   {
     path: "/attendance",
     name: "attendance-legacy",

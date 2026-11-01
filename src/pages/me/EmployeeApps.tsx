@@ -49,7 +49,7 @@ const EmployeeApps = () => {
       { label: "Khảo sát", to: "/toi/khao-sat", icon: ClipboardList, group: "apps" },
       { label: "Tài liệu", to: "/toi/tai-lieu", icon: FolderOpen, group: "apps" },
     ];
-    if (canDo("employees", "view")) apps.push({ label: "Danh bạ", to: "/employees", icon: Users, group: "apps" });
+    if (canDo("employees", "view") && role !== "employee") apps.push({ label: "Danh bạ", to: "/employees", icon: Users, group: "apps" });
     if (canDo("assets", "view")) apps.push({ label: "Tài sản", to: "/tai-san", icon: FolderOpen, group: "apps" });
     if (canDo("insurance", "view")) apps.push({ label: "Bảo hiểm", to: "/bao-hiem", icon: Shield, group: "apps" });
     if (canDo("news", "view")) apps.push({ label: "Bảng tin", to: "/tin-tuc", icon: Megaphone, group: "apps" });
