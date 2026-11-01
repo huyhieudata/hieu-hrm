@@ -21,6 +21,7 @@ export const isInAppBrowser = () =>
 
 export const INSTALL_DISMISS_KEY = "onhrm.install.dismissedAt";
 export const INSTALL_DONE_KEY = "onhrm.install.installed";
+export const INSTALL_NEVER_KEY = "onhrm.install.never";
 export const INSTALL_REOPEN_EVENT = "onhrm:install";
 
 export const registerServiceWorker = () => {

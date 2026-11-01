@@ -3,13 +3,14 @@ import { Check, Download, MoreVertical, Share, X } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-provider";
 import {
   INSTALL_DISMISS_KEY,
   INSTALL_DONE_KEY,
+  INSTALL_NEVER_KEY,
   INSTALL_REOPEN_EVENT,
   isInAppBrowser,
   isIosDevice,
-  isMobileViewport,
   isStandalone,
 } from "@/lib/pwa";
 
@@ -17,6 +18,30 @@ interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
+
+/** Minh hoạ Safari iOS: thanh dưới có nút Chia sẻ → mục “Thêm vào Màn hình chính”. */
+const IosShareIllustration = () => (
+  <div className="flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-[#0e2d58] to-[#16467f] p-3 text-white">
+    <div className="w-[118px] rounded-[18px] border-2 border-white/40 bg-white/10 p-1.5">
+      <div className="h-14 rounded-lg bg-white/15" />
+      <div className="mt-1.5 flex items-center justify-around rounded-md bg-white/20 py-1">
+        <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#f47b20] ring-2 ring-white">
+          <Share className="h-3.5 w-3.5" />
+        </span>
+        <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+      </div>
+    </div>
+    <span className="text-[18px] font-bold text-[#f47b20]">→</span>
+    <div className="w-[128px] space-y-1 rounded-xl bg-white p-2 text-[10px] font-semibold text-[#0e2d58]">
+      <div className="rounded-md bg-muted px-2 py-1 text-muted-foreground">Sao chép</div>
+      <div className="flex items-center justify-between rounded-md bg-[#fff1e6] px-2 py-1 ring-1 ring-[#f47b20]">
+        Thêm vào MH chính <span className="text-[12px]">＋</span>
+      </div>
+      <div className="rounded-md bg-muted px-2 py-1 text-muted-foreground">Dấu trang</div>
+    </div>
+  </div>
+);
 
 const BENEFITS = [
   "Mở nhanh từ màn hình chính",
@@ -40,15 +65,21 @@ const writeKey = (key: string, value: string) => {
   }
 };
 
+const SNOOZE_DAYS = 3;
+const HIDDEN_PATHS = ["/login", "/ung-tuyen", "/xem-truoc-nhan-vien", "/tham-gia"];
+const onHiddenPath = () => HIDDEN_PATHS.some((path) => window.location.pathname.startsWith(path));
+
 const dismissedRecently = () => {
   const value = readKey(INSTALL_DISMISS_KEY);
   if (!value) return false;
   const timestamp = Number(value);
   if (!Number.isFinite(timestamp)) return false;
-  return Date.now() - timestamp < 7 * 24 * 60 * 60 * 1000;
+  return Date.now() - timestamp < SNOOZE_DAYS * 24 * 60 * 60 * 1000;
 };
 
 export const InstallPrompt = () => {
+  const { user } = useAuth();
+  const signedIn = Boolean(user?.id);
   const [open, setOpen] = useState(false);
   const [instructions, setInstructions] = useState(false);
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
@@ -60,11 +91,40 @@ export const InstallPrompt = () => {
     setInstructions(false);
   }, []);
 
+  const never = useCallback(() => {
+    writeKey(INSTALL_NEVER_KEY, "1");
+    setOpen(false);
+    setInstructions(false);
+  }, []);
+
+  // Luôn lắng nghe để không lỡ sự kiện beforeinstallprompt (bắn sớm, trước khi đăng nhập xong).
+  useEffect(() => {
+    const onBeforeInstall = (event: Event) => {
+      event.preventDefault();
+      setDeferred(event as BeforeInstallPromptEvent);
+    };
+    const onInstalled = () => {
+      writeKey(INSTALL_DONE_KEY, "1");
+      setDeferred(null);
+      setOpen(false);
+      setInstructions(false);
+    };
+    window.addEventListener("beforeinstallprompt", onBeforeInstall);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!signedIn) {
+      setOpen(false);
+      return;
+    }
     if (isStandalone() || readKey(INSTALL_DONE_KEY)) return;
-    if (window.location.pathname.startsWith("/ung-tuyen")) return;
-    if (window.location.pathname.startsWith("/xem-truoc-nhan-vien")) return;
+    if (onHiddenPath()) return;
 
     const installParam = new URLSearchParams(window.location.search).get("install");
     const forceGuide = installParam === "guide" || installParam === "guide-ios";
@@ -72,21 +132,15 @@ export const InstallPrompt = () => {
     if (forceGuide) {
       setInstructions(true);
       setOpen(true);
-    } else if (isMobileViewport() && !dismissedRecently()) {
-      timer = window.setTimeout(() => setOpen(true), 900);
+    } else if (!readKey(INSTALL_NEVER_KEY) && !dismissedRecently()) {
+      // Hiện sau khi đăng nhập, trên cả điện thoại và máy tính; bỏ qua nếu đang ở trang công khai.
+      timer = window.setTimeout(() => {
+        if (!isStandalone() && !onHiddenPath()) setOpen(true);
+      }, 1500);
     }
 
-    const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
-      setDeferred(event as BeforeInstallPromptEvent);
-    };
-    const onInstalled = () => {
-      writeKey(INSTALL_DONE_KEY, "1");
-      setOpen(false);
-      setInstructions(false);
-    };
     const onReopen = () => {
-      if (!isMobileViewport() || isStandalone()) return;
+      if (isStandalone()) return;
       setInstructions(false);
       setOpen(true);
     };
@@ -94,18 +148,14 @@ export const InstallPrompt = () => {
       if (event.key === "Escape") setOpen(false);
     };
 
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    window.addEventListener("appinstalled", onInstalled);
     window.addEventListener(INSTALL_REOPEN_EVENT, onReopen);
     window.addEventListener("keydown", onKeyDown);
     return () => {
       if (timer) window.clearTimeout(timer);
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-      window.removeEventListener("appinstalled", onInstalled);
       window.removeEventListener(INSTALL_REOPEN_EVENT, onReopen);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, []);
+  }, [signedIn]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -114,7 +164,7 @@ export const InstallPrompt = () => {
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open || !signedIn) return null;
 
   const ios =
     isIosDevice() || new URLSearchParams(window.location.search).get("install") === "guide-ios";
@@ -181,11 +231,12 @@ export const InstallPrompt = () => {
                 Bạn đang mở trong ứng dụng khác. Hãy mở liên kết bằng Safari hoặc Chrome để cài đặt.
               </p>
             )}
+            {ios ? <IosShareIllustration /> : null}
             {ios ? (
               <ol className="space-y-2.5">
                 {[
                   { icon: Share, title: "Nhấn nút Chia sẻ", detail: "Biểu tượng ô vuông có mũi tên trên Safari." },
-                  { icon: MoreVertical, title: "Chọn “Thêm vào MH chính”", detail: "Cuộn xuống trong bảng chia sẻ." },
+                  { icon: MoreVertical, title: "Chọn “Thêm vào Màn hình chính”", detail: "Cuộn xuống trong bảng chia sẻ." },
                   { icon: Check, title: "Nhấn “Thêm”", detail: "Biểu tượng ONHRM sẽ xuất hiện trên màn hình chính." },
                 ].map((step, index) => {
                   const Icon = step.icon;
@@ -225,9 +276,14 @@ export const InstallPrompt = () => {
                 ))}
               </ol>
             )}
-            <Button className="mt-2 h-10 w-full" onClick={dismiss}>
-              Đã hiểu
-            </Button>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Button className="h-10" onClick={dismiss}>
+                Đã hiểu
+              </Button>
+              <Button variant="ghost" className="h-10 text-[12px] text-muted-foreground" onClick={never}>
+                Không hiện lại
+              </Button>
+            </div>
           </div>
         ) : (
           <>
@@ -246,12 +302,17 @@ export const InstallPrompt = () => {
                 <Download className={installing ? "h-4 w-4 animate-pulse" : "h-4 w-4"} />
                 {deferred ? "Cài đặt ngay" : "Thêm vào màn hình chính"}
               </Button>
-              <Button variant="ghost" className="h-9 text-[12px] text-muted-foreground" onClick={dismiss}>
-                Để sau
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="h-9 text-[12px]" onClick={dismiss}>
+                  Để sau
+                </Button>
+                <Button variant="ghost" className="h-9 text-[12px] text-muted-foreground" onClick={never}>
+                  Không hiện lại
+                </Button>
+              </div>
             </div>
             <p className="mt-3 text-center text-[10px] leading-4 text-muted-foreground">
-              Không cần tải từ App Store hay CH Play. Bạn có thể cài lại trong mục “Thêm”.
+              Không cần App Store hay CH Play. “Để sau” sẽ nhắc lại sau 3 ngày.
             </p>
           </>
         )}
