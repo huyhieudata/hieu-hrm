@@ -51,6 +51,7 @@ import {
   getGpsFix,
   getPolicy,
   isMobileDevice,
+  listLocations,
   listMyDevices,
   punchAttendance,
   uploadAttendancePhoto,
@@ -83,6 +84,7 @@ const CheckIn = () => {
   const [shifts, setShifts] = useState<WorkShift[]>([]);
   const [assignments, setAssignments] = useState<ShiftAssignment[]>([]);
   const [policy, setPolicy] = useState<AttendancePolicy | null>(null);
+  const [activeLocationCount, setActiveLocationCount] = useState<number | null>(null);
   const [device, setDevice] = useState<EmployeeDevice | null>(null);
   const [deviceName, setDeviceName] = useState("");
   const [camera, setCamera] = useState<{ session: string; action: "in" | "out"; gps: GpsFix | null } | null>(null);
@@ -101,16 +103,18 @@ const CheckIn = () => {
     try {
       const employee = await findMyEmployee(companyId, user.id);
       setMe(employee);
-      const [shiftRows, assignmentRows, policyRow, info, hash] = await Promise.all([
+      const [shiftRows, assignmentRows, policyRow, locationRows, info, hash] = await Promise.all([
         listRows<WorkShift>("work_shifts", companyId, "start_time", true),
         listRows<ShiftAssignment>("shift_assignments", companyId, "created_at"),
         getPolicy(companyId),
+        listLocations(companyId),
         describeDevice(),
         getDeviceHash(),
       ]);
       setShifts(shiftRows);
       setAssignments(assignmentRows);
       setPolicy(policyRow);
+      setActiveLocationCount(locationRows.filter((location) => location.active).length);
       setDeviceName(info.suggestedName);
       if (employee) {
         const devices = await listMyDevices(employee.id);
@@ -231,9 +235,20 @@ const CheckIn = () => {
       return;
     }
     if (action === "out" && !existing?.check_in) return;
-    if (policy.require_device && device?.status !== "approved") {
-      toast.error("Thiết bị chưa được duyệt", {
-        description: "Chỉ điện thoại đã đăng ký và được HR duyệt mới chấm công được. Xem mục Thiết bị này bên dưới.",
+    if (device?.status !== "approved") {
+      const description = !device
+        ? "Điện thoại này chưa được đăng ký. Hãy đăng ký máy ở mục Thiết bị bên dưới; máy đổi mới cần HR duyệt."
+        : device.status === "pending"
+          ? "Điện thoại này đang chờ HR duyệt, chưa thể chấm công."
+          : device.status === "rejected"
+            ? "Điện thoại này đã bị HR từ chối. Liên hệ HR."
+            : "Điện thoại này đã bị thu hồi quyền chấm công. Liên hệ HR.";
+      toast.error("Không thể chấm công trên thiết bị này", { description });
+      return;
+    }
+    if (activeLocationCount === 0) {
+      toast.error("Chưa có địa điểm chấm công", {
+        description: "Công ty chưa khai báo địa điểm chấm công. Liên hệ HR để thiết lập trước khi chấm.",
       });
       return;
     }
@@ -242,7 +257,7 @@ const CheckIn = () => {
     try {
       setStep("Đang lấy vị trí GPS…");
       gps = await getGpsFix();
-      if (policy.require_gps && gps.accuracy > policy.max_accuracy_m) {
+      if (gps.accuracy > policy.max_accuracy_m) {
         toast.error("GPS chưa đủ chính xác", {
           description: `Sai số ±${Math.round(gps.accuracy)} m (cần ≤ ${policy.max_accuracy_m} m). Bật định vị chính xác, ra chỗ thoáng rồi thử lại.`,
         });
@@ -251,12 +266,12 @@ const CheckIn = () => {
         return;
       }
     } catch (error) {
-      if (policy.require_gps) {
-        toast.error("Không lấy được vị trí", { description: getErrorMessage(error) });
-        setBusySession(null);
-        setStep(null);
-        return;
-      }
+      toast.error("Không lấy được vị trí GPS", {
+        description: `${getErrorMessage(error)} Hãy bật định vị và cho phép trình duyệt truy cập vị trí.`,
+      });
+      setBusySession(null);
+      setStep(null);
+      return;
     }
     setStep(null);
     if (policy.require_photo) {
@@ -451,18 +466,24 @@ const CheckIn = () => {
                   <Badge variant={policy.require_photo ? "subtle" : "muted"} className="gap-1">
                     <Camera className="h-3 w-3" /> {policy.require_photo ? "Bắt buộc ảnh" : "Không cần ảnh"}
                   </Badge>
-                  <Badge variant={policy.require_gps ? "subtle" : "muted"} className="gap-1">
-                    <MapPin className="h-3 w-3" /> {policy.require_gps ? "Bắt buộc GPS" : "GPS tuỳ chọn"}
+                  <Badge variant="subtle" className="gap-1">
+                    <MapPin className="h-3 w-3" /> Trong bán kính văn phòng
                   </Badge>
-                  <Badge variant={policy.require_device ? "subtle" : "muted"} className="gap-1">
-                    <Smartphone className="h-3 w-3" /> {policy.require_device ? "Thiết bị đã duyệt" : "Mọi thiết bị"}
+                  <Badge variant="subtle" className="gap-1">
+                    <Smartphone className="h-3 w-3" /> Đúng điện thoại đã duyệt
                   </Badge>
                 </div>
               )}
 
-              {policy && !isMobileDevice() && policy.require_device && (
+              {policy && !isMobileDevice() && (
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   Bạn đang dùng máy tính. Nên đăng ký và chấm công bằng điện thoại cá nhân.
+                </p>
+              )}
+
+              {policy && activeLocationCount === 0 && (
+                <p className="mt-2 rounded-md bg-destructive-subtle px-3 py-2 text-[11.5px] text-destructive">
+                  Công ty chưa khai báo địa điểm chấm công nên chưa thể chấm. Liên hệ HR.
                 </p>
               )}
 
@@ -470,7 +491,7 @@ const CheckIn = () => {
                 <MyDeviceCard
                   companyId={companyId}
                   device={device}
-                  required={policy.require_device}
+                  required
                   suggestedName={deviceName}
                   onChanged={() => void load()}
                 />

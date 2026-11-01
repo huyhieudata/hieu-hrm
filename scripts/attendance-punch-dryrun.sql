@@ -11,7 +11,13 @@ begin
   insert into auth.users(id, email, aud, role) values (v_uid, 'dryrun-att@example.invalid', 'authenticated', 'authenticated');
   insert into public.employees(company_id, code, full_name, user_id, status) values (v_emp.company_id, 'DRYRUN1', 'Dry Run', v_uid, (select status from public.employees limit 1))
     returning * into v_emp;
-  insert into public.attendance_locations(company_id, name, latitude, longitude, radius_m) values (v_emp.company_id, 'VP', 21.0285, 105.8542, 200);
+  -- 17 không cho chuyển về chế độ "chỉ gắn cờ"
+  begin
+    insert into public.attendance_policies(company_id, gps_mode) values (v_emp.company_id, 'flag')
+      on conflict (company_id) do update set gps_mode = 'flag';
+    out := out || '17 FAIL flag allowed; ';
+  exception when others then out := out || '17 ok(flag blocked); ';
+  end;
   insert into public.attendance_policies(company_id, gps_mode) values (v_emp.company_id, 'reject')
     on conflict (company_id) do update set gps_mode = 'reject', require_photo = true, require_gps = true, require_device = true, auto_approve_first_device = true, max_devices = 1;
 
@@ -32,6 +38,12 @@ begin
   -- 3 đăng ký -> tự duyệt
   d := public.register_attendance_device(v_emp.company_id, v_hash, 'iPhone', 'iOS', 'iPhone', 'Safari', 'UA');
   out := out || '3 ' || d.status || '; ';
+  -- 3b chưa có địa điểm -> chặn
+  r := public.attendance_punch(v_emp.company_id, 'in', 'morning', v_hash, 21.0286, 105.8543, 20, null);
+  out := out || '3b ' || (r->>'reason') || '; ';
+  reset role;
+  insert into public.attendance_locations(company_id, name, latitude, longitude, radius_m) values (v_emp.company_id, 'VP', 21.0285, 105.8542, 200);
+  set local role authenticated;
   -- 4 máy thứ 2 bị chặn
   begin
     d := public.register_attendance_device(v_emp.company_id, repeat('b', 64), 'Máy 2', 'Android', 'x', 'Chrome', 'UA');
@@ -44,6 +56,9 @@ begin
   -- 6 ngoài vùng (reject)
   r := public.attendance_punch(v_emp.company_id, 'in', 'morning', v_hash, 21.10, 105.90, 20, null);
   out := out || '6 ' || (r->>'reason') || '; ';
+  -- 6b không có GPS
+  r := public.attendance_punch(v_emp.company_id, 'in', 'morning', v_hash, null, null, null, null);
+  out := out || '6b ' || (r->>'reason') || '; ';
   -- 7 thiếu ảnh
   r := public.attendance_punch(v_emp.company_id, 'in', 'morning', v_hash, 21.0286, 105.8543, 20, null);
   out := out || '7 ' || (r->>'reason') || '; ';
@@ -92,5 +107,14 @@ begin
   -- 15 anon không gọi được
   reset role;
   out := out || '15 anon_exec=' || has_function_privilege('anon', 'public.attendance_punch(uuid,text,text,text,double precision,double precision,double precision,text)', 'execute') || '; ';
+  -- 16 thiết bị bị thu hồi -> chặn
+  reset role;
+  update public.employee_devices set status = 'revoked' where employee_id = v_emp.id;
+  set local role authenticated;
+  r := public.attendance_punch(v_emp.company_id, 'out', 'afternoon', v_hash, 21.0286, 105.8543, 20, v_path);
+  out := out || '16 ' || (r->>'reason') || '; ';
+  -- 18 máy khác (hash khác) -> chặn
+  r := public.attendance_punch(v_emp.company_id, 'in', 'afternoon', repeat('c', 64), 21.0286, 105.8543, 20, v_path);
+  out := out || '18 ' || (r->>'reason') || '; ';
   raise exception 'DRYRUN %', out;
 end $$;

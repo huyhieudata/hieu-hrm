@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Crosshair, Loader2, MapPin, Plus, Save, Trash2 } from "lucide-react";
+import { AlertTriangle, Crosshair, Loader2, MapPin, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -140,12 +140,17 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
       <Card className="p-5">
         <h3 className="text-[13px] font-semibold text-foreground">Xác thực khi chấm công</h3>
         <p className="mb-2 text-[11.5px] text-muted-foreground">Áp dụng cho toàn công ty. Máy chủ kiểm tra lại mọi điều kiện.</p>
+        <div className="mt-1 rounded-lg bg-muted/60 p-3 text-[11.5px] text-foreground">
+          <p className="font-medium">Luôn bắt buộc (chặn cứng):</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-muted-foreground">
+            <li>Đúng điện thoại đã đăng ký và được HR duyệt (máy lạ, chờ duyệt, bị thu hồi đều bị từ chối).</li>
+            <li>Có GPS với sai số không vượt ngưỡng bên dưới.</li>
+            <li>Đứng trong bán kính một địa điểm chấm công đang dùng.</li>
+          </ul>
+        </div>
         <div className="divide-y divide-border/60">
           <Row title="Bắt buộc ảnh selfie" hint="Chụp bằng camera trước tại thời điểm chấm.">
             <Switch disabled={!canManage} checked={policy.require_photo} onCheckedChange={(value) => set("require_photo", value)} />
-          </Row>
-          <Row title="Bắt buộc vị trí GPS" hint="Từ chối nếu không có GPS hoặc sai số quá lớn.">
-            <Switch disabled={!canManage} checked={policy.require_gps} onCheckedChange={(value) => set("require_gps", value)} />
           </Row>
           <Row title="Sai số GPS tối đa (m)" hint="Khuyến nghị 100–200 m.">
             <Input
@@ -155,16 +160,6 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
               value={policy.max_accuracy_m}
               onChange={(event) => set("max_accuracy_m", Number(event.target.value) || 0)}
             />
-          </Row>
-          <Row title="Chặn chấm ngoài vùng" hint="Tắt: vẫn cho chấm nhưng gắn cờ “Ngoài vùng” để HR xem.">
-            <Switch
-              disabled={!canManage}
-              checked={policy.gps_mode === "reject"}
-              onCheckedChange={(value) => set("gps_mode", value ? "reject" : "flag")}
-            />
-          </Row>
-          <Row title="Chỉ điện thoại đã đăng ký" hint="Nhân viên đăng ký máy, HR duyệt ở trang Thiết bị chấm công.">
-            <Switch disabled={!canManage} checked={policy.require_device} onCheckedChange={(value) => set("require_device", value)} />
           </Row>
           <Row title="Số thiết bị tối đa / người" hint="Thường là 1.">
             <Input
@@ -195,7 +190,7 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-[13px] font-semibold text-foreground">Địa điểm chấm công</h3>
-            <p className="text-[11.5px] text-muted-foreground">Nhân viên phải ở trong bán kính một địa điểm. Chưa có địa điểm = không giới hạn vùng.</p>
+            <p className="text-[11.5px] text-muted-foreground">Nhân viên phải đứng trong bán kính một địa điểm đang dùng mới chấm được.</p>
           </div>
           {canManage && !draft && (
             <Button size="sm" variant="outline" className="h-8 gap-1 text-[11.5px]" onClick={() => setDraft({ ...emptyDraft })}>
@@ -203,6 +198,16 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
             </Button>
           )}
         </div>
+
+        {locations.filter((location) => location.active).length === 0 && (
+          <div className="mt-3 flex gap-2 rounded-lg border border-destructive/40 bg-destructive-subtle p-3 text-[11.5px] text-destructive">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              <span className="font-semibold">Chưa có địa điểm chấm công đang dùng.</span> Toàn bộ nhân viên sẽ bị từ chối khi chấm
+              công cho tới khi bạn thêm ít nhất một địa điểm.
+            </p>
+          </div>
+        )}
 
         {draft && (
           <div className="mt-3 space-y-2 rounded-lg border border-border p-3">
