@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-provider";
 import { clearMustChangePassword } from "@/lib/employee-accounts";
+import { passwordProblem, withTimeout } from "@/lib/password-rules";
 
 /** Màn hình bắt buộc đổi mật khẩu tạm (tài khoản do quản trị tạo). Chặn toàn bộ ứng dụng tới khi đổi xong. */
 export const ForcePasswordChange = ({ onDone }: { onDone: () => void }) => {
@@ -20,12 +21,13 @@ export const ForcePasswordChange = ({ onDone }: { onDone: () => void }) => {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) return setError("Mật khẩu mới cần ít nhất 8 ký tự.");
+    const weak = passwordProblem(password);
+    if (weak) return setError(weak);
     if (password !== confirm) return setError("Mật khẩu nhập lại không khớp.");
     setSaving(true);
     try {
-      await updatePassword(password);
-      await clearMustChangePassword();
+      await withTimeout(updatePassword(password), 20000, "Máy chủ phản hồi chậm khi đổi mật khẩu. Thử lại sau giây lát.");
+      await withTimeout(clearMustChangePassword(), 15000, "Đã đổi mật khẩu nhưng chưa cập nhật được trạng thái. Bấm lại để hoàn tất.");
       toast.success("Đã đổi mật khẩu");
       onDone();
     } catch (err) {

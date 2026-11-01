@@ -97,11 +97,25 @@ export const VerificationSettings = ({ companyId, canManage }: { companyId: stri
 
   const saveDraft = async () => {
     if (!draft) return;
-    const latitude = Number(draft.latitude);
-    const longitude = Number(draft.longitude);
+    const latText = draft.latitude.trim().replace(",", ".");
+    const lngText = draft.longitude.trim().replace(",", ".");
+    const latitude = latText ? Number(latText) : Number.NaN;
+    const longitude = lngText ? Number(lngText) : Number.NaN;
     const radius = Number(draft.radius_m);
-    if (!draft.name.trim() || !Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
-      toast.error("Nhập tên và toạ độ hợp lệ.");
+    if (!draft.name.trim()) {
+      toast.error("Nhập tên địa điểm.");
+      return;
+    }
+    if (!Number.isFinite(latitude) || Math.abs(latitude) > 90) {
+      toast.error("Vĩ độ phải là số từ -90 đến 90.");
+      return;
+    }
+    if (!Number.isFinite(longitude) || Math.abs(longitude) > 180) {
+      toast.error("Kinh độ phải là số từ -180 đến 180.");
+      return;
+    }
+    if (latitude === 0 && longitude === 0) {
+      toast.error("Toạ độ 0,0 không hợp lệ. Bấm lấy vị trí hiện tại hoặc nhập toạ độ thật.");
       return;
     }
     if (!Number.isFinite(radius) || radius < 20) {

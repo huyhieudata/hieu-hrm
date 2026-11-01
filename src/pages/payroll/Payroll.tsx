@@ -459,8 +459,6 @@ const Payroll = () => {
     if (periods.some((period) => period.year === year && period.month === month)) {
       throw new Error(`Kỳ lương tháng ${month}/${year} đã tồn tại.`);
     }
-    if (!(await askCreatePeriod(`${month}/${year}`))) return;
-
     try {
       await createPayrollPeriod({
         company_id: companyId,

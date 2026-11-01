@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { clearMustChangePassword } from "@/lib/employee-accounts";
+import { passwordProblem } from "@/lib/password-rules";
 import { AlertCircle, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
@@ -44,7 +45,7 @@ const ResetPassword = () => {
     setError(null);
     const errors: Partial<Record<FieldKey, string>> = {};
     if (!password) errors.password = "Vui lòng nhập mật khẩu mới.";
-    else if (password.length < 6) errors.password = "Mật khẩu phải có ít nhất 6 ký tự.";
+    else if (passwordProblem(password)) errors.password = passwordProblem(password) ?? undefined;
     if (!confirm) errors.confirm = "Vui lòng nhập lại mật khẩu.";
     else if (confirm !== password) errors.confirm = "Mật khẩu nhập lại không khớp.";
     setFieldErrors(errors);

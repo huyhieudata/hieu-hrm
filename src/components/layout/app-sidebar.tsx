@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import { canEnterStaffPath } from "@/lib/staff-routes";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
@@ -44,6 +45,7 @@ import {
   MapPinned,
   Smartphone,
   UserRound,
+  ClipboardList,
 } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
@@ -122,6 +124,8 @@ export const buildNavGroups = ({
         { label: "Thiết bị chấm công", to: "/toi/thiet-bi", icon: Smartphone },
         { label: "Bảng công của tôi", to: "/toi/bang-cong", icon: CalendarDays },
         { label: "Phiếu lương", to: "/toi/phieu-luong", icon: Wallet },
+        { label: "Khảo sát", to: "/toi/khao-sat", icon: ClipboardList },
+        { label: "Tài liệu nội bộ", to: "/toi/tai-lieu", icon: FolderOpen },
         { label: "Hồ sơ cá nhân", to: "/toi", icon: UserRound, exact: true },
       ] as NavItem[],
     },
@@ -269,7 +273,10 @@ export const buildNavGroups = ({
       items: [{ label: "Đánh giá hiệu suất", icon: Star, soon: true }],
     },
   ].filter((group) => group.items.length > 0);
-  return groups;
+  // Vai trò Nhân viên: ẩn menu quản trị (Hồ sơ nhân viên, Chấm công quản lý, Cài đặt).
+  return groups
+    .map((group) => ({ ...group, items: group.items.filter((item) => !item.to || canEnterStaffPath(item.to, role ?? null, canManageModule)) }))
+    .filter((group) => group.items.length > 0);
 };
 
 export const AppSidebar = ({
