@@ -9,6 +9,7 @@ import {
   REQUEST_CATEGORY_LABELS,
   REQUEST_STATUS_LABELS,
   requestStatusTone,
+  overtimeSummary,
   type EmployeeRequest,
   type RequestType,
 } from "@/lib/requests";
@@ -120,7 +121,7 @@ export const EmployeeRequestsView = ({
                 </div>
                 <p className="mt-0.5 text-[13px] text-muted-foreground">
                   {formatRange(request)}
-                  {request.leave_days ? ` · ${request.leave_days} ngày` : ""}
+                  {category === "overtime" ? ` · ${overtimeSummary(request)}` : request.leave_days ? ` · ${request.leave_days} ngày` : ""}
                   {request.reason ? ` · ${request.reason}` : ""}
                 </p>
                 {request.decision_note ? <p className="mt-1 text-[12px] text-muted-foreground">HR: {request.decision_note}</p> : null}
@@ -181,7 +182,7 @@ export const EmployeeRequestsView = ({
             </div>
             <p className="mt-1 text-[12.5px] text-muted-foreground">
               {formatRange(request)}
-              {request.leave_days ? ` · ${request.leave_days} ngày` : ""}
+              {category === "overtime" ? ` · ${overtimeSummary(request)}` : request.leave_days ? ` · ${request.leave_days} ngày` : ""}
             </p>
             {request.reason ? <p className="mt-1 line-clamp-2 text-[12.5px] text-foreground/80">{request.reason}</p> : null}
             {request.decision_note ? <p className="mt-1 text-[12px] text-muted-foreground">HR: {request.decision_note}</p> : null}

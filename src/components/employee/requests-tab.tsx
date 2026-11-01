@@ -43,6 +43,7 @@ import {
   createRequestRow,
   deleteRequestRow,
   leaveDays,
+  overtimeSummary,
   listRequests,
   listRequestTypes,
   REQUEST_SESSION_LABELS,
@@ -260,6 +261,7 @@ const RequestsTab = ({ employeeId, companyId, canManage }: RequestsTabProps) => 
                         {REQUEST_STATUS_LABELS[request.status] ?? request.status}
                       </Badge>
                       {type?.deduct_leave && <Badge variant="info">Trừ {request.leave_days} ngày phép</Badge>}
+                      {type?.category === "overtime" && <Badge variant="info">{overtimeSummary(request)}</Badge>}
                     </div>
                     <p className="mt-0.5 text-[11.5px] text-muted-foreground">
                       {period}

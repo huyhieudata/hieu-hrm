@@ -1,3 +1,4 @@
+import { OT_MULTIPLIERS } from "./payroll-calc";
 import { countWorkdays, type WorkCalendar } from "./work-calendar";
 import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +57,8 @@ export interface EmployeeRequest {
   start_time: string | null;
   end_time: string | null;
   leave_days: number;
+  ot_kind?: string | null;
+  ot_hours?: number | null;
   reason: string | null;
   attachment_url: string | null;
   status: string;
@@ -211,3 +214,10 @@ export const applyAttendanceFix = async (request: EmployeeRequest) => {
 
 export const requestTypeByCategory = (types: RequestType[], category: string) =>
   types.find((type) => type.category === category) ?? null;
+
+/** "Tăng ca 2.5 giờ × 150%" — dùng cho thẻ đơn tăng ca (hệ số theo Điều 98 BLLĐ 2019). */
+export const overtimeSummary = (request: { ot_kind?: string | null; ot_hours?: number | null }) => {
+  const mult = OT_MULTIPLIERS[request.ot_kind ?? "weekday"] ?? 1.5;
+  const hours = Number(request.ot_hours ?? 0);
+  return `Tăng ca ${hours.toLocaleString("vi-VN")} giờ × ${Math.round(mult * 100)}%`;
+};

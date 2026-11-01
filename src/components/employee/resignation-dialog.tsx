@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { confirmDialog } from "@/components/common/confirm-dialog";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -103,6 +105,8 @@ export const ResignationDialog = ({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasAccount = !!employee.user_id;
+  const [lockAccess, setLockAccess] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -174,6 +178,15 @@ export const ResignationDialog = ({
       return;
     }
 
+    if (
+      hasAccount &&
+      lockAccess &&
+      !(await confirmDialog(
+        `Khoá đăng nhập của ${employee.full_name} vào công ty ngay bây giờ? Dữ liệu hồ sơ được giữ nguyên; có thể mở lại ở Cài đặt › Thành viên & quyền.`,
+      ))
+    )
+      return;
+
     setSubmitting(true);
     setError(null);
     try {
@@ -190,11 +203,18 @@ export const ResignationDialog = ({
 
       await updateEmployee(employee.id, { resignation_reason: reason });
 
+      let lockNote = "";
+      if (hasAccount && lockAccess) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: lockErr } = await (supabase as any).rpc("suspend_employee_access", { p_employee: employee.id });
+        lockNote = lockErr ? ` Chưa khoá được đăng nhập: ${lockErr.message}` : " Đã khoá đăng nhập vào công ty.";
+      }
+
       toast.success("Đã ghi nhận nghỉ việc", {
         description: [
           `${employee.full_name} nghỉ từ ${formatDate(resignDate)}.`,
           activeContracts.length > 0 ? `${activeContracts.length} hợp đồng đã chấm dứt.` : "Không có hợp đồng hiệu lực.",
-        ].join(" "),
+        ].join(" ") + lockNote,
       });
 
       await onDone();
@@ -474,6 +494,17 @@ export const ResignationDialog = ({
                   className="text-[13px]"
                 />
               </div>
+              {hasAccount && (
+                <label className="flex items-start gap-2 rounded-md border p-2.5 text-[12px] sm:col-span-2">
+                  <Checkbox checked={lockAccess} onCheckedChange={(v) => setLockAccess(v === true)} className="mt-0.5" />
+                  <span>
+                    Khoá đăng nhập vào công ty (khuyến nghị)
+                    <span className="block text-[11px] text-muted-foreground">
+                      Tài khoản bị tạm dừng trong công ty này, không xoá dữ liệu. Không áp dụng cho Chủ sở hữu.
+                    </span>
+                  </span>
+                </label>
+              )}
             </section>
 
             {error && (

@@ -268,6 +268,17 @@ const Members = () => {
     }
   };
 
+  const reactivate = async (member: MemberRow) => {
+    try {
+      const { error } = await supabase.from("company_members").update({ status: "active" }).eq("id", member.id);
+      if (error) throw error;
+      toast.success(`Đã mở lại đăng nhập cho ${profiles[member.user_id]?.full_name ?? "thành viên"}`);
+      await load();
+    } catch (error) {
+      toast.error("Không mở lại được", { description: getErrorMessage(error) });
+    }
+  };
+
   const removeMember = async () => {
     if (!pendingRemove) return;
     try {
@@ -467,7 +478,12 @@ const Members = () => {
                             {member.user_id === user?.id ? " (bạn)" : ""}
                           </p>
                           <p className="text-[11px] text-muted-foreground">
-                            {profile?.email ?? "Chưa có email"} · {member.status === "active" ? "Đang hoạt động" : member.status}
+                            {profile?.email ?? "Chưa có email"} · {member.status === "active" ? "Đang hoạt động" : member.status === "suspended" ? "Đã khoá đăng nhập" : member.status}
+                            {member.status === "suspended" && canEditMembers && (
+                              <button type="button" className="ml-2 font-medium text-primary hover:underline" onClick={() => void reactivate(member)}>
+                                Mở lại
+                              </button>
+                            )}
                           </p>
                         </td>
                         <td className="px-3 py-2.5">
