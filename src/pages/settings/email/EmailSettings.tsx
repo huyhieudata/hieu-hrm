@@ -335,7 +335,7 @@ const EmailSettings = () => {
   return (
     <AppShell>
       <PageHeader eyebrow="Cài đặt · Email" title="Email" description="Mẫu email, luồng gửi tự động và nhật ký gửi." />
-      <div className="flex gap-1 overflow-x-auto border-b">
+      <div className="no-scrollbar flex gap-1 overflow-x-auto border-b">
         {TABS.map(([k, l]) => (
           <NavLink key={k} to={`/cai-dat/email/${k}`} className={({ isActive }) => `min-h-[44px] whitespace-nowrap border-b-2 px-3 py-2.5 text-sm ${isActive ? "border-brand-orange font-semibold text-brand-navy" : "border-transparent text-muted-foreground"}`}>{l}</NavLink>
         ))}

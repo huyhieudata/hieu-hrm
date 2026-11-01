@@ -1142,7 +1142,7 @@ const EmployeeProfile = () => {
         <div className="sticky top-0 z-20 border-t border-border/60 bg-card/95 backdrop-blur">
           <div
             ref={tabBarRef}
-            className="scrollbar-slim flex gap-1 overflow-x-auto px-3 py-2"
+            className="no-scrollbar flex gap-1 overflow-x-auto px-3 py-2"
           >
             {tabs.map((item) => {
               const Icon = item.icon;

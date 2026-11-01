@@ -64,8 +64,8 @@ export const MobileHeader = ({
         <div className="pointer-events-none absolute -right-14 -top-10 h-52 w-52 rounded-full bg-white/[0.07]" />
         <div className="relative z-[1] pt-[env(safe-area-inset-top)]">
           <div className="flex items-center justify-between px-5 pt-2">
-            <p className="min-w-0 truncate font-display text-[22px] font-bold tracking-tight">{companyName || "ONHRM"}</p>
-            <div className="flex items-center gap-1">
+            <p className="line-clamp-2 min-w-0 break-words font-display text-[19px] font-bold leading-tight tracking-tight">{companyName || "ONHRM"}</p>
+            <div className="flex shrink-0 items-center gap-1">
               {onScan ? (
                 <IconButton label="Quét QR chấm công" onClick={onScan} light>
                   <ScanLine className="h-5 w-5" strokeWidth={1.8} />
@@ -88,7 +88,7 @@ export const MobileHeader = ({
                 {initials || "NV"}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-[16px] font-semibold">{personName}</p>
+                <p className="line-clamp-2 break-words text-[16px] font-semibold leading-snug">{personName}</p>
                 {personMeta ? <p className="mt-0.5 truncate text-[13px] text-white/70">{personMeta}</p> : null}
               </div>
             </div>

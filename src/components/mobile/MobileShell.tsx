@@ -168,7 +168,7 @@ export const MobileShell = ({ children, frame }: MobileShellProps) => {
         className={cn(
           "mx-auto w-full max-w-md",
           meta.variant === "home" ? "-mt-20 px-4" : "px-4 pt-4",
-          hideTabs ? "pb-[calc(168px+env(safe-area-inset-bottom))]" : "pb-[calc(var(--tabbar-h)+var(--tabbar-bump)+24px+env(safe-area-inset-bottom))]",
+          hideTabs ? "pb-[calc(168px+env(safe-area-inset-bottom))]" : "pb-[calc(var(--tabbar-h)+var(--tabbar-bump)+40px+env(safe-area-inset-bottom))]",
         )}
       >
         <div key={frame ? meta.tab + meta.title : pathname}>{children}</div>

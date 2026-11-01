@@ -118,12 +118,12 @@ export const MobileNav = () => {
                 onClick={() => go(tab.to)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] font-medium",
+                  "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10.5px] font-medium leading-tight",
                   active ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
                 )}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
-                <span className={active ? "font-bold" : ""}>{tab.label}</span>
+                <span className={cn("max-w-full truncate whitespace-nowrap", active && "font-semibold")}>{tab.label}</span>
               </button>
             );
             // Nút tròn Chấm công nổi ở giữa thanh dưới (cam ONHRM, vùng chạm 60px).
@@ -149,12 +149,12 @@ export const MobileNav = () => {
             aria-expanded={moreOpen}
             aria-label="Mở tất cả tính năng"
             className={cn(
-              "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] font-medium",
+              "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10.5px] font-medium leading-tight",
               moreOpen ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
             )}
           >
             <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={1.9} />
-            <span className={moreOpen ? "font-bold" : ""}>Thêm</span>
+            <span className={cn("whitespace-nowrap", moreOpen && "font-semibold")}>Thêm</span>
           </button>
         </div>
       </nav>
