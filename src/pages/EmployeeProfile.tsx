@@ -210,7 +210,7 @@ const InfoRow = ({
   value: string | null | undefined;
 }) => (
   <div className="min-w-0">
-    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
       {label}
     </p>
     <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">
@@ -282,7 +282,7 @@ const EditableInfoRow = ({
   if (editing) {
     return (
       <div className="min-w-0">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           {label}
         </p>
         {kind === "select" ? (
@@ -332,7 +332,7 @@ const EditableInfoRow = ({
       onDoubleClick={start}
       title={canEdit ? "Nháy đúp để sửa" : undefined}
     >
-      <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </p>
       <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">
@@ -1004,7 +1004,7 @@ const EmployeeProfile = () => {
                   {employee.full_name}
                 </h1>
                 <Badge variant={meta.tone}>{meta.label}</Badge>
-                <Badge variant="outline" className="font-mono text-[10.5px]">
+                <Badge variant="outline" className="font-mono text-[11px]">
                   {employee.code}
                 </Badge>
                 {warnings.length > 0 && (
@@ -1013,7 +1013,7 @@ const EmployeeProfile = () => {
                     onClick={() => setTab("warnings")}
                     title={`${warnings.length} cảnh báo hồ sơ`}
                     aria-label={`${warnings.length} cảnh báo hồ sơ`}
-                    className="inline-flex items-center gap-1 rounded-full bg-destructive-subtle px-1.5 py-0.5 text-[10px] font-semibold text-destructive transition-colors hover:bg-destructive/15"
+                    className="inline-flex items-center gap-1 rounded-full bg-destructive-subtle px-1.5 py-0.5 text-[11px] font-semibold text-destructive transition-colors hover:bg-destructive/15"
                   >
                     <AlertTriangle className="h-3 w-3" />
                     {warnings.length}
@@ -1235,7 +1235,7 @@ const EmployeeProfile = () => {
             </div>
           )}
 
-          <p className="text-[10.5px] leading-5 text-muted-foreground">
+          <p className="text-[11px] leading-5 text-muted-foreground">
             Cảnh báo được tính tự động từ hợp đồng, thông tin thanh toán, mức
             đầy đủ hồ sơ, checklist giấy tờ và tiến độ hội nhập.
           </p>
@@ -1246,7 +1246,7 @@ const EmployeeProfile = () => {
         <div className="space-y-5">
           <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
             <Card className="p-4">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Thâm niên
               </p>
               <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.02em] text-foreground">
@@ -1258,7 +1258,7 @@ const EmployeeProfile = () => {
               </p>
             </Card>
             <Card className="p-4">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Hợp đồng hiện tại
               </p>
               <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.02em] text-foreground">
@@ -1274,7 +1274,7 @@ const EmployeeProfile = () => {
               </p>
             </Card>
             <Card className="p-4">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Mức lương hiện tại
               </p>
               <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.02em] text-foreground">
@@ -1289,7 +1289,7 @@ const EmployeeProfile = () => {
               </p>
             </Card>
             <Card className="p-4">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Bảo hiểm đang đóng
               </p>
               <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.02em] text-foreground">

@@ -79,7 +79,7 @@ export const ActivityTimeline = ({ entityType, entityId, title = "Lịch sử ho
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[12.5px] font-medium leading-5 text-foreground">{log.summary}</p>
-                  <p className="text-[10.5px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     {formatDateTime(log.created_at)}
                     {log.actor_name ? ` · ${log.actor_name}` : " · Hệ thống"}
                   </p>

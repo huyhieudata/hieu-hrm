@@ -660,7 +660,7 @@ const Onboarding = () => {
           { label: "Đã huỷ", value: stats.cancelled, tone: "text-muted-foreground" },
         ].map((item) => (
           <Card key={item.label} className="p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
               {item.label}
             </p>
             <p className={`mt-1 font-display text-[22px] font-semibold ${item.tone}`}>{item.value}</p>
@@ -802,7 +802,7 @@ const Onboarding = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[1050px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   {canManage && (
                     <th className="w-[40px] px-2 py-2.5 text-center font-semibold">
                       <input
@@ -849,7 +849,7 @@ const Onboarding = () => {
                         >
                           {record.full_name}
                         </button>
-                        <p className="text-[10px] text-muted-foreground">{employee?.code ?? "—"}</p>
+                        <p className="text-[11px] text-muted-foreground">{employee?.code ?? "—"}</p>
                       </td>
                       <td className="px-3 py-2.5 text-[12px] text-foreground">{record.position ?? "—"}</td>
                       <td className="px-3 py-2.5 text-[12px] text-muted-foreground">{record.department ?? "—"}</td>
@@ -867,11 +867,11 @@ const Onboarding = () => {
                               style={{ width: `${progress.percent}%` }}
                             />
                           </div>
-                          <span className="w-10 text-right text-[10.5px] font-medium text-muted-foreground">
+                          <span className="w-10 text-right text-[11px] font-medium text-muted-foreground">
                             {progress.percent}%
                           </span>
                         </div>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
                           {progress.done}/{progress.total} mục
                         </p>
                       </td>
@@ -1032,14 +1032,14 @@ const Onboarding = () => {
                           </span>
                           <span className="text-[11.5px] text-foreground">
                             {item.label}
-                            {item.required && <span className="ml-1 text-[10px] text-destructive">*</span>}
+                            {item.required && <span className="ml-1 text-[11px] text-destructive">*</span>}
                           </span>
                         </button>
                         {item.attachment_path && (
                           <button
                             type="button"
                             onClick={() => void openAttachment(item.attachment_path as string)}
-                            className="inline-flex max-w-[140px] shrink-0 items-center gap-1 truncate text-[10px] text-primary hover:underline"
+                            className="inline-flex max-w-[140px] shrink-0 items-center gap-1 truncate text-[11px] text-primary hover:underline"
                             title={item.attachment_name ?? "Tài liệu đính kèm"}
                           >
                             <Paperclip className="h-3 w-3 shrink-0" />
@@ -1072,7 +1072,7 @@ const Onboarding = () => {
                             {comment.author_name ?? "Thành viên"}
                           </p>
                           <p className="whitespace-pre-line text-[11.5px] text-muted-foreground">{comment.content}</p>
-                          <p className="mt-0.5 text-[10px] text-muted-foreground/80">
+                          <p className="mt-0.5 text-[11px] text-muted-foreground/80">
                             {new Date(comment.created_at).toLocaleString("vi-VN")}
                           </p>
                         </div>
@@ -1123,7 +1123,7 @@ const Onboarding = () => {
                     activity.map((entry) => (
                       <div key={entry.id} className="rounded-md border border-border bg-muted/20 px-3 py-2">
                         <p className="text-[11.5px] text-foreground">{entry.summary}</p>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
                           {entry.actor_name ?? "Hệ thống"} · {new Date(entry.created_at).toLocaleString("vi-VN")}
                         </p>
                       </div>
@@ -1248,14 +1248,14 @@ const Onboarding = () => {
                   onChange={(event) => setExpectedDate(event.target.value)}
                   className="h-10"
                 />
-                <p className="text-[10px] text-muted-foreground">Mặc định: ngày nhận việc + 3 ngày.</p>
+                <p className="text-[11px] text-muted-foreground">Mặc định: ngày nhận việc + 3 ngày.</p>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px]">Trạng thái</Label>
                 <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-[12px] text-muted-foreground">
                   Tự động theo tiến độ checklist
                 </div>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   0%: Chờ hội nhập · &gt;0%: Đang hội nhập · 100%: Hoàn thành.
                 </p>
               </div>
@@ -1264,7 +1264,7 @@ const Onboarding = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-[12px]">Checklist hội nhập</Label>
-                <span className="text-[10.5px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground">
                   {checklist.filter((item) => item.completed).length}/{checklist.length} mục
                 </span>
               </div>
@@ -1302,7 +1302,7 @@ const Onboarding = () => {
                       </span>
                       <span className="text-[11.5px] text-foreground">
                         {item.label}
-                        {item.required && <span className="ml-1 text-[10px] text-destructive">*</span>}
+                        {item.required && <span className="ml-1 text-[11px] text-destructive">*</span>}
                       </span>
                     </button>
                   ))

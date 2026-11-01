@@ -292,19 +292,19 @@ const Workspaces = () => {
 
       <div className="grid gap-3 sm:grid-cols-4">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tổng workspace</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tổng workspace</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{stats.total}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đang hoạt động</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đang hoạt động</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-success">{stats.active}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Sắp hết hạn 30 ngày</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Sắp hết hạn 30 ngày</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-warning">{stats.expiring}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tạm dừng</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tạm dừng</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{stats.suspended}</p>
         </Card>
       </div>
@@ -363,7 +363,7 @@ const Workspaces = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[980px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="px-4 py-2.5 text-left font-semibold">Workspace</th>
                   <th className="px-3 py-2.5 text-left font-semibold">Gói dịch vụ</th>
                   <th className="px-3 py-2.5 text-center font-semibold">Thành viên</th>
@@ -379,7 +379,7 @@ const Workspaces = () => {
                     <tr key={workspace.id} className="border-t border-border/50 hover:bg-muted/20">
                       <td className="px-4 py-2.5">
                         <p className="text-[12px] font-medium text-foreground">{workspace.name}</p>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           Tạo {new Date(workspace.created_at).toLocaleDateString("vi-VN")}
                         </p>
                       </td>
@@ -391,7 +391,7 @@ const Workspaces = () => {
                         <p className="text-[11.5px] text-foreground">{formatDate(workspace.subscription_expires_at)}</p>
                         {days !== null && (
                           <p
-                            className={`text-[10px] ${
+                            className={`text-[11px] ${
                               days < 0 ? "text-destructive" : days <= 30 ? "text-warning" : "text-muted-foreground"
                             }`}
                           >

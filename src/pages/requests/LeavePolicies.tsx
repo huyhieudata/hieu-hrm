@@ -624,19 +624,19 @@ const LeavePolicies = () => {
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tổng quỹ phép</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tổng quỹ phép</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
             {Number(totals.entitlement.toFixed(1))}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đã sử dụng</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đã sử dụng</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-warning">
             {Number(totals.used.toFixed(1))}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Còn lại</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Còn lại</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-success">
             {Number(totals.remaining.toFixed(1))}
           </p>
@@ -692,10 +692,10 @@ const LeavePolicies = () => {
 
       {policy && (
         <Card className="p-4">
-          <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             <Layers className="h-3.5 w-3.5" /> Các loại phép trong quỹ
           </p>
-          <p className="mt-1 text-[10.5px] text-muted-foreground">
+          <p className="mt-1 text-[11px] text-muted-foreground">
             Phạm vi áp dụng:{" "}
             {policyAssignments.length === 0 || policyAssignments.some((assignment) => assignment.scope_type === "company")
               ? "Toàn công ty"
@@ -782,7 +782,7 @@ const LeavePolicies = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[1040px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="px-4 py-2.5 text-left font-semibold">Nhân sự</th>
                   {policy?.auto_annual_leave && (
                     <th className="w-[120px] px-2 py-2.5 text-center font-semibold">Phép năm (HĐ)</th>
@@ -809,7 +809,7 @@ const LeavePolicies = () => {
                   <tr key={employee.id} className="border-t border-border/50 hover:bg-muted/20">
                     <td className="px-4 py-2">
                       <p className="text-[12px] font-medium text-foreground">{employee.full_name}</p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {employee.code}
                         {employee.department ? ` · ${employee.department}` : ""}
                       </p>
@@ -892,7 +892,7 @@ const LeavePolicies = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/30 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/30 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="px-4 py-2 text-left font-semibold">Thời gian nghỉ</th>
                   <th className="px-3 py-2 text-left font-semibold">Nhân sự</th>
                   <th className="px-3 py-2 text-left font-semibold">Nguồn phép</th>
@@ -915,7 +915,7 @@ const LeavePolicies = () => {
                       </td>
                       <td className="px-3 py-2">
                         <span className="text-foreground">{employee?.full_name ?? "—"}</span>
-                        <span className="ml-1 text-[10px] text-muted-foreground">{employee?.code ?? ""}</span>
+                        <span className="ml-1 text-[11px] text-muted-foreground">{employee?.code ?? ""}</span>
                       </td>
                       <td className="px-3 py-2">
                         <Badge variant="info">{type?.name ?? "Nghỉ phép"}</Badge>
@@ -946,15 +946,15 @@ const LeavePolicies = () => {
             <div className="space-y-4 py-1">
               <div className="grid grid-cols-3 gap-2">
                 <div className="rounded-md border border-border bg-muted/25 px-3 py-2">
-                  <p className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">Tổng quỹ</p>
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Tổng quỹ</p>
                   <p className="text-[18px] font-semibold text-foreground">{detailSummary.entitlement}</p>
                 </div>
                 <div className="rounded-md border border-border bg-muted/25 px-3 py-2">
-                  <p className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">Đã dùng</p>
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Đã dùng</p>
                   <p className="text-[18px] font-semibold text-warning">{detailSummary.used}</p>
                 </div>
                 <div className="rounded-md border border-border bg-muted/25 px-3 py-2">
-                  <p className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">Còn lại</p>
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Còn lại</p>
                   <p className={`text-[18px] font-semibold ${detailSummary.remaining < 0 ? "text-destructive" : "text-success"}`}>
                     {detailSummary.remaining}
                   </p>
@@ -962,7 +962,7 @@ const LeavePolicies = () => {
               </div>
 
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Nguồn phép</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Nguồn phép</p>
                 <ul className="mt-1.5 divide-y divide-border/60 rounded-md border border-border">
                   {detailSources.length === 0 ? (
                     <li className="flex items-center justify-between px-3 py-2 text-[11.5px]">
@@ -974,7 +974,7 @@ const LeavePolicies = () => {
                       <li key={source.id} className="flex items-center justify-between px-3 py-2 text-[11.5px]">
                         <span className="text-foreground">
                           {source.name}
-                          {!source.carriesOver && <span className="ml-1.5 text-[10px] text-muted-foreground">không chuyển</span>}
+                          {!source.carriesOver && <span className="ml-1.5 text-[11px] text-muted-foreground">không chuyển</span>}
                         </span>
                         <span className="font-semibold text-foreground">{source.days}</span>
                       </li>
@@ -992,7 +992,7 @@ const LeavePolicies = () => {
               </div>
 
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   Lịch sử thay đổi phép
                 </p>
                 {detailHistory.length === 0 ? (
@@ -1005,7 +1005,7 @@ const LeavePolicies = () => {
                       <li key={entry.id} className="flex items-start justify-between gap-3 px-3 py-2">
                         <div className="min-w-0">
                           <p className="truncate text-[11.5px] font-medium text-foreground">{entry.label}</p>
-                          <p className="truncate text-[10.5px] text-muted-foreground">
+                          <p className="truncate text-[11px] text-muted-foreground">
                             {new Date(entry.date).toLocaleDateString("vi-VN")}
                             {entry.note ? ` · ${entry.note}` : ""}
                           </p>
@@ -1143,7 +1143,7 @@ const LeavePolicies = () => {
               </div>
 
               {draft.auto_annual_leave && (
-                <p className="rounded-md border border-border bg-muted/25 px-3 py-2 text-[10.5px] text-muted-foreground">
+                <p className="rounded-md border border-border bg-muted/25 px-3 py-2 text-[11px] text-muted-foreground">
                   Phép năm được tính tự động: mỗi tháng làm việc theo hợp đồng xác định thời hạn hoặc không xác
                   định thời hạn = 1 ngày. Chỉ thêm các loại phép bổ sung bên dưới.
                 </p>
@@ -1195,7 +1195,7 @@ const LeavePolicies = () => {
                 </div>
               ))}
 
-              <p className="text-[10.5px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 Tổng quỹ:{" "}
                 <span className="font-semibold text-foreground">
                   {Number(draft.items.reduce((sum, item) => sum + (Number(item.days) || 0), 0).toFixed(1))} ngày
@@ -1339,7 +1339,7 @@ const LeavePolicies = () => {
                             </span>
                             <span className="min-w-0">
                               <span className="block truncate text-[11.5px] text-foreground">{employee.full_name}</span>
-                              <span className="block truncate text-[10px] text-muted-foreground">
+                              <span className="block truncate text-[11px] text-muted-foreground">
                                 {employee.code}
                                 {employee.department ? ` · ${employee.department}` : ""}
                               </span>

@@ -188,7 +188,7 @@ const Devices = () => {
                   <p className="text-[11px] text-muted-foreground">
                     {device.device_name ?? "—"} · {[device.platform, device.model, device.browser].filter(Boolean).join(" / ")}
                   </p>
-                  <p className="text-[10.5px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     Gửi {formatDateTime(device.created_at)} · Dùng gần nhất {formatDateTime(device.last_used_at)}
                   </p>
                 </div>

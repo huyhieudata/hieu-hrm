@@ -285,7 +285,7 @@ const Campaigns = () => {
     >
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Đang tuyển
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-success">
@@ -293,7 +293,7 @@ const Campaigns = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Chỉ tiêu
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -301,7 +301,7 @@ const Campaigns = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Ứng viên
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -387,7 +387,7 @@ const Campaigns = () => {
                     <p className="truncate text-[13px] font-semibold text-foreground">
                       {row.title}
                     </p>
-                    <p className="mt-0.5 text-[10.5px] text-muted-foreground">
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
                       {row.code ?? "Chưa có mã"}
                       {row.department ? ` · ${row.department}` : ""}
                     </p>
@@ -436,7 +436,7 @@ const Campaigns = () => {
                   </Link>
                   <div className="flex items-center gap-1">
                     {row.start_date && (
-                      <span className="inline-flex items-center gap-1 text-[10.5px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                         <CalendarClock className="h-3 w-3" />
                         {new Date(row.start_date).toLocaleDateString("vi-VN")}
                       </span>

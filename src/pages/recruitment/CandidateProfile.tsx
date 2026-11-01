@@ -1049,7 +1049,7 @@ const CandidateProfile = () => {
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                 Điểm đánh giá TB
               </p>
               <p className="tabular text-[16px] font-semibold text-foreground">
@@ -1057,7 +1057,7 @@ const CandidateProfile = () => {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                 Lương mong muốn
               </p>
               <p className="tabular text-[16px] font-semibold text-foreground">
@@ -1149,7 +1149,7 @@ const CandidateProfile = () => {
                   ["Địa điểm làm việc", candidate.work_location ?? "—"],
                 ].map(([label, value]) => (
                   <div key={label}>
-                    <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                    <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                       {label}
                     </p>
                     <p className="mt-0.5 text-[12.5px] text-foreground">
@@ -1160,7 +1160,7 @@ const CandidateProfile = () => {
               </div>
               {candidate.note && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                     Ghi chú
                   </p>
                   <p className="mt-1 whitespace-pre-line text-[12px] leading-6 text-foreground">
@@ -1280,7 +1280,7 @@ const CandidateProfile = () => {
                         {campaignById.get(application.campaign_id)?.title ??
                           "Chiến dịch đã xoá"}
                       </p>
-                      <p className="text-[10.5px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {formatDateTime(application.applied_at)}
                         {application.note ? ` · ${application.note}` : ""}
                       </p>
@@ -1385,7 +1385,7 @@ const CandidateProfile = () => {
                         <p className="text-[12.5px] font-semibold text-foreground">
                           {evaluation.reviewer_name ?? "Người đánh giá"}
                         </p>
-                        <p className="text-[10.5px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {formatDateTime(evaluation.created_at)}
                         </p>
                       </div>
@@ -1430,7 +1430,7 @@ const CandidateProfile = () => {
                         ["Thái độ", evaluation.attitude_score],
                       ].map(([label, value]) => (
                         <div key={label as string}>
-                          <p className="text-[9px] uppercase tracking-[0.05em] text-muted-foreground">
+                          <p className="text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                             {label}
                           </p>
                           <p className="tabular text-[13px] font-semibold text-foreground">
@@ -1439,7 +1439,7 @@ const CandidateProfile = () => {
                         </div>
                       ))}
                       <div>
-                        <p className="text-[9px] uppercase tracking-[0.05em] text-muted-foreground">
+                        <p className="text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                           TB
                         </p>
                         <p className="tabular text-[13px] font-semibold text-primary">
@@ -1516,7 +1516,7 @@ const CandidateProfile = () => {
                             interview.status}
                         </Badge>
                       </p>
-                      <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10.5px] text-muted-foreground">
+                      <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
                         <span className="inline-flex items-center gap-1">
                           <Video className="h-3 w-3" />{" "}
                           {INTERVIEW_MODE_LABELS[interview.mode] ??
@@ -1579,7 +1579,7 @@ const CandidateProfile = () => {
                       candidate.position_applied ??
                       "Offer làm việc"}
                   </p>
-                  <p className="text-[10.5px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     Tạo {formatDay(latestOffer.created_at)}
                     {latestOffer.department
                       ? ` · ${latestOffer.department}`
@@ -1594,7 +1594,7 @@ const CandidateProfile = () => {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                     Lương cơ bản
                   </p>
                   <p className="tabular mt-0.5 text-[14px] font-semibold text-foreground">
@@ -1604,7 +1604,7 @@ const CandidateProfile = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                     Phụ cấp
                   </p>
                   <p className="tabular mt-0.5 text-[14px] font-semibold text-foreground">
@@ -1614,7 +1614,7 @@ const CandidateProfile = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                     Ngày nhận việc
                   </p>
                   <p className="mt-0.5 text-[14px] font-semibold text-foreground">
@@ -1868,7 +1868,7 @@ const CandidateProfile = () => {
                     <p className="truncate text-[12px] font-medium text-foreground">
                       {email.subject}
                     </p>
-                    <p className="text-[10.5px] text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground">
                       {email.sent_to ?? "Chưa có người nhận"} ·{" "}
                       {formatDateTime(email.sent_at)}
                     </p>

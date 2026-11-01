@@ -23,7 +23,7 @@ export const ShiftCard = ({ name, range, dateLabel, time }: ShiftCardProps) => {
     <section className="bg-gradient-primary shadow-glow-navy rounded-3xl px-4 py-3.5 text-white">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[13px] font-bold">{name}</p>
-        <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold">Hôm nay</span>
+        <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold">Hôm nay</span>
       </div>
       <p className="mt-1 font-display text-[34px] font-extrabold leading-none tracking-tight tabular">
         {hours}

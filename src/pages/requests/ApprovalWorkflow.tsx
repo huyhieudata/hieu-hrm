@@ -385,7 +385,7 @@ const ApprovalWorkflow = () => {
 
       {workflows.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Quy trình theo phạm vi áp dụng
           </p>
           {workflows.map((workflow) => {
@@ -404,7 +404,7 @@ const ApprovalWorkflow = () => {
                         ? ` · ${workflow.effective_from ?? "…"} → ${workflow.effective_to ?? "…"}`
                         : " · áp dụng không thời hạn"}
                     </p>
-                    <p className="mt-0.5 text-[10.5px] text-muted-foreground">
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
                       Loại đơn: {typeNames.length > 0 ? typeNames.join(", ") : "chưa chọn"}
                     </p>
                   </div>
@@ -465,12 +465,12 @@ const ApprovalWorkflow = () => {
                   <ol className="mt-3 space-y-2">
                     {typeSteps.map((step) => (
                       <li key={step.id} className="flex items-start gap-2.5">
-                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[10px] font-semibold text-primary-subtle-foreground">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[11px] font-semibold text-primary-subtle-foreground">
                           {step.step_order}
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-[12px] font-medium text-foreground">{step.name ?? `Bước ${step.step_order}`}</p>
-                          <p className="truncate text-[10.5px] text-muted-foreground">
+                          <p className="truncate text-[11px] text-muted-foreground">
                             {APPROVER_TYPE_LABELS[step.approver_type] ?? step.approver_type}
                             {step.approver_type === "specific"
                               ? ` · ${employeeName(step.approver_employee_id) ?? "Chưa chọn người"}`

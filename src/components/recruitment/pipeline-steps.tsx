@@ -37,7 +37,7 @@ export const CandidatePipeline = ({ status, className }: { status: string; class
                 />
                 <span
                   className={cn(
-                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold",
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold",
                     done
                       ? "border-primary bg-primary text-primary-foreground"
                       : active
@@ -61,7 +61,7 @@ export const CandidatePipeline = ({ status, className }: { status: string; class
               </div>
               <span
                 className={cn(
-                  "text-[10px] leading-4",
+                  "text-[11px] leading-4",
                   active ? "font-semibold text-primary" : done ? "text-foreground" : "text-muted-foreground",
                 )}
               >

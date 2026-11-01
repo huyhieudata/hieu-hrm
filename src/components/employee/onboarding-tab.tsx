@@ -162,7 +162,7 @@ export const OnboardingTab = ({ employeeId, companyId, canManage }: OnboardingTa
                         style={{ width: `${progress.percent}%` }}
                       />
                     </span>
-                    <span className="text-[10.5px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                       {progress.done}/{progress.total} · {progress.percent}%
                     </span>
                   </div>

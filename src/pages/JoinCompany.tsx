@@ -220,7 +220,7 @@ const JoinCompany = () => {
           </div>
         </Card>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-[10.5px] text-muted-foreground">
+        <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
           <LogoMark className="h-5 w-5 rounded-[6px]" />
           ONHRM · Liên kết mời chỉ dùng được một lần
         </div>

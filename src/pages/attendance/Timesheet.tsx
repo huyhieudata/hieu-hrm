@@ -317,7 +317,7 @@ const Timesheet = () => {
           </label>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-[10.5px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
           {Object.entries(STATUS_SYMBOL).map(([status, symbol]) => (
             <span key={status} className="inline-flex items-center gap-1">
               <span className="inline-flex h-4 w-4 items-center justify-center rounded bg-muted font-semibold text-foreground">
@@ -344,7 +344,7 @@ const Timesheet = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[1100px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="sticky left-0 z-10 min-w-[210px] bg-muted/40 px-4 py-2.5 text-left font-semibold">
                     Nhân sự
                   </th>
@@ -365,7 +365,7 @@ const Timesheet = () => {
                     <tr key={employee.id} className="border-t border-border/50 hover:bg-muted/20">
                       <td className="sticky left-0 z-10 bg-card px-4 py-2">
                         <p className="truncate text-[12px] font-medium text-foreground">{employee.full_name}</p>
-                        <p className="truncate text-[10px] text-muted-foreground">
+                        <p className="truncate text-[11px] text-muted-foreground">
                           {employee.code}
                           {employee.department ? ` · ${employee.department}` : ""}
                         </p>
@@ -377,7 +377,7 @@ const Timesheet = () => {
                             {info.symbol ? (
                               <span
                                 title={`${info.title} · ${formatCredit(info.credit)} công`}
-                                className={`inline-flex h-5 min-w-5 items-center justify-center rounded px-0.5 text-[10px] font-semibold ${
+                                className={`inline-flex h-5 min-w-5 items-center justify-center rounded px-0.5 text-[11px] font-semibold ${
                                   info.tone === "late"
                                     ? "bg-warning-subtle text-warning"
                                     : info.tone === "absent"
@@ -417,7 +417,7 @@ const Timesheet = () => {
             <span>
               {filtered.length} nhân sự · tháng {month}
             </span>
-            <span className="text-[10.5px]">Công = hệ số ca; nghỉ phép đã duyệt = 0 công; làm từ xa = 1 công</span>
+            <span className="text-[11px]">Công = hệ số ca; nghỉ phép đã duyệt = 0 công; làm từ xa = 1 công</span>
           </div>
         </Card>
       )}

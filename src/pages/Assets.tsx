@@ -325,7 +325,7 @@ const Assets = () => {
           { label: "Mất / hư hỏng", value: String(stats.broken), tone: "text-destructive" },
         ].map((item) => (
           <Card key={item.label} className="p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{item.label}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{item.label}</p>
             <p className={`mt-1 font-display text-[22px] font-semibold ${item.tone}`}>{item.value}</p>
           </Card>
         ))}
@@ -457,7 +457,7 @@ const Assets = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[1000px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   {canManage && (
                     <th className="w-[40px] px-2 py-2.5 text-center font-semibold">
                       <input
@@ -495,14 +495,14 @@ const Assets = () => {
                     )}
                     <td className="px-4 py-2.5">
                       <p className="text-[12px] font-medium text-foreground">{asset.name}</p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {asset.asset_code ?? "—"}
                         {asset.serial_number ? ` · SN ${asset.serial_number}` : ""}
                       </p>
                     </td>
                     <td className="px-3 py-2.5">
                       <p className="text-[12px] text-foreground">{asset.employee_name ?? "—"}</p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {asset.employee_code ?? ""}
                         {asset.department ? ` · ${asset.department}` : ""}
                       </p>
@@ -513,7 +513,7 @@ const Assets = () => {
                     <td className="px-3 py-2.5 text-[12px] text-foreground">
                       {formatDay(asset.assigned_date)}
                       {asset.return_date && (
-                        <span className="block text-[10px] text-muted-foreground">
+                        <span className="block text-[11px] text-muted-foreground">
                           Thu hồi {formatDay(asset.return_date)}
                         </span>
                       )}

@@ -373,7 +373,7 @@ export const AppSidebar = ({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[252px]">
-            <DropdownMenuLabel className="text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
+            <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
               Công ty của bạn
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -383,14 +383,14 @@ export const AppSidebar = ({
                 className="gap-2.5 py-2"
                 onSelect={() => switchCompany(membership.company_id)}
               >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] bg-primary-subtle text-[10px] font-semibold text-primary-subtle-foreground">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] bg-primary-subtle text-[11px] font-semibold text-primary-subtle-foreground">
                   {companyInitials(membership.company.name)}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[12.5px] font-medium text-foreground">
                     {membership.company.name}
                   </span>
-                  <span className="block text-[10.5px] text-muted-foreground">
+                  <span className="block text-[11px] text-muted-foreground">
                     {ROLE_LABELS[membership.role]}
                   </span>
                 </span>
@@ -421,7 +421,7 @@ export const AppSidebar = ({
           {groups.map((group) => (
             <div key={group.label}>
               {!isCollapsed && (
-                <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
+                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
                   {group.label}
                 </p>
               )}
@@ -438,12 +438,12 @@ export const AppSidebar = ({
                         <span className="truncate">{item.label}</span>
                       )}
                       {!isCollapsed && item.badge && (
-                        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
                           {item.badge}
                         </span>
                       )}
                       {!isCollapsed && item.soon && (
-                        <span className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        <span className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           Sắp có
                         </span>
                       )}
@@ -540,9 +540,9 @@ export const AppSidebar = ({
         </div>
 
         {!isCollapsed && (
-          <div className="flex items-center justify-between px-2 pb-1 text-[10px] text-muted-foreground/80">
+          <div className="flex items-center justify-between px-2 pb-1 text-[11px] text-muted-foreground/80">
             <span>Phiên bản 1.0.0</span>
-            <Badge variant="success" className="px-1.5 py-0 text-[9px]">
+            <Badge variant="success" className="px-1.5 py-0 text-[11px]">
               Đã kết nối
             </Badge>
           </div>

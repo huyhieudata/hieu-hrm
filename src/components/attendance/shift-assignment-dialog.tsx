@@ -270,7 +270,7 @@ const ShiftAssignmentDialog = ({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <Label className="text-[12px]">Vị trí / chức danh</Label>
-                <span className="text-[10.5px] text-muted-foreground">Đã chọn {positionTitles.length}</span>
+                <span className="text-[11px] text-muted-foreground">Đã chọn {positionTitles.length}</span>
               </div>
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -353,7 +353,7 @@ const ShiftAssignmentDialog = ({
                             {employee.full_name}
                             <span className="ml-1 font-normal text-muted-foreground">{employee.code}</span>
                           </span>
-                          <span className="block truncate text-[10.5px] text-muted-foreground">
+                          <span className="block truncate text-[11px] text-muted-foreground">
                             {employee.department ?? "Chưa có phòng ban"}
                             {employee.position ? ` · ${employee.position}` : ""}
                           </span>
@@ -390,7 +390,7 @@ const ShiftAssignmentDialog = ({
                 onChange={(event) => setEffectiveTo(event.target.value)}
                 className="h-10"
               />
-              <p className="text-[10.5px] text-muted-foreground">Bỏ trống nếu áp dụng không thời hạn.</p>
+              <p className="text-[11px] text-muted-foreground">Bỏ trống nếu áp dụng không thời hạn.</p>
             </div>
           </div>
 

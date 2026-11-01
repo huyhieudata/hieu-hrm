@@ -197,7 +197,7 @@ const RequestDialog = ({
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0" />
                     <span className="min-w-0 flex-1 truncate text-left">{REQUEST_CATEGORY_LABELS[value] ?? value}</span>
-                    {count > 1 && <span className="text-[9.5px] opacity-70">{count}</span>}
+                    {count > 1 && <span className="text-[11px] opacity-70">{count}</span>}
                   </button>
                 );
               })}
@@ -245,7 +245,7 @@ const RequestDialog = ({
                 </SelectContent>
               </Select>
               {selectedType && (
-                <p className="text-[10.5px] text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   {selectedType.max_days ? `Tối đa ${selectedType.max_days} ngày` : "Không giới hạn số ngày"}
                   {selectedType.deduct_leave ? " · trừ vào ngày phép năm" : " · không trừ ngày phép"}
                 </p>

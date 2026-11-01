@@ -203,7 +203,7 @@ export const FieldDialog = ({
                 }
               >
                 {section.label && (
-                  <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-primary">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
                     {section.label}
                   </p>
                 )}
@@ -353,7 +353,7 @@ export const FieldDialog = ({
                         )}
 
                         {field.hint && (
-                          <p className="text-[10.5px] leading-4 text-muted-foreground">
+                          <p className="text-[11px] leading-4 text-muted-foreground">
                             {field.hint}
                           </p>
                         )}

@@ -459,7 +459,7 @@ const Members = () => {
             <div className="scrollbar-slim overflow-x-auto">
               <table className="w-full min-w-[920px] border-collapse text-[11.5px]">
                 <thead>
-                  <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                  <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                     <th className="px-4 py-2.5 text-left font-semibold">Thành viên</th>
                     <th className="px-3 py-2.5 text-left font-semibold">Hồ sơ nhân sự</th>
                     <th className="px-3 py-2.5 text-left font-semibold">Vai trò</th>
@@ -481,7 +481,7 @@ const Members = () => {
                             {profile?.full_name ?? "Thành viên"}
                             {member.user_id === user?.id ? " (bạn)" : ""}
                           </p>
-                          <p className="text-[10.5px] text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground">
                             {profile?.email ?? "Chưa có email"} · {member.status === "active" ? "Đang hoạt động" : member.status}
                           </p>
                         </td>
@@ -489,7 +489,7 @@ const Members = () => {
                           {employee ? (
                             <div>
                               <p className="text-[12px] text-foreground">{employee.full_name}</p>
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="text-[11px] text-muted-foreground">
                                 {employee.code}
                                 {employee.department ? ` · ${employee.department}` : ""}
                               </p>
@@ -577,7 +577,7 @@ const Members = () => {
                   <li key={invite.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                     <div>
                       <p className="text-[12px] text-foreground">{invite.email ?? "Lời mời bằng liên kết"}</p>
-                      <p className="text-[10.5px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {ROLE_LABELS[invite.role]} · hết hạn {formatDate(invite.expires_at)}
                       </p>
                     </div>
@@ -633,7 +633,7 @@ const Members = () => {
           </div>
 
           <div className="rounded-lg border border-border/70 bg-muted/20 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               Quyền đặc biệt
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -711,7 +711,7 @@ const Members = () => {
                     <p className="mt-0.5 text-[11px] text-muted-foreground">
                       {group.description ?? "Không có mô tả"}
                     </p>
-                    <p className="mt-1 text-[10.5px] text-muted-foreground">
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                       {expandLegacyPermissions(group.permissions).length} quyền
                     </p>
                   </div>
@@ -829,7 +829,7 @@ const Members = () => {
               </div>
               <div className="grid gap-1.5 sm:grid-cols-2">
                 {effectiveKeys.map((key) => (
-                  <span key={key} className="rounded-md border border-border/60 bg-muted/20 px-2 py-1 text-[10.5px] text-foreground">
+                  <span key={key} className="rounded-md border border-border/60 bg-muted/20 px-2 py-1 text-[11px] text-foreground">
                     {permissionLabel(key)}
                   </span>
                 ))}

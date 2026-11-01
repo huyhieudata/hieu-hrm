@@ -137,7 +137,7 @@ const RecruitmentOverview = () => {
           return (
             <Card key={item.label} className="p-4">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   {item.label}
                 </p>
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -159,25 +159,25 @@ const RecruitmentOverview = () => {
           <Card className="space-y-3 p-4 lg:col-span-2">
             <div className="flex items-center justify-between">
               <p className="text-[12.5px] font-semibold text-foreground">Pipeline tuyển dụng</p>
-              <span className="text-[10.5px] text-muted-foreground">{candidates.length} ứng viên</span>
+              <span className="text-[11px] text-muted-foreground">{candidates.length} ứng viên</span>
             </div>
             <div className="space-y-2">
               {funnel.map((item) => (
                 <div key={item.stage} className="flex items-center gap-2">
-                  <span className="w-[104px] shrink-0 text-[10.5px] text-muted-foreground">{item.label}</span>
+                  <span className="w-[104px] shrink-0 text-[11px] text-muted-foreground">{item.label}</span>
                   <div className="h-5 flex-1 overflow-hidden rounded-md bg-muted/60">
                     <div
-                      className="flex h-full items-center justify-end rounded-md bg-primary/85 px-1.5 text-[9.5px] font-semibold text-primary-foreground transition-all"
+                      className="flex h-full items-center justify-end rounded-md bg-primary/85 px-1.5 text-[11px] font-semibold text-primary-foreground transition-all"
                       style={{ width: `${Math.max((item.count / funnelMax) * 100, item.count > 0 ? 8 : 0)}%` }}
                     >
                       {item.count > 0 ? item.count : ""}
                     </div>
                   </div>
-                  <span className="tabular w-6 shrink-0 text-right text-[10.5px] text-foreground">{item.count}</span>
+                  <span className="tabular w-6 shrink-0 text-right text-[11px] text-foreground">{item.count}</span>
                 </div>
               ))}
             </div>
-            <div className="flex flex-wrap items-center gap-3 border-t border-border/60 pt-2 text-[10.5px] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
               <span>Đã nhận việc: <span className="font-semibold text-success">{started}</span></span>
               <span>Đã dừng: <span className="font-semibold text-destructive">{rejected}</span></span>
               <span>Tổng vị trí: {jobs.length}</span>
@@ -187,7 +187,7 @@ const RecruitmentOverview = () => {
           <Card className="space-y-2.5 p-4">
             <div className="flex items-center justify-between">
               <p className="text-[12.5px] font-semibold text-foreground">Phỏng vấn sắp tới</p>
-              <Link to="/tuyen-dung/lich-hen" className="text-[10.5px] font-medium text-primary hover:underline">
+              <Link to="/tuyen-dung/lich-hen" className="text-[11px] font-medium text-primary hover:underline">
                 Xem lịch
               </Link>
             </div>
@@ -205,10 +205,10 @@ const RecruitmentOverview = () => {
                       >
                         {candidate?.full_name ?? "Ứng viên"}
                       </Link>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {formatDateTime(interview.scheduled_at)} · {interview.duration_minutes} phút
                       </p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {interview.interviewer ?? INTERVIEW_STATUS_LABELS[interview.status] ?? "Chưa có người phỏng vấn"}
                       </p>
                     </li>
@@ -221,7 +221,7 @@ const RecruitmentOverview = () => {
           <Card className="space-y-2.5 p-4 lg:col-span-2">
             <div className="flex items-center justify-between">
               <p className="text-[12.5px] font-semibold text-foreground">Chiến dịch đang mở</p>
-              <Link to="/tuyen-dung/chien-dich" className="text-[10.5px] font-medium text-primary hover:underline">
+              <Link to="/tuyen-dung/chien-dich" className="text-[11px] font-medium text-primary hover:underline">
                 Xem tất cả
               </Link>
             </div>
@@ -246,7 +246,7 @@ const RecruitmentOverview = () => {
                     <li key={campaign.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                       <div className="min-w-0">
                         <p className="truncate text-[12px] font-semibold text-foreground">{campaign.title}</p>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {list.length} ứng viên · {hired}/{campaign.headcount} đã nhận
                         </p>
                       </div>
@@ -277,13 +277,13 @@ const RecruitmentOverview = () => {
                     >
                       {candidate.full_name}
                     </Link>
-                    <p className="truncate text-[10px] text-muted-foreground">
+                    <p className="truncate text-[11px] text-muted-foreground">
                       {candidate.position_applied ?? "Chưa chọn vị trí"}
                       {candidate.campaign_id ? ` · ${campaignById.get(candidate.campaign_id)?.title ?? ""}` : ""}
                     </p>
                     <div className="mt-1 flex items-center gap-2">
                       <CandidateStatusBadge status={candidate.status} />
-                      <span className="text-[9.5px] text-muted-foreground">{formatDay(candidate.applied_at)}</span>
+                      <span className="text-[11px] text-muted-foreground">{formatDay(candidate.applied_at)}</span>
                     </div>
                   </li>
                 ))}

@@ -440,7 +440,7 @@ const Contracts = () => {
 
       <div className="grid gap-3 sm:grid-cols-4">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Tổng hợp đồng
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -448,7 +448,7 @@ const Contracts = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Đang hiệu lực
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-success">
@@ -456,7 +456,7 @@ const Contracts = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Sắp hết hạn 30 ngày
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-warning">
@@ -464,7 +464,7 @@ const Contracts = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Hết hạn / chấm dứt
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -556,7 +556,7 @@ const Contracts = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[1000px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   {canManage && (
                     <th className="w-[40px] px-2 py-2.5 text-center font-semibold">
                       <input
@@ -623,7 +623,7 @@ const Contracts = () => {
                         >
                           {contract.employee_name ?? "Nhân sự"}
                         </button>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {contract.employee_code ?? "—"}
                           {contract.employee_department
                             ? ` · ${contract.employee_department}`
@@ -634,7 +634,7 @@ const Contracts = () => {
                         <p className="font-mono text-[11.5px] text-foreground">
                           {contract.contract_no ?? "—"}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {CONTRACT_TYPE_LABELS[contract.contract_type] ??
                             contract.contract_type}
                           {contract.position ? ` · ${contract.position}` : ""}
@@ -651,14 +651,14 @@ const Contracts = () => {
                           days !== null &&
                           days >= 0 &&
                           days <= 30 && (
-                            <p className="text-[10px] font-medium text-warning">
+                            <p className="text-[11px] font-medium text-warning">
                               Còn {days} ngày
                             </p>
                           )}
                         {contract.status === "active" &&
                           days !== null &&
                           days < 0 && (
-                            <p className="text-[10px] font-medium text-destructive">
+                            <p className="text-[11px] font-medium text-destructive">
                               Đã quá hạn {-days} ngày
                             </p>
                           )}
@@ -775,7 +775,7 @@ const Contracts = () => {
                     key={String(label)}
                     className="rounded-lg border border-border bg-muted/20 px-3 py-2"
                   >
-                    <p className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">
+                    <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                       {label}
                     </p>
                     <p className="mt-0.5 text-[12.5px] font-medium text-foreground">
@@ -792,7 +792,7 @@ const Contracts = () => {
               )}
 
               <div className="rounded-lg border border-border px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                   Tài liệu hợp đồng
                 </p>
                 {detailContract.contract_file_path ? (
@@ -855,7 +855,7 @@ const Contracts = () => {
                     )}
                   </div>
                 )}
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   PDF/DOC/DOCX/ảnh, tối đa 15MB.
                 </p>
               </div>

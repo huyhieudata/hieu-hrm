@@ -41,7 +41,7 @@ export const AttendanceToday = ({
           <h3 className="text-[15px] font-semibold leading-6 text-foreground">Chấm công hôm nay</h3>
           <p className="mt-0.5 text-[12px] text-muted-foreground">{dateLabel}</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-success-subtle px-2 py-1 text-[10px] font-semibold text-success">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-success-subtle px-2 py-1 text-[11px] font-semibold text-success">
           <span className="h-1.5 w-1.5 rounded-full bg-success" />
           Hôm nay
         </span>
@@ -74,7 +74,7 @@ export const AttendanceToday = ({
             <span className="tabular font-display text-[26px] font-semibold leading-8 text-foreground">
               {percentage}%
             </span>
-            <span className="text-[10.5px] text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground">
               {present}/{total} có mặt
             </span>
           </div>
@@ -85,7 +85,7 @@ export const AttendanceToday = ({
             <div key={metric.label} className="min-w-0">
               <div className="flex items-center gap-1">
                 <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", metric.dot)} />
-                <span className="truncate whitespace-nowrap text-[10px] text-muted-foreground">
+                <span className="truncate whitespace-nowrap text-[11px] text-muted-foreground">
                   {metric.label}
                 </span>
               </div>

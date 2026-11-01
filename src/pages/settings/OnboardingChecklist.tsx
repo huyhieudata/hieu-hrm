@@ -211,7 +211,7 @@ const OnboardingChecklist = () => {
                   <button
                     type="button"
                     onClick={() => void handleOpenAttachment(item.attachment_path as string)}
-                    className="inline-flex max-w-[160px] items-center gap-1 truncate text-[10.5px] text-primary hover:underline"
+                    className="inline-flex max-w-[160px] items-center gap-1 truncate text-[11px] text-primary hover:underline"
                     title={item.attachment_name ?? "Tài liệu đính kèm"}
                   >
                     <Paperclip className="h-3 w-3 shrink-0" />
@@ -220,7 +220,7 @@ const OnboardingChecklist = () => {
                 )}
                 {canManage && (
                   <label
-                    className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-border px-2 py-1 text-[10.5px] text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-primary/40 hover:text-foreground"
                     title="Đính kèm tài liệu / biểu mẫu"
                   >
                     <Paperclip className="h-3 w-3" />

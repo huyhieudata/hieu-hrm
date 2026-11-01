@@ -18,7 +18,7 @@ export const PermissionMatrix = ({
   showDeny = false,
 }: PermissionMatrixProps) => (
   <div className="space-y-2">
-    <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+    <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
       <span>Hạng mục</span>
       <div className="flex gap-3 pr-1">
         {CRUD_ACTIONS.map((action) => (
@@ -70,7 +70,7 @@ export const PermissionMatrix = ({
     })}
 
     {showDeny && (
-      <p className="pt-1 text-[10.5px] leading-4 text-muted-foreground">
+      <p className="pt-1 text-[11px] leading-4 text-muted-foreground">
         Bấm một ô để chuyển trạng thái: trống → cấp quyền → thu hồi. Quyền thu hồi sẽ bị loại khỏi
         quyền nền của vai trò.
       </p>
@@ -82,7 +82,7 @@ export const PermissionMatrix = ({
 const keysHint = (selected: string[], denied: string[]) => {
   const granted = selected.filter((key) => !denied.includes(key)).length;
   return (
-    <p className="text-[10.5px] text-muted-foreground">
+    <p className="text-[11px] text-muted-foreground">
       Đang chọn <span className="font-semibold text-foreground">{granted}</span> quyền
       {denied.length > 0 ? ` · ${denied.length} quyền bị thu hồi` : ""}
     </p>

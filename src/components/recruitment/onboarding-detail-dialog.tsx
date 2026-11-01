@@ -169,7 +169,7 @@ export const OnboardingDetailDialog = ({
                 ["Điện thoại", record.phone ?? "—"],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     {label}
                   </p>
                   <p className="text-[12px] font-medium text-foreground">{value}</p>
@@ -233,7 +233,7 @@ export const OnboardingDetailDialog = ({
               )}
             </div>
 
-            <p className="text-[10.5px] leading-5 text-muted-foreground">
+            <p className="text-[11px] leading-5 text-muted-foreground">
               Tích đủ toàn bộ đầu việc → trạng thái tự chuyển “Hoàn thành”. Nếu còn thiếu, thanh tiến độ và
               trạng thái “Chưa hoàn thành” hiển thị tương ứng. {saving && "Đang lưu…"}
             </p>

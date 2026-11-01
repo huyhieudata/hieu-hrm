@@ -449,7 +449,7 @@ const Headcount = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[1180px] border-collapse text-[12px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
                   <th className="sticky left-0 z-10 min-w-[240px] bg-muted/40 px-4 py-2.5 text-left font-semibold">
                     Phòng ban / Vị trí
                   </th>

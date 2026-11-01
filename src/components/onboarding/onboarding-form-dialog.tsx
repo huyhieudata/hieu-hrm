@@ -154,7 +154,7 @@ const OnboardingFormDialog = ({ open, onOpenChange, companyId, employee, onSaved
                 onChange={(event) => setExpectedDate(event.target.value)}
                 className="h-10"
               />
-              <p className="text-[10px] text-muted-foreground">Mặc định: ngày nhận việc + 3 ngày.</p>
+              <p className="text-[11px] text-muted-foreground">Mặc định: ngày nhận việc + 3 ngày.</p>
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
@@ -162,7 +162,7 @@ const OnboardingFormDialog = ({ open, onOpenChange, companyId, employee, onSaved
               <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-[12px] text-muted-foreground">
                 Tự động theo tiến độ checklist
               </div>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 0%: Chờ hội nhập · &gt;0%: Đang hội nhập · 100%: Hoàn thành.
               </p>
             </div>
@@ -171,7 +171,7 @@ const OnboardingFormDialog = ({ open, onOpenChange, companyId, employee, onSaved
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-[12px]">Checklist hội nhập</Label>
-              <span className="text-[10.5px] text-muted-foreground">
+              <span className="text-[11px] text-muted-foreground">
                 {done}/{checklist.length} mục
               </span>
             </div>
@@ -203,7 +203,7 @@ const OnboardingFormDialog = ({ open, onOpenChange, companyId, employee, onSaved
                     </span>
                     <span className="text-[11.5px] text-foreground">
                       {item.label}
-                      {item.required && <span className="ml-1 text-[10px] text-destructive">*</span>}
+                      {item.required && <span className="ml-1 text-[11px] text-destructive">*</span>}
                     </span>
                   </button>
                 ))

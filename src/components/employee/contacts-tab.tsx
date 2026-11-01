@@ -260,7 +260,7 @@ const ContactsTab = ({ employeeId, companyId, canManage }: ContactsTabProps) => 
                         {CHANNEL_LABELS[row.channel] ?? row.channel}
                         {row.result ? ` · ${row.result}` : ""}
                       </span>
-                      <span className="block truncate text-[10.5px] text-muted-foreground">
+                      <span className="block truncate text-[11px] text-muted-foreground">
                         {row.note ?? "Không có ghi chú"}
                       </span>
                     </span>
@@ -389,15 +389,15 @@ const ContactsTab = ({ employeeId, companyId, canManage }: ContactsTabProps) => 
                 <Badge variant={stateTone(detail.state)}>{STATE_LABELS[detail.state] ?? detail.state}</Badge>
               </div>
               <div>
-                <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">Kết quả liên hệ</p>
+                <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Kết quả liên hệ</p>
                 <p className="mt-0.5 text-[12.5px] text-foreground">{detail.result || "—"}</p>
               </div>
               <div>
-                <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">Ghi chú</p>
+                <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Ghi chú</p>
                 <p className="mt-0.5 whitespace-pre-line text-[12px] text-muted-foreground">{detail.note || "—"}</p>
               </div>
               <div>
-                <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">Người thao tác</p>
+                <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Người thao tác</p>
                 <p className="mt-0.5 text-[12px] text-foreground">
                   {detail.author_name ?? "—"} · {new Date(detail.created_at).toLocaleString("vi-VN")}
                 </p>

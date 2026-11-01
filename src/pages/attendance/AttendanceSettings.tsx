@@ -209,7 +209,7 @@ const AttendanceSettings = () => {
                   return (
                     <span
                       key={method}
-                      className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10.5px] font-medium text-muted-foreground"
+                      className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                     >
                       <Icon className="h-2.5 w-2.5" />
                       {ATTENDANCE_METHOD_LABELS[method] ?? method}

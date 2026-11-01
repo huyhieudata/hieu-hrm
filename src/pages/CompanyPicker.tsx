@@ -258,7 +258,7 @@ const CompanyPicker = () => {
           </Card>
         </div>
 
-        <div className="mt-10 flex items-center gap-3 text-[10.5px] text-muted-foreground">
+        <div className="mt-10 flex items-center gap-3 text-[11px] text-muted-foreground">
           <LogoMark className="h-5 w-5 rounded-[6px]" />
           ONHRM · Dữ liệu được bảo vệ theo từng công ty
         </div>

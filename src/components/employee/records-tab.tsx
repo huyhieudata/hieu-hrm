@@ -207,7 +207,7 @@ export function RecordsTab<T extends { id: string }>({
         </div>
       ) : (
         <>
-          <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground md:flex">
+          <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground md:flex">
             <span className="flex-1">{columns[0]?.label}</span>
             {columns.slice(1).map((column) => (
               <span key={column.key} style={{ width: column.width ?? "128px" }} className="shrink-0">

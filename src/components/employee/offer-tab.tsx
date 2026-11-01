@@ -149,7 +149,7 @@ export const OfferTab = ({ employeeId, companyId }: OfferTabProps) => {
                     ["Hạn phản hồi", offer.response_deadline ? formatDay(offer.response_deadline) : "—"],
                   ].map(([label, value]) => (
                     <div key={label}>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                         {label}
                       </p>
                       <p className="text-[12.5px] font-medium text-foreground">{value}</p>
@@ -168,7 +168,7 @@ export const OfferTab = ({ employeeId, companyId }: OfferTabProps) => {
         )}
       </Card>
 
-      <p className="flex items-start gap-1.5 text-[10.5px] leading-5 text-muted-foreground">
+      <p className="flex items-start gap-1.5 text-[11px] leading-5 text-muted-foreground">
         <Info className="mt-0.5 h-3 w-3 shrink-0" />
         Offer chỉ được đồng bộ từ module Tuyển dụng — mở hồ sơ ứng viên để thêm, sửa hoặc xoá offer.
       </p>

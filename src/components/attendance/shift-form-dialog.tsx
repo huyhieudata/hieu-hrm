@@ -286,7 +286,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
                     <span className="min-w-0">
                       <span className="block text-[12px] font-semibold">{item.label}</span>
                       <span
-                        className={`block text-[10.5px] ${active ? "text-primary-subtle-foreground/80" : "text-muted-foreground"}`}
+                        className={`block text-[11px] ${active ? "text-primary-subtle-foreground/80" : "text-muted-foreground"}`}
                       >
                         {item.hint}
                       </span>
@@ -326,7 +326,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
 
           {isSingle ? (
             <div className="rounded-lg border border-border bg-muted/25 p-3.5">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Giờ làm việc liên tục
               </p>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -359,7 +359,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-border bg-muted/25 p-3.5">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Buổi sáng
                 </p>
                 <div className="mt-2 space-y-2.5">
@@ -391,7 +391,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
               </div>
 
               <div className="rounded-lg border border-border bg-muted/25 p-3.5">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Buổi chiều
                 </p>
                 <div className="mt-2 space-y-2.5">
@@ -426,7 +426,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-muted/25 p-3.5">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Khung giờ chấm công buổi sáng
               </p>
               <div className="mt-2 space-y-2.5">
@@ -473,7 +473,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
 
             {!isSingle && (
               <div className="rounded-lg border border-border bg-muted/25 p-3.5">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Khung giờ chấm công buổi chiều
                 </p>
                 <div className="mt-2 space-y-2.5">
@@ -520,7 +520,7 @@ const ShiftFormDialog = ({ open, onOpenChange, shift, onSubmit }: ShiftFormDialo
             )}
           </div>
 
-          <p className="text-[10.5px] leading-4 text-muted-foreground">
+          <p className="text-[11px] leading-4 text-muted-foreground">
             Chấm công trong khung hợp lệ được ghi nhận; sau giờ muộn bị tính đi muộn; ngoài khung hợp lệ không ghi
             nhận công.
           </p>

@@ -61,7 +61,7 @@ export const Logo = ({ collapsed = false, className, subtitle = "People Platform
       <div className="-ml-[1px] flex flex-col">
         <BrandWordmark className={large ? "text-[21px]" : "text-[16px]"} />
         {subtitle && (
-          <span className="mt-0.5 text-[9.5px] font-medium uppercase leading-3 tracking-[0.16em] text-muted-foreground">
+          <span className="mt-0.5 text-[11px] font-medium uppercase leading-3 tracking-[0.16em] text-muted-foreground">
             {subtitle}
           </span>
         )}

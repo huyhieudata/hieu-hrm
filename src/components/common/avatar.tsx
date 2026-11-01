@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { avatarTone, initials } from "@/lib/format";
 
 const sizes = {
-  sm: "h-7 w-7 text-[10px]",
+  sm: "h-7 w-7 text-[11px]",
   md: "h-9 w-9 text-[11px]",
   lg: "h-11 w-11 text-[13px]",
 };
@@ -39,7 +39,7 @@ export const AvatarStack = ({ names, extra }: { names: string[]; extra?: number 
       </span>
     ))}
     {!!extra && (
-      <span className="-ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-card">
+      <span className="-ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground ring-2 ring-card">
         +{extra}
       </span>
     )}

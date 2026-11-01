@@ -123,7 +123,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
           <LogoMark className="h-8 w-8 rounded-[10px]" />
           <div className="min-w-0">
             <p className="truncate text-[13px] font-semibold leading-4 text-foreground">{meta.label}</p>
-            <p className="truncate text-[10px] leading-3 text-muted-foreground">{meta.group}</p>
+            <p className="truncate text-[11px] leading-3 text-muted-foreground">{meta.group}</p>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
               aria-label="Tìm nhân viên toàn hệ thống"
               className="h-9 w-[210px] rounded-md border border-border bg-card pl-9 pr-16 text-[13px] text-foreground shadow-xs outline-none transition-all duration-200 placeholder:text-muted-foreground/80 hover:border-primary/30 focus:w-[280px] focus:border-primary focus:shadow-focus xl:w-[280px] xl:focus:w-[320px]"
             />
-            <kbd className="pointer-events-none absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <kbd className="pointer-events-none absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
               <Command className="h-2.5 w-2.5" />K
             </kbd>
           </form>
@@ -202,7 +202,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
                   <span className="block max-w-[160px] truncate text-[12.5px] font-semibold leading-4 text-foreground">
                     {name}
                   </span>
-                  <span className="block text-[10.5px] text-muted-foreground">
+                  <span className="block text-[11px] text-muted-foreground">
                     {role ? ROLE_LABELS[role] : "Chưa có vai trò"}
                   </span>
                 </span>

@@ -342,14 +342,14 @@ const PublicApplyForm = () => {
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 {submitting ? "Đang gửi…" : "Gửi hồ sơ ứng tuyển"}
               </Button>
-              <p className="text-center text-[10.5px] leading-5 text-muted-foreground">
+              <p className="text-center text-[11px] leading-5 text-muted-foreground">
                 Bằng việc gửi hồ sơ, bạn đồng ý để {info?.company_name} lưu và xử lý thông tin cho mục đích tuyển dụng.
               </p>
             </form>
           </Card>
         )}
 
-        <p className="mt-6 text-center text-[10.5px] text-muted-foreground">© 2026 ONHRM · Biểu mẫu ứng tuyển</p>
+        <p className="mt-6 text-center text-[11px] text-muted-foreground">© 2026 ONHRM · Biểu mẫu ứng tuyển</p>
       </div>
     </div>
   );

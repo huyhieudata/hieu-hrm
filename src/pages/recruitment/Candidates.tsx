@@ -226,7 +226,7 @@ const Candidates = () => {
           .slice(0, MAX_VISIBLE_STATS)
           .map((item) => (
             <Card key={item.label} className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 {item.label}
               </p>
               <p className={`mt-1 font-display text-[22px] font-semibold ${item.tone}`}>{item.value}</p>
@@ -323,7 +323,7 @@ const Candidates = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[960px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="px-4 py-2.5 text-left font-semibold">Ứng viên</th>
                   <th className="px-3 py-2.5 text-left font-semibold">Vị trí / chiến dịch</th>
                   <th className="px-3 py-2.5 text-left font-semibold">Nguồn</th>
@@ -341,14 +341,14 @@ const Candidates = () => {
                   >
                     <td className="px-4 py-2.5">
                       <p className="text-[12.5px] font-semibold text-foreground">{row.full_name}</p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {row.email ?? "Chưa có email"}
                         {row.phone ? ` · ${row.phone}` : ""}
                       </p>
                     </td>
                     <td className="px-3 py-2.5">
                       <p className="text-[12px] text-foreground">{row.position_applied ?? "—"}</p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         {row.campaign_id ? campaignById.get(row.campaign_id)?.title ?? "—" : "Chưa gắn chiến dịch"}
                       </p>
                     </td>
@@ -404,7 +404,7 @@ const Candidates = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="truncate text-[13px] font-semibold text-foreground">{row.full_name}</p>
-                  <p className="truncate text-[10.5px] text-muted-foreground">
+                  <p className="truncate text-[11px] text-muted-foreground">
                     {row.position_applied ?? "Chưa chọn vị trí"}
                     {row.campaign_id ? ` · ${campaignById.get(row.campaign_id)?.title ?? ""}` : ""}
                   </p>
@@ -412,7 +412,7 @@ const Candidates = () => {
                 <CandidateStatusBadge status={row.status} />
               </div>
               <div className="mt-2 flex items-end justify-between gap-2">
-                <div className="text-[10.5px] text-muted-foreground">
+                <div className="text-[11px] text-muted-foreground">
                   <p>{row.email ?? row.phone ?? "Chưa có liên hệ"}</p>
                   <p>
                     {row.source ? CANDIDATE_SOURCE_LABELS[row.source] ?? row.source : "—"} ·{" "}
@@ -471,7 +471,7 @@ const Candidates = () => {
         >
           <FileDown className="h-3.5 w-3.5" /> PDF
         </Button>
-        <p className="text-[10.5px] text-muted-foreground">
+        <p className="text-[11px] text-muted-foreground">
           {filtered.length}/{rows.length} ứng viên
         </p>
       </div>

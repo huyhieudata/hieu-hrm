@@ -217,9 +217,9 @@ const Schedule = () => {
       ) : (
         <Card className="overflow-hidden p-0">
           <div className="scrollbar-slim overflow-x-auto">
-            <table className="w-full border-collapse text-[10.5px]">
+            <table className="w-full border-collapse text-[11px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="sticky left-0 z-10 min-w-[210px] bg-muted/40 px-4 py-2.5 text-left font-semibold">
                     Nhân sự
                   </th>
@@ -231,8 +231,8 @@ const Schedule = () => {
                         key={date}
                         className={`w-[86px] px-1 py-2 text-center font-semibold ${weekend ? "text-muted-foreground/60" : ""}`}
                       >
-                        <span className="block text-[9.5px]">{WEEKDAY_SHORT[weekday]}</span>
-                        <span className="block text-[10.5px] text-foreground/80">{index + 1}</span>
+                        <span className="block text-[11px]">{WEEKDAY_SHORT[weekday]}</span>
+                        <span className="block text-[11px] text-foreground/80">{index + 1}</span>
                       </th>
                     );
                   })}
@@ -243,14 +243,14 @@ const Schedule = () => {
                   <tr key={employee.id} className="border-t border-border/50">
                     <td className="sticky left-0 z-10 bg-card px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[9.5px] font-semibold text-primary-subtle-foreground">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[11px] font-semibold text-primary-subtle-foreground">
                           {employee.full_name.slice(0, 2).toUpperCase()}
                         </span>
                         <span className="min-w-0">
                           <span className="block truncate text-[12px] font-medium text-foreground">
                             {employee.full_name}
                           </span>
-                          <span className="block truncate text-[10px] text-muted-foreground">
+                          <span className="block truncate text-[11px] text-muted-foreground">
                             {employee.code}
                             {employee.department ? ` · ${employee.department}` : ""}
                           </span>
@@ -275,7 +275,7 @@ const Schedule = () => {
                         return (
                           <td
                             key={date}
-                            className="bg-muted/10 px-1 py-2 text-center text-[10px] text-muted-foreground/50"
+                            className="bg-muted/10 px-1 py-2 text-center text-[11px] text-muted-foreground/50"
                           >
                             Nghỉ
                           </td>
@@ -285,11 +285,11 @@ const Schedule = () => {
                       return (
                         <td key={date} className="px-1 py-1.5 text-center align-top">
                           <span className="block rounded-[5px] bg-muted/40 px-1 py-1">
-                            <span className="block text-[9.5px] font-medium text-foreground/80">
+                            <span className="block text-[11px] font-medium text-foreground/80">
                               {workingHours(shift)}
                             </span>
                             <span
-                              className={`mt-0.5 block text-[9px] font-semibold ${
+                              className={`mt-0.5 block text-[11px] font-semibold ${
                                 checkIns.length === 0 ? "text-muted-foreground/60" : late ? "text-warning" : "text-success"
                               }`}
                             >

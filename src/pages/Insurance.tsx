@@ -396,7 +396,7 @@ const Insurance = () => {
           </div>
         </div>
 
-        <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:flex">
+        <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:flex">
           <span className="flex-1">Nhân sự</span>
           <span className="w-[130px] shrink-0">Số sổ BHXH</span>
           <span className="w-[110px] shrink-0">Bắt đầu đóng</span>
@@ -545,7 +545,7 @@ const Insurance = () => {
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center gap-2">
               {detail?.employee.full_name}
-              <Badge variant="muted" className="font-mono text-[10.5px]">
+              <Badge variant="muted" className="font-mono text-[11px]">
                 {detail?.employee.code}
               </Badge>
             </DialogTitle>
@@ -602,7 +602,7 @@ const Insurance = () => {
 
             <div className="overflow-x-auto rounded-md border border-border">
               <table className="w-full text-[11.5px]">
-                <thead className="bg-muted/50 text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
+                <thead className="bg-muted/50 text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
                     <th className="px-2.5 py-2 text-left font-semibold">
                       Số sổ
@@ -627,7 +627,7 @@ const Insurance = () => {
                 <tbody className="divide-y divide-border/60">
                   {(detail?.records ?? []).map((record) => (
                     <tr key={record.id}>
-                      <td className="px-2.5 py-2 font-mono text-[10.5px] text-muted-foreground">
+                      <td className="px-2.5 py-2 font-mono text-[11px] text-muted-foreground">
                         {record.insurance_number ?? "—"}
                       </td>
                       <td className="px-2.5 py-2 text-muted-foreground">
@@ -656,7 +656,7 @@ const Insurance = () => {
               </table>
             </div>
 
-            <p className="text-[10.5px] leading-5 text-muted-foreground">
+            <p className="text-[11px] leading-5 text-muted-foreground">
               Bảng kê gồm mọi giai đoạn đóng BHXH của nhân sự. Hiện chỉ giai
               đoạn gần nhất được hiển thị ở danh sách chính.
             </p>

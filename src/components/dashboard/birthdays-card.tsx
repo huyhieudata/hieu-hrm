@@ -33,7 +33,7 @@ export const BirthdaysCard = ({ birthdays }: { birthdays: DashboardBirthday[] })
               <span className="tabular font-display text-[14px] font-semibold leading-4 text-foreground">
                 {person.day}
               </span>
-              <span className="text-[9px] uppercase leading-3 text-muted-foreground">Th{person.month}</span>
+              <span className="text-[11px] uppercase leading-3 text-muted-foreground">Th{person.month}</span>
             </div>
             <Avatar name={person.name} size="md" />
             <div className="min-w-0 flex-1">

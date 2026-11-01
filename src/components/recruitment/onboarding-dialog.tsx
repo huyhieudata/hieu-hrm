@@ -90,7 +90,7 @@ const Field = ({
       {required && <span className="ml-0.5 text-destructive">*</span>}
     </Label>
     {children}
-    {hint && <p className="text-[10.5px] leading-4 text-muted-foreground">{hint}</p>}
+    {hint && <p className="text-[11px] leading-4 text-muted-foreground">{hint}</p>}
   </div>
 );
 
@@ -379,7 +379,7 @@ export const OnboardingDialog = ({
 
           <div className="space-y-5 py-3">
             <section className="space-y-3">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Thông tin cá nhân
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -452,7 +452,7 @@ export const OnboardingDialog = ({
             </section>
 
             <section className="space-y-3">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Vị trí & hội nhập
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -485,14 +485,14 @@ export const OnboardingDialog = ({
                 <div className="flex items-center gap-2">
                   <UserCog className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                       Quản lý trực tiếp {manualManager ? "(gán thủ công)" : "(tự động theo cơ cấu tổ chức)"}
                     </p>
                     <p className="truncate text-[12px] font-medium text-foreground">
                       {effectiveManagerName ?? "Chưa gán người quản lý cho phòng ban này"}
                     </p>
                   </div>
-                  <Button asChild variant="ghost" size="sm" className="h-7 gap-1 text-[10.5px]">
+                  <Button asChild variant="ghost" size="sm" className="h-7 gap-1 text-[11px]">
                     <Link to="/cai-dat/co-cau-to-chuc">
                       <Settings2 className="h-3 w-3" /> Cài đặt
                     </Link>
@@ -610,7 +610,7 @@ export const OnboardingDialog = ({
                   <ListChecks className="h-3.5 w-3.5 text-primary" />
                   <div>
                     <p className="text-[12px] font-semibold text-foreground">Checklist hội nhập</p>
-                    <p className="text-[10.5px] text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground">
                       Lấy từ Cài đặt → Checklist hội nhập
                     </p>
                   </div>

@@ -45,7 +45,7 @@ const NotFound = () => {
             <Link to="/login">Đăng nhập lại</Link>
           </Button>
         </div>
-        <div className="mt-7 flex items-center justify-center gap-1.5 border-t border-border pt-4 text-[10.5px] text-muted-foreground">
+        <div className="mt-7 flex items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
           <MapPinOff className="h-3 w-3" />
           ONHRM · Mã lỗi 404
         </div>

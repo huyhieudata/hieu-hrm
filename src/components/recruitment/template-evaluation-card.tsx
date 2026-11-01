@@ -38,7 +38,7 @@ export const TemplateEvaluationCard = ({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[12.5px] font-semibold text-foreground">{evaluation.reviewer_name ?? "Người đánh giá"}</p>
-          <p className="text-[10.5px] text-muted-foreground">
+          <p className="text-[11px] text-muted-foreground">
             {isDraft ? "Cập nhật nháp" : "Nộp lúc"} {formatDateTime(evaluation.submitted_at ?? evaluation.created_at)}
           </p>
         </div>
@@ -62,18 +62,18 @@ export const TemplateEvaluationCard = ({
           <p className="truncate font-medium text-foreground">
             {template ? `${template.name} · v${template.version}` : "Biểu mẫu đã xoá"}
           </p>
-          <p className="truncate text-[10.5px] text-muted-foreground">
+          <p className="truncate text-[11px] text-muted-foreground">
             {template ? EVALUATION_KIND_LABELS[template.kind] ?? template.kind : ""}
             {interview ? ` · Vòng PV ${formatDateTime(interview.scheduled_at)}` : " · Không gắn vòng phỏng vấn"}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[9px] uppercase tracking-[0.05em] text-muted-foreground">Điểm tổng</p>
+          <p className="text-[11px] uppercase tracking-[0.05em] text-muted-foreground">Điểm tổng</p>
           <p className="tabular text-[15px] font-semibold text-primary">
             {evaluation.total_score ?? "—"}
             <span className="text-[11px] font-normal text-muted-foreground">/{template?.scale_max ?? 5}</span>
           </p>
-          {isDraft && <p className="text-[9.5px] text-muted-foreground">{answered} tiêu chí đã chấm</p>}
+          {isDraft && <p className="text-[11px] text-muted-foreground">{answered} tiêu chí đã chấm</p>}
         </div>
       </div>
       <div className="flex items-center gap-1.5">

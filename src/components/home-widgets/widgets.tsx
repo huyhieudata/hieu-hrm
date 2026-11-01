@@ -86,7 +86,7 @@ const ClockWidget = ({ surface, size }: WidgetProps) => {
           : "flex h-full flex-col justify-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-navy/80 p-5 text-white shadow-sm"
       }
     >
-      <p className="flex items-center gap-1.5 text-[12px] font-semibold text-white/70">
+      <p className="flex items-center gap-1.5 text-[12px] font-semibold text-white/85">
         <Clock className="h-3.5 w-3.5" /> Giờ Việt Nam (UTC+7)
       </p>
       <p
@@ -307,7 +307,7 @@ const NewsWidget = ({ surface, size, companyId, audience }: WidgetProps) => {
                 </p>
               ) : null}
               {post.published_at ? (
-                <p className="mt-1 text-[10.5px] text-muted-foreground">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   {new Date(post.published_at).toLocaleDateString("vi-VN")}
                 </p>
               ) : null}

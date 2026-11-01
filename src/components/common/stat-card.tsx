@@ -93,7 +93,7 @@ export const StatCard = ({
           <div className="flex min-w-0 items-center gap-1.5">
             <span
               className={cn(
-                "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10.5px] font-semibold",
+                "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
                 favorable
                   ? "bg-success-subtle text-success"
                   : "bg-destructive-subtle text-destructive",
@@ -106,12 +106,12 @@ export const StatCard = ({
               )}
               {Math.abs(delta)}%
             </span>
-            <span className="hidden truncate whitespace-nowrap text-[10.5px] text-muted-foreground xl:inline">
+            <span className="hidden truncate whitespace-nowrap text-[11px] text-muted-foreground xl:inline">
               {deltaLabel}
             </span>
           </div>
         ) : (
-          <span className="truncate whitespace-nowrap text-[10.5px] text-muted-foreground">{deltaLabel}</span>
+          <span className="truncate whitespace-nowrap text-[11px] text-muted-foreground">{deltaLabel}</span>
         )}
         <Sparkline data={data} stroke={styles.stroke} fill={styles.fill} className="hidden h-8 w-[56px] shrink-0 sm:block xl:hidden 2xl:block" />
       </div>

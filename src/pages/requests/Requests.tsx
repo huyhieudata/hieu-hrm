@@ -443,15 +443,15 @@ const Requests = () => {
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Chờ duyệt</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Chờ duyệt</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{pendingCount}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đã duyệt</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đã duyệt</p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{approvedCount}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Ngày phép đã trừ ({year})
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{leaveUsed}</p>
@@ -476,7 +476,7 @@ const Requests = () => {
             >
               {item.label}
               <span
-                className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9.5px] ${
+                className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[11px] ${
                   tab === item.value ? "bg-primary/15" : "bg-muted"
                 }`}
               >
@@ -608,7 +608,7 @@ const Requests = () => {
                       <p className="mt-1 text-[11px] text-muted-foreground">Phản hồi: {request.decision_note}</p>
                     )}
                     {steps.length > 0 && (
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10.5px] text-muted-foreground">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
                         {pendingStep ? (
                           <>
                             <Badge variant={pendingState === "overdue" ? "destructive" : "muted"}>

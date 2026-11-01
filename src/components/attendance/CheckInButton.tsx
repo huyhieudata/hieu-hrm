@@ -74,7 +74,7 @@ export const CheckInButton = ({ mode, label, hint, onPress, holdMs = 1000 }: Che
         >
           {mode === "busy" ? <Loader2 className="h-7 w-7 animate-spin" /> : <ScanFace className="h-7 w-7" />}
           <span className="text-[15px] font-extrabold tracking-wide">{label}</span>
-          {hint ? <span className="px-3 text-center text-[10px] font-semibold opacity-90">{hint}</span> : null}
+          {hint ? <span className="px-3 text-center text-[11px] font-semibold opacity-90">{hint}</span> : null}
         </button>
       </div>
       {holding && progress > 0 ? (

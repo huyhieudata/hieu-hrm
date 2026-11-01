@@ -23,7 +23,7 @@ export const LeaveApprovals = ({ items }: { items: DashboardLeaveItem[] }) => (
       <div>
         <div className="flex items-center gap-2">
           <h3 className="text-[15px] font-semibold leading-6 text-foreground">Đơn từ chờ xử lý</h3>
-          <span className="tabular flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-subtle px-1.5 text-[10.5px] font-semibold text-primary-subtle-foreground">
+          <span className="tabular flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-subtle px-1.5 text-[11px] font-semibold text-primary-subtle-foreground">
             {items.length}
           </span>
         </div>
@@ -69,7 +69,7 @@ export const LeaveApprovals = ({ items }: { items: DashboardLeaveItem[] }) => (
                 {shortDate(item.startDate)}
                 {item.endDate !== item.startDate ? ` – ${shortDate(item.endDate)}` : ""}
                 {item.days > 0 && (
-                  <span className="ml-1 rounded-full bg-warning-subtle px-1.5 py-0.5 text-[10px] font-semibold text-warning">
+                  <span className="ml-1 rounded-full bg-warning-subtle px-1.5 py-0.5 text-[11px] font-semibold text-warning">
                     {item.days} ngày
                   </span>
                 )}

@@ -282,7 +282,7 @@ export const TemplateEvaluationDialog = ({
                         </p>
                       )}
                     </div>
-                    <span className="text-[10.5px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                       Trọng số {criterion.weight}
                     </span>
                   </div>
@@ -358,7 +358,7 @@ export const TemplateEvaluationDialog = ({
             </Select>
           </div>
           <div className="flex flex-col justify-end rounded-md bg-muted/40 px-3 py-2">
-            <p className="text-[10.5px] uppercase tracking-[0.05em] text-muted-foreground">
+            <p className="text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
               Điểm tổng có trọng số
             </p>
             <p className="tabular text-[18px] font-semibold text-primary">
@@ -369,7 +369,7 @@ export const TemplateEvaluationDialog = ({
               </span>
             </p>
             {!readOnly && missing > 0 && templateCriteria.length > 0 && (
-              <p className="text-[10.5px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 Còn {missing} tiêu chí chưa chấm
               </p>
             )}

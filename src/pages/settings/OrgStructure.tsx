@@ -231,13 +231,13 @@ const PositionsDialog = ({ department, positions, open, onOpenChange, canManage,
                         <span className="truncate">{position.title}</span>
                         {position.is_management && <Badge variant="subtle">Quản lý</Badge>}
                       </p>
-                      <p className="truncate text-[10.5px] text-muted-foreground">
+                      <p className="truncate text-[11px] text-muted-foreground">
                         {position.level ?? "Chưa xếp cấp bậc"}
                         {position.description ? ` · ${position.description}` : ""}
                       </p>
                     </div>
                     <label
-                      className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-1 text-[10.5px] ${
+                      className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] ${
                         position.is_management
                           ? "border-primary/30 bg-primary-subtle text-primary-subtle-foreground"
                           : "border-border bg-card text-muted-foreground"
@@ -531,15 +531,15 @@ const OrgStructure = () => {
                   key={position.id}
                   className={
                     position.is_management
-                      ? "inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2 py-0.5 text-[10px] font-semibold text-primary-subtle-foreground"
-                      : "inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                      ? "inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2 py-0.5 text-[11px] font-semibold text-primary-subtle-foreground"
+                      : "inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                   }
                 >
                   {position.title}
                 </span>
               ))}
               {positionsOfDepartment.length > 4 && (
-                <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
                   +{positionsOfDepartment.length - 4}
                 </span>
               )}
@@ -628,7 +628,7 @@ const OrgStructure = () => {
                     {headcounts[department.name] ?? 0} nhân sự · {(positionsByDepartment[department.id] ?? []).length} vị trí
                   </p>
                   {parentName(department) && (
-                    <p className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-muted-foreground">
+                    <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                       <ChevronRight className="h-2.5 w-2.5" /> Thuộc {parentName(department)}
                     </p>
                   )}
@@ -667,7 +667,7 @@ const OrgStructure = () => {
               <div className="mt-3 flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
                 <UserCog className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Người quản lý
                   </p>
                   <p className="truncate text-[12px] font-medium text-foreground">
@@ -684,8 +684,8 @@ const OrgStructure = () => {
                       key={position.id}
                       className={
                         position.is_management
-                          ? "inline-flex items-center rounded-full bg-primary-subtle px-2 py-0.5 text-[10px] font-semibold text-primary-subtle-foreground"
-                          : "inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                          ? "inline-flex items-center rounded-full bg-primary-subtle px-2 py-0.5 text-[11px] font-semibold text-primary-subtle-foreground"
+                          : "inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                       }
                     >
                       {position.title}

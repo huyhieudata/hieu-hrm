@@ -342,7 +342,7 @@ const CheckIn = () => {
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <Card className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Công tháng này
               </p>
               <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -350,13 +350,13 @@ const CheckIn = () => {
               </p>
             </Card>
             <Card className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Ngày đã chấm
               </p>
               <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{stats.workedDays}</p>
             </Card>
             <Card className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Ngày đi muộn
               </p>
               <p className={`mt-1 font-display text-[22px] font-semibold ${stats.lateDays ? "text-warning" : "text-foreground"}`}>
@@ -406,17 +406,17 @@ const CheckIn = () => {
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
                           <p className="text-[12.5px] font-semibold text-foreground">{row.label}</p>
-                          <p className="text-[10.5px] text-muted-foreground">Hợp lệ {row.windowLabel}</p>
+                          <p className="text-[11px] text-muted-foreground">Hợp lệ {row.windowLabel}</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <p className="text-[9.5px] uppercase tracking-[0.06em] text-muted-foreground">Vào</p>
+                            <p className="text-[11px] uppercase tracking-[0.06em] text-muted-foreground">Vào</p>
                             <p className="text-[13px] font-semibold text-foreground">
                               {formatTime(record?.check_in ?? null)}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-[9.5px] uppercase tracking-[0.06em] text-muted-foreground">Ra</p>
+                            <p className="text-[11px] uppercase tracking-[0.06em] text-muted-foreground">Ra</p>
                             <p className="text-[13px] font-semibold text-foreground">
                               {formatTime(record?.check_out ?? null)}
                             </p>
@@ -462,7 +462,7 @@ const CheckIn = () => {
               )}
 
               {policy && (
-                <div className="mt-3 flex flex-wrap gap-1.5 text-[10.5px]">
+                <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
                   <Badge variant={policy.require_photo ? "subtle" : "muted"} className="gap-1">
                     <Camera className="h-3 w-3" /> {policy.require_photo ? "Bắt buộc ảnh" : "Không cần ảnh"}
                   </Badge>
@@ -498,7 +498,7 @@ const CheckIn = () => {
               )}
 
               {myShift && (
-                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-[10.5px] text-muted-foreground">
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground">
                   <span>Khung hợp lệ: {shiftWindowLabel(myShift)}</span>
                   <span className="text-border">·</span>
                   <span>

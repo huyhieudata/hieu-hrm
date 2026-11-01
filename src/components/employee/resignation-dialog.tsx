@@ -408,7 +408,7 @@ export const ResignationDialog = ({
                   onChange={(event) => setResignDate(event.target.value)}
                   className="h-10"
                 />
-                <p className="text-[10.5px] leading-4 text-muted-foreground">
+                <p className="text-[11px] leading-4 text-muted-foreground">
                   Ngày sẽ tự khớp với ngày kết thúc của mốc công tác trước đó nếu đã có.
                 </p>
               </div>

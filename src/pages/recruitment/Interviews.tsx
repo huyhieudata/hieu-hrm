@@ -291,7 +291,7 @@ const Interviews = () => {
               {INTERVIEW_STATUS_LABELS[row.status] ?? row.status}
             </Badge>
           </div>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10.5px] text-muted-foreground">
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <CalendarClock className="h-3 w-3" />{" "}
               {formatDateTime(row.scheduled_at)}
@@ -369,7 +369,7 @@ const Interviews = () => {
     >
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Sắp tới
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-info">
@@ -377,7 +377,7 @@ const Interviews = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Hoàn thành tháng này
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-success">
@@ -385,7 +385,7 @@ const Interviews = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Tổng lịch hẹn
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -435,7 +435,7 @@ const Interviews = () => {
           {upcoming.length > 0 && (
             <Card className="overflow-hidden p-0">
               <div className="border-b border-border/60 bg-muted/25 px-4 py-2">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-primary">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-primary">
                   Sắp tới
                 </p>
               </div>
@@ -447,7 +447,7 @@ const Interviews = () => {
           {past.length > 0 && (
             <Card className="overflow-hidden p-0">
               <div className="border-b border-border/60 bg-muted/25 px-4 py-2">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   Đã qua / đã huỷ
                 </p>
               </div>

@@ -150,14 +150,14 @@ const PermissionsTab = ({ employeeId, companyId, canManage }: PermissionsTabProp
               ))}
             </SelectContent>
           </Select>
-          <p className="text-[10.5px] text-muted-foreground">
+          <p className="text-[11px] text-muted-foreground">
             Chọn nhóm để nạp sẵn quyền; sau đó có thể tích/bỏ từng quyền bên dưới.
           </p>
         </div>
       </div>
 
       <div className="mt-4 rounded-lg border border-border/70 bg-muted/20 p-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
           Quyền đặc biệt
         </p>
         <div className="mt-2 flex flex-wrap gap-2">

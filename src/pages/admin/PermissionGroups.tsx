@@ -225,7 +225,7 @@ const PermissionGroups = () => {
                 {group.permissions.map((permission) => (
                   <span
                     key={permission}
-                    className="rounded-md bg-muted px-2 py-0.5 text-[10.5px] font-medium text-muted-foreground"
+                    className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                   >
                     {permissionLabel(permission)}
                   </span>
@@ -261,7 +261,7 @@ const PermissionGroups = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 <span>Hạng mục</span>
                 <div className="flex gap-3 pr-1">
                   {CRUD_ACTIONS.map((action) => (

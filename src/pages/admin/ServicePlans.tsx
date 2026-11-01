@@ -193,7 +193,7 @@ const ServicePlans = () => {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h3 className="text-[14px] font-semibold text-foreground">{plan.name}</h3>
-                  <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">{plan.code ?? "—"}</p>
+                  <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{plan.code ?? "—"}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Badge variant={plan.active ? "success" : "muted"}>{plan.active ? "Đang bán" : "Tạm dừng"}</Badge>
@@ -243,7 +243,7 @@ const ServicePlans = () => {
                 {plan.features.map((feature) => (
                   <span
                     key={feature}
-                    className="rounded-md bg-muted px-2 py-0.5 text-[10.5px] font-medium text-muted-foreground"
+                    className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                   >
                     {feature}
                   </span>

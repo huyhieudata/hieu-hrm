@@ -26,7 +26,7 @@ export const AppInstallCell = ({ status }: { status?: AppInstallStatus }) => {
         Đã cài ·{" "}
         {status.platforms.map((p) => PLATFORM_LABELS[p] ?? p).join(", ")}
       </Badge>
-      <p className="mt-0.5 text-[10px] text-muted-foreground">
+      <p className="mt-0.5 text-[11px] text-muted-foreground">
         Mở gần nhất{" "}
         {formatWhen(status.last_opened_at ?? status.first_installed_at)}
       </p>
@@ -69,7 +69,7 @@ export const AppInstallSummary = ({
       >
         Chưa cài app ({total - installed})
       </button>
-      <span className="text-[10.5px] text-muted-foreground">
+      <span className="text-[11px] text-muted-foreground">
         Chỉ ghi nhận khi người dùng đã mở app đã cài ít nhất 1 lần.
       </span>
     </div>

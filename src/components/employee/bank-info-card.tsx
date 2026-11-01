@@ -27,7 +27,7 @@ const bankFields = [
 
 const InfoItem = ({ label, value }: { label: string; value: string | null }) => (
   <div className="min-w-0">
-    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
+    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
     <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">{value?.trim() || "—"}</p>
   </div>
 );

@@ -33,7 +33,7 @@ const IosShareIllustration = () => (
       </div>
     </div>
     <span className="text-[18px] font-bold text-brand-orange">→</span>
-    <div className="w-[128px] space-y-1 rounded-xl bg-white p-2 text-[10px] font-semibold text-brand-navy">
+    <div className="w-[128px] space-y-1 rounded-xl bg-white p-2 text-[11px] font-semibold text-brand-navy">
       <div className="rounded-md bg-muted px-2 py-1 text-muted-foreground">Sao chép</div>
       <div className="flex items-center justify-between rounded-md bg-brand-orange/10 px-2 py-1 ring-1 ring-brand-orange">
         Thêm vào MH chính <span className="text-[12px]">＋</span>
@@ -249,7 +249,7 @@ export const InstallPrompt = () => {
                         <span className="block text-[12px] font-semibold text-foreground">
                           {index + 1}. {step.title}
                         </span>
-                        <span className="mt-0.5 block text-[10.5px] leading-4 text-muted-foreground">
+                        <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
                           {step.detail}
                         </span>
                       </span>
@@ -270,7 +270,7 @@ export const InstallPrompt = () => {
                     </span>
                     <span>
                       <span className="block text-[12px] font-semibold text-foreground">{step.title}</span>
-                      <span className="mt-0.5 block text-[10.5px] leading-4 text-muted-foreground">{step.detail}</span>
+                      <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">{step.detail}</span>
                     </span>
                   </li>
                 ))}

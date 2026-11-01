@@ -54,7 +54,7 @@ export const HeadcountChart = ({ data }: { data: { month: string; count: number 
             <h3 className="text-[15px] font-semibold leading-6 text-foreground">Biến động nhân sự</h3>
             {first > 0 && (
               <span
-                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
                   positive ? "bg-success-subtle text-success" : "bg-destructive-subtle text-destructive"
                 }`}
               >

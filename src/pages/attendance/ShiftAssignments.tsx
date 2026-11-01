@@ -142,7 +142,7 @@ const ShiftAssignments = () => {
       />
 
       <Card className="overflow-hidden p-0">
-        <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:flex">
+        <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:flex">
           <span className="flex-1">Ca làm việc</span>
           <span className="w-[150px] shrink-0">Phân cho</span>
           <span className="w-[190px] shrink-0">Giá trị phạm vi</span>

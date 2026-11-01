@@ -162,7 +162,7 @@ export const MobileNav = () => {
                   <p className="truncate text-[13px] font-semibold text-foreground">
                     {activeCompany?.name ?? "ONHRM"}
                   </p>
-                  <p className="text-[10.5px] text-muted-foreground">Tất cả tính năng</p>
+                  <p className="text-[11px] text-muted-foreground">Tất cả tính năng</p>
                 </div>
               </div>
               <button
@@ -178,7 +178,7 @@ export const MobileNav = () => {
             <div className="space-y-5 px-4 pt-4">
               {!standalone && (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     Ứng dụng
                   </p>
                   <button
@@ -196,7 +196,7 @@ export const MobileNav = () => {
                       <span className="block text-[12.5px] font-semibold text-primary-subtle-foreground">
                         Thêm ONHRM ra màn hình chính
                       </span>
-                      <span className="block text-[10.5px] leading-4 text-muted-foreground">
+                      <span className="block text-[11px] leading-4 text-muted-foreground">
                         Mở nhanh như ứng dụng, không cần trình duyệt
                       </span>
                     </span>
@@ -209,7 +209,7 @@ export const MobileNav = () => {
                 if (items.length === 0) return null;
                 return (
                   <div key={group.label}>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       {group.label}
                     </p>
                     <div className="mt-2 grid grid-cols-3 gap-2">
@@ -254,7 +254,7 @@ export const MobileNav = () => {
                   <Avatar name={name} size="md" />
                   <div className="min-w-0">
                     <p className="truncate text-[12px] font-semibold text-foreground">{name}</p>
-                    <p className="truncate text-[10.5px] text-muted-foreground">{user?.email}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{user?.email}</p>
                   </div>
                 </div>
                 <button
@@ -266,13 +266,13 @@ export const MobileNav = () => {
                       navigate("/login", { replace: true });
                     }
                   }}
-                  className="flex h-8 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[10.5px] font-semibold text-destructive"
+                  className="flex h-8 items-center gap-1 rounded-full border border-border bg-card px-2.5 text-[11px] font-semibold text-destructive"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Đăng xuất
                 </button>
               </div>
 
-              <p className="pb-1 text-center text-[10px] text-muted-foreground">
+              <p className="pb-1 text-center text-[11px] text-muted-foreground">
                 {navItems.length} tính năng · ONHRM
               </p>
             </div>

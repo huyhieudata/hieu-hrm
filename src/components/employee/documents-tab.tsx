@@ -264,7 +264,7 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-2 text-[10.5px] text-muted-foreground">
+        <p className="mt-2 text-[11px] text-muted-foreground">
           Mỗi hạng mục tự động được tích khi có ít nhất một tệp được tải lên.
         </p>
       </Card>
@@ -374,7 +374,7 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
           >
             <FolderOpen className="mx-auto h-4 w-4 text-primary" />
             <p className="mt-1 text-[12px] font-medium text-foreground">Kéo tệp vào đây hoặc bấm để chọn</p>
-            <p className="mt-0.5 text-[10.5px] text-muted-foreground">PDF, ảnh, Word, Excel · tối đa 15MB mỗi tệp</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">PDF, ảnh, Word, Excel · tối đa 15MB mỗi tệp</p>
           </div>
         )}
 

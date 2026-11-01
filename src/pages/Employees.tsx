@@ -833,7 +833,7 @@ const Employees = () => {
           </div>
         </div>
 
-        <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:flex">
+        <div className="hidden items-center gap-3 border-b border-border/60 bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:flex">
           <span className="flex-1">Nhân viên</span>
           <span className="w-[150px] shrink-0">Phòng ban</span>
           <span className="w-[120px] shrink-0">Trạng thái</span>
@@ -931,7 +931,7 @@ const Employees = () => {
                             to={`/employees/${person.id}?tab=warnings`}
                             title={`${warningsByEmployee[person.id]} cảnh báo hồ sơ`}
                             aria-label={`${warningsByEmployee[person.id]} cảnh báo hồ sơ`}
-                            className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-destructive-subtle px-1 text-[9.5px] font-semibold text-destructive hover:bg-destructive/15"
+                            className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-destructive-subtle px-1 text-[11px] font-semibold text-destructive hover:bg-destructive/15"
                           >
                             <AlertTriangle className="h-2.5 w-2.5" />
                             {warningsByEmployee[person.id]}
@@ -954,7 +954,7 @@ const Employees = () => {
                             }
                             title={health.label}
                             className={cn(
-                              "mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors",
+                              "mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
                               health.tone === "destructive"
                                 ? "bg-destructive-subtle text-destructive hover:bg-destructive/15"
                                 : "bg-warning-subtle text-warning hover:bg-warning/15",

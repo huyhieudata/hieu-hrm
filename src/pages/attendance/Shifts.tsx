@@ -131,11 +131,11 @@ const Shifts = () => {
                 <div className="min-w-0">
                   <h3 className="flex flex-wrap items-center gap-2 text-[14px] font-semibold text-foreground">
                     {shift.name}
-                    <Badge variant="muted" className="text-[10px]">
+                    <Badge variant="muted" className="text-[11px]">
                       {SHIFT_TYPE_LABELS[shift.shift_type] ?? "Tùy chọn"}
                     </Badge>
                     {shift.code && (
-                      <Badge variant="outline" className="font-mono text-[10px]">
+                      <Badge variant="outline" className="font-mono text-[11px]">
                         {shift.code}
                       </Badge>
                     )}
@@ -197,17 +197,17 @@ const Shifts = () => {
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <div className="rounded-md bg-muted/40 px-2.5 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Giờ chấm công hợp lệ
                   </p>
                   <p className="text-[12px] font-medium text-foreground">{shiftWindowLabel(shift)}</p>
-                  <p className="text-[10.5px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     Muộn sau {shortTime(shift.late_after)}
                     {shift.late_after_pm ? ` · chiều ${shortTime(shift.late_after_pm)}` : ""}
                   </p>
                 </div>
                 <div className="rounded-md bg-muted/40 px-2.5 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Công ghi nhận
                   </p>
                   <p className="text-[12px] font-medium text-foreground">
@@ -225,7 +225,7 @@ const Shifts = () => {
                   return (
                     <span
                       key={day}
-                      className={`inline-flex h-6 min-w-7 items-center justify-center rounded-md px-1.5 text-[10.5px] font-medium ${
+                      className={`inline-flex h-6 min-w-7 items-center justify-center rounded-md px-1.5 text-[11px] font-medium ${
                         active
                           ? "bg-primary-subtle text-primary-subtle-foreground"
                           : "bg-muted/50 text-muted-foreground/60"

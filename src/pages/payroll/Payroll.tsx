@@ -774,7 +774,7 @@ const Payroll = () => {
             <div className="scrollbar-slim overflow-x-auto">
               <table className="w-full min-w-[820px] border-collapse text-[11.5px]">
                 <thead>
-                  <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                  <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                     <th className="px-4 py-2.5 text-left font-semibold">Kỳ lương</th>
                     <th className="px-3 py-2.5 text-center font-semibold">Nhân sự</th>
                     <th className="px-3 py-2.5 text-right font-semibold">Quỹ lương</th>
@@ -798,7 +798,7 @@ const Payroll = () => {
                           >
                             Tháng {period.month}/{period.year}
                           </button>
-                          <p className="text-[10px] text-muted-foreground">{period.standard_work_days} ngày công chuẩn</p>
+                          <p className="text-[11px] text-muted-foreground">{period.standard_work_days} ngày công chuẩn</p>
                         </td>
                         <td className="px-3 py-2.5 text-center text-[12px] text-muted-foreground">{totals.count}</td>
                         <td className="px-3 py-2.5 text-right text-[12px] text-foreground">{money(totals.gross)}</td>
@@ -858,7 +858,7 @@ const Payroll = () => {
                   <div className="flex items-start justify-between gap-2">
                     <button type="button" className="min-w-0 text-left" onClick={() => setDetailPeriod(period)}>
                       <p className="text-[13px] font-semibold text-foreground">Tháng {period.month}/{period.year}</p>
-                      <p className="mt-0.5 text-[10.5px] text-muted-foreground">
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
                         {period.standard_work_days} ngày công chuẩn · {totals.count} nhân sự
                       </p>
                     </button>
@@ -883,11 +883,11 @@ const Payroll = () => {
                   </div>
                   <div className="mt-3 flex items-end justify-between gap-2">
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Thực nhận</p>
+                      <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Thực nhận</p>
                       <p className="tabular mt-0.5 text-[15px] font-semibold text-foreground">{money(totals.net)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Thuế TNCN</p>
+                      <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Thuế TNCN</p>
                       <p className="tabular mt-0.5 text-[12px] text-muted-foreground">{money(totals.tax)}</p>
                     </div>
                   </div>
@@ -1018,7 +1018,7 @@ const Payroll = () => {
                 </Select>
               </div>
 
-              <p className="rounded-md border border-border/60 bg-muted/25 px-3 py-2 text-[10.5px] leading-4 text-muted-foreground">
+              <p className="rounded-md border border-border/60 bg-muted/25 px-3 py-2 text-[11px] leading-4 text-muted-foreground">
                 Lương và phụ cấp tính theo ngày công chấm công + phép hưởng lương, tối đa{" "}
                 {detailPeriod?.standard_work_days ?? 0} ngày công chuẩn · BHNV{" "}
                 {(INSURANCE_EMPLOYEE_RATE * 100).toLocaleString("vi-VN")}% · giảm trừ bản thân{" "}
@@ -1035,7 +1035,7 @@ const Payroll = () => {
                 <div className="scrollbar-slim max-h-[54vh] overflow-auto rounded-lg border border-border/60">
                   <table className="w-full min-w-[1040px] border-collapse text-[11.5px]">
                     <thead className="sticky top-0 z-10">
-                      <tr className="bg-muted text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                      <tr className="bg-muted text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                         <th className="px-3 py-2 text-left font-semibold">Nhân sự</th>
                         <th className="px-2 py-2 text-center font-semibold">Công</th>
                         <th className="px-2 py-2 text-right font-semibold">Lương CB</th>
@@ -1063,7 +1063,7 @@ const Payroll = () => {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="text-[11px] text-muted-foreground">
                                 {item.employee_code ?? ""}
                                 {item.department ? ` · ${item.department}` : ""}
                                 {item.note ? ` · ${item.note}` : ""}
@@ -1078,7 +1078,7 @@ const Payroll = () => {
                                 {dayCount(item.work_days)}
                               </span>
                               {Number(item.leave_days) > 0 && (
-                                <span className="block text-[9.5px] font-medium text-info">
+                                <span className="block text-[11px] font-medium text-info">
                                   +{dayCount(item.leave_days)} phép
                                 </span>
                               )}
@@ -1252,15 +1252,15 @@ const Payroll = () => {
 
           <div className="grid gap-2 sm:grid-cols-3">
             <div className="rounded-lg border border-border/60 bg-muted/25 p-3">
-              <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Thực nhận</p>
+              <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Thực nhận</p>
               <p className="tabular mt-1 text-[15px] font-semibold text-foreground">{money(report?.net ?? 0)}</p>
             </div>
             <div className="rounded-lg border border-border/60 bg-muted/25 p-3">
-              <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Thuế TNCN</p>
+              <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Thuế TNCN</p>
               <p className="tabular mt-1 text-[15px] font-semibold text-foreground">{money(report?.tax ?? 0)}</p>
             </div>
             <div className="rounded-lg border border-border/60 bg-muted/25 p-3">
-              <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Bảo hiểm</p>
+              <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Bảo hiểm</p>
               <p className="tabular mt-1 text-[15px] font-semibold text-foreground">{money(report?.insurance ?? 0)}</p>
             </div>
           </div>
@@ -1287,9 +1287,9 @@ const Payroll = () => {
                   >
                     <div className="min-w-0">
                       <p className="truncate text-[11.5px] font-medium text-foreground">{warning.employee_name}</p>
-                      <p className="text-[10.5px] text-muted-foreground">{warning.detail}</p>
+                      <p className="text-[11px] text-muted-foreground">{warning.detail}</p>
                     </div>
-                    <span className="shrink-0 rounded-full bg-warning-subtle px-2 py-0.5 text-[9.5px] font-semibold text-warning">
+                    <span className="shrink-0 rounded-full bg-warning-subtle px-2 py-0.5 text-[11px] font-semibold text-warning">
                       {WARNING_LABEL[warning.code]}
                     </span>
                   </li>

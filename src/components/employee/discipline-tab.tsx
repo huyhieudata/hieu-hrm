@@ -371,7 +371,7 @@ const DisciplineForm = ({
                   <p className="text-[12px] font-semibold text-foreground">
                     Checklist quy trình xử lý kỷ luật lao động
                   </p>
-                  <p className="text-[10.5px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     Mỗi bước phải được tích và có hồ sơ đính kèm mới lưu được.
                   </p>
                 </div>
@@ -397,12 +397,12 @@ const DisciplineForm = ({
                         <label htmlFor={`step-${step.key}`} className="min-w-0 cursor-pointer">
                           <span className="block text-[12px] font-medium text-foreground">{step.label}</span>
                           {value?.file_name ? (
-                            <span className="flex items-center gap-1 text-[10.5px] text-muted-foreground">
+                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                               <Paperclip className="h-3 w-3" />
                               <span className="truncate">{value.file_name}</span>
                             </span>
                           ) : (
-                            <span className="text-[10.5px] text-destructive/80">Chưa có hồ sơ đính kèm</span>
+                            <span className="text-[11px] text-destructive/80">Chưa có hồ sơ đính kèm</span>
                           )}
                         </label>
                       </div>
@@ -604,7 +604,7 @@ export const DisciplineTab = ({ employeeId, canManage }: DisciplineTabProps) => 
 
                 {summary && (
                   <span
-                    className={`hidden shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium sm:inline-flex ${
+                    className={`hidden shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline-flex ${
                       summary.done === summary.total
                         ? "bg-success-subtle text-success"
                         : "bg-warning-subtle text-warning"

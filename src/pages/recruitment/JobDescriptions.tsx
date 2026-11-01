@@ -307,7 +307,7 @@ const JobDescriptions = () => {
     >
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Tổng vị trí
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
@@ -315,7 +315,7 @@ const JobDescriptions = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Đang áp dụng
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-success">
@@ -323,7 +323,7 @@ const JobDescriptions = () => {
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Bản nháp
           </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-muted-foreground">
@@ -385,7 +385,7 @@ const JobDescriptions = () => {
           <div className="scrollbar-slim overflow-x-auto">
             <table className="w-full min-w-[880px] border-collapse text-[11.5px]">
               <thead>
-                <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
+                <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="px-4 py-2.5 text-left font-semibold">
                     Vị trí
                   </th>
@@ -421,7 +421,7 @@ const JobDescriptions = () => {
                         <p className="text-[12.5px] font-semibold text-foreground hover:text-primary hover:underline">
                           {row.title}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {row.code ?? "Chưa có mã"} · Tạo{" "}
                           {formatDay(row.created_at)}
                         </p>
@@ -533,7 +533,7 @@ const JobDescriptions = () => {
               ].map(([label, content]) =>
                 content ? (
                   <div key={label as string}>
-                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-primary">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-primary">
                       {label}
                     </p>
                     <p className="mt-1 whitespace-pre-line text-[12.5px] leading-6 text-foreground">

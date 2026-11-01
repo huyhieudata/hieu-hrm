@@ -182,7 +182,7 @@ export const ImportEmployeesDialog = ({
                     <span className="w-5 shrink-0 text-muted-foreground">
                       {index + 1}
                     </span>
-                    <span className="w-[92px] shrink-0 truncate font-mono text-[10.5px] text-muted-foreground">
+                    <span className="w-[92px] shrink-0 truncate font-mono text-[11px] text-muted-foreground">
                       {row.code || "—"}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-foreground">
