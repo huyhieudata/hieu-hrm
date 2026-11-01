@@ -62,7 +62,7 @@ const STATUS_OPTIONS = ["pending", "approved", "rejected", "cancelled"];
 const TIME_CATEGORIES = ["late", "early_leave", "attendance_fix", "outside"];
 const SESSION_CATEGORIES = ["leave", "remote", "attendance_fix"];
 
-const formatDay = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN");
+const formatDay = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 const shortTime = (value: string | null) => (value ? value.slice(0, 5) : "");
 
 const RequestsTab = ({ employeeId, companyId, canManage }: RequestsTabProps) => {

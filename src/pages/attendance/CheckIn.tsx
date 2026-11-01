@@ -381,7 +381,7 @@ const CheckIn = ({ personal = false }: { personal?: boolean }) => {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Hôm nay · {new Date().toLocaleDateString("vi-VN")}
+                    Hôm nay · {new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                   </p>
                   <h2 className="mt-1 font-display text-[18px] font-semibold text-foreground">{me.full_name}</h2>
                   <p className="text-[12px] text-muted-foreground">

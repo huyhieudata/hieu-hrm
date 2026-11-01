@@ -1,4 +1,4 @@
-import { documentDownloadName, documentFileProblem, translateStorageError } from "@/lib/employee-records";
+import { DOCUMENT_ACCEPT, documentDownloadName, documentFileProblem, translateStorageError } from "@/lib/employee-records";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle2,
@@ -181,10 +181,10 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
         expiryDate: expiryDate || null,
         documentNo,
       });
+      await load();
       toast.success("Đã tải lên tài liệu");
       setPendingFile(null);
       setPreset(null);
-      await load();
     } catch (uploadError) {
       const message = translateStorageError(uploadError);
       setError(message);
@@ -217,6 +217,8 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
     if (!pendingDelete) return;
     try {
       await deleteEmployeeDocument({ id: pendingDelete.id, file_path: pendingDelete.file_path });
+      const goneId = pendingDelete.id;
+      setDocuments((rows) => rows.filter((row) => row.id !== goneId));
       toast.success("Đã xoá tài liệu");
       setPendingDelete(null);
       await load();
@@ -235,6 +237,9 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
     }
     try {
       await updateRecord("employee_documents", renameTarget.id, { name: renameValue.trim() });
+      const renamedId = renameTarget.id;
+      const nextName = renameValue.trim();
+      setDocuments((rows) => rows.map((row) => (row.id === renamedId ? { ...row, name: nextName } : row)));
       toast.success("Đã đổi tên tài liệu");
       setRenameTarget(null);
       await load();
@@ -251,7 +256,7 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
         ref={inputRef}
         type="file"
         className="hidden"
-        accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
+        accept={DOCUMENT_ACCEPT}
         onChange={(event) => {
           handleFileChange(event.target.files?.[0]);
           event.target.value = "";

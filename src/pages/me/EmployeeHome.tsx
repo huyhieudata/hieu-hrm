@@ -151,7 +151,7 @@ const MobileEmployeeHome = () => {
         <ShortcutGrid items={shortcuts} />
         <NewsPoster
           title={post?.title}
-          meta={post ? [post.author_name, post.published_at ? new Date(post.published_at).toLocaleDateString("vi-VN") : null].filter(Boolean).join(" · ") : null}
+          meta={post ? [post.author_name, post.published_at ? new Date(post.published_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : null].filter(Boolean).join(" · ") : null}
           empty="Chưa có tin đang phát hành."
         />
       </div>

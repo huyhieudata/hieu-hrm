@@ -79,7 +79,7 @@ import {
 import { contractLegalWarnings } from "@/lib/contract-docs";
 
 const formatDay = (value: string | null) =>
-  value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—";
+  value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
 
 const formatMoney = (value: number | null) =>
   value === null || value === undefined

@@ -823,7 +823,9 @@ export const uploadEmployeeFile = async (input: {
 };
 
 /** Định dạng tài liệu hồ sơ được phép (khớp bucket). */
+/** Định dạng tài liệu dùng CHUNG cho tài liệu hồ sơ và tài liệu nội bộ công ty. */
 export const EMPLOYEE_DOCUMENT_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "webp", "doc", "docx", "xls", "xlsx"];
+export const DOCUMENT_ACCEPT = EMPLOYEE_DOCUMENT_EXTENSIONS.map((ext) => `.${ext}`).join(",");
 
 /** Lỗi tiếng Việt nếu tệp không đúng định dạng, null nếu hợp lệ. */
 export const documentFileProblem = (file: File) => {

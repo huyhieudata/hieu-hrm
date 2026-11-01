@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { Check, Download, MoreVertical, Share, X } from "lucide-react";
 
@@ -107,25 +108,14 @@ export const InstallPrompt = () => {
     };
     // Nút "Thêm ONHRM ra màn hình chính" ở mọi nơi: luôn có phản hồi (prompt thật nếu được, không thì hướng dẫn).
     const onReopen = () => {
-      if (isStandalone()) return;
-      const event = getDeferredInstall();
-      if (event) {
-        // Gọi prompt() ngay trong cùng cú chạm của người dùng.
-        void event.prompt().then(() => event.userChoice).then((choice) => {
-          clearDeferredInstall();
-          setDeferred(null);
-          if (choice.outcome === "accepted") writeKey(INSTALL_DONE_KEY, "1");
-          else {
-            setInstructions(true);
-            setOpen(true);
-          }
-        }).catch(() => {
-          setInstructions(true);
-          setOpen(true);
-        });
+      // Luôn có phản hồi ngay: mở banner (nút Cài nếu trình duyệt hỗ trợ, không thì hướng dẫn cài tay).
+      if (isStandalone()) {
+        toast.success("ONHRM đã được cài trên thiết bị này.");
         return;
       }
-      setInstructions(true);
+      const event = getDeferredInstall();
+      setDeferred(event);
+      setInstructions(!event);
       setOpen(true);
     };
     window.addEventListener("onhrm:install-ready", onReady);

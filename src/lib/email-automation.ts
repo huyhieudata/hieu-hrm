@@ -53,7 +53,7 @@ export const varsFor = (k: string | null | undefined): [string, string][] => [
 export const SAMPLE_VARS: Record<string, string> = {
   ten_nhan_vien: "Nguyễn Văn A", ma_nhan_vien: "NV001", email_nhan_vien: "a@congty.vn", phong_ban: "Kinh doanh",
   chuc_danh: "Chuyên viên", ten_quan_ly: "Trần Thị B", ngay_vao_lam: "01/11/2026", ten_cong_ty: "Công ty mẫu",
-  ngay: new Date().toLocaleDateString("vi-VN"), link_app: "https://hieu-hrm.vercel.app", ten_nguoi_nhan: "Nguyễn Văn A",
+  ngay: new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }), link_app: "https://hieu-hrm.vercel.app", ten_nguoi_nhan: "Nguyễn Văn A",
   ten_dang_nhap: "a@congty.vn", mat_khau_tam: "Abcd-Efgh-2345", link_dang_nhap: "https://hieu-hrm.vercel.app/login",
   link_loi_moi: "https://hieu-hrm.vercel.app/tham-gia/mau", han_loi_moi: "15/11/2026", vai_tro: "Nhân viên",
   ngay_sinh: "01/11", tuoi: "30", so_hop_dong: "HD-001", loai_hop_dong: "Xác định thời hạn", ngay_het_han: "30/11/2026",

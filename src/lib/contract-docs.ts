@@ -69,7 +69,7 @@ MST cá nhân: {{ma_so_thue}} · Số sổ BHXH: {{so_bhxh}}</p>
 </tr></table>`;
 
 const vnDate = (value: string | null | undefined) =>
-  value ? new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString("vi-VN") : "";
+  value ? new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "";
 const vnMoney = (value: number | null | undefined) =>
   value === null || value === undefined ? "" : `${new Intl.NumberFormat("vi-VN").format(Number(value))} đồng`;
 

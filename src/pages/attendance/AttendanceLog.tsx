@@ -199,7 +199,7 @@ const AttendanceLog = () => {
                     {employee?.full_name ?? "Nhân viên"} <span className="font-normal text-muted-foreground">{employee?.code}</span>
                   </p>
                   <p className="text-[11px] text-muted-foreground">
-                    {new Date(`${record.work_date}T00:00:00`).toLocaleDateString("vi-VN")} ·{" "}
+                    {new Date(`${record.work_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })} ·{" "}
                     {record.session === "afternoon" ? "Chiều" : "Sáng"}
                     {record.location_id ? ` · ${locationMap.get(record.location_id)?.name ?? ""}` : ""}
                   </p>

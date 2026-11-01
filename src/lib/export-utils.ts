@@ -72,7 +72,7 @@ export const exportPdf = (
   footer{margin-top:18px;color:#888;font-size:10.5px}
 </style></head><body>
 <h1>${escapeHtml(title)}</h1>
-<p class="sub">${escapeHtml(subtitle)} · Xuất ngày ${new Date().toLocaleDateString("vi-VN")}</p>
+<p class="sub">${escapeHtml(subtitle)} · Xuất ngày ${new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}</p>
 <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
 <footer>${rows.length} dòng · ONHRM</footer>
 </body></html>`;

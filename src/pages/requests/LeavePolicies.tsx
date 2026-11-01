@@ -452,10 +452,11 @@ const LeavePolicies = () => {
       );
 
       toast.success(editingPolicy ? "Đã cập nhật chính sách phép" : "Đã tạo chính sách phép");
+      // Tải lại xong rồi mới đóng → danh sách đã cập nhật khi dialog đóng.
+      await load();
       setPolicyOpen(false);
       setEditingPolicy(null);
       setYear(Number(draft.year));
-      await load();
     } catch (error) {
       setPolicyError(getErrorMessage(error));
       toast.error("Không lưu được chính sách", { description: getErrorMessage(error) });
@@ -469,8 +470,8 @@ const LeavePolicies = () => {
     try {
       await deleteLeavePolicy(pendingDelete.id);
       toast.success("Đã xoá chính sách phép");
-      setPendingDelete(null);
       await load();
+      setPendingDelete(null);
     } catch (error) {
       toast.error("Không xoá được", { description: getErrorMessage(error) });
     }
@@ -502,8 +503,8 @@ const LeavePolicies = () => {
         });
       }
       toast.success("Đã cập nhật số dư phép");
-      setAdjustEmployee(null);
       await load();
+      setAdjustEmployee(null);
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -926,10 +927,10 @@ const LeavePolicies = () => {
                     <tr key={request.id} className="border-t border-border/50">
                       <td className="px-4 py-2 text-foreground">
                         {request.start_date === request.end_date
-                          ? new Date(`${request.start_date}T00:00:00`).toLocaleDateString("vi-VN")
-                          : `${new Date(`${request.start_date}T00:00:00`).toLocaleDateString("vi-VN")} → ${new Date(
+                          ? new Date(`${request.start_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })
+                          : `${new Date(`${request.start_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })} → ${new Date(
                               `${request.end_date}T00:00:00`,
-                            ).toLocaleDateString("vi-VN")}`}
+                            ).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}`}
                       </td>
                       <td className="px-3 py-2">
                         <span className="text-foreground">{employee?.full_name ?? "—"}</span>
@@ -1024,7 +1025,7 @@ const LeavePolicies = () => {
                         <div className="min-w-0">
                           <p className="truncate text-[11.5px] font-medium text-foreground">{entry.label}</p>
                           <p className="truncate text-[11px] text-muted-foreground">
-                            {new Date(entry.date).toLocaleDateString("vi-VN")}
+                            {new Date(entry.date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                             {entry.note ? ` · ${entry.note}` : ""}
                           </p>
                         </div>

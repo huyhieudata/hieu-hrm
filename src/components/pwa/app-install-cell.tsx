@@ -41,6 +41,8 @@ interface SummaryProps {
   onToggle: (value: boolean) => void;
   /** Tên người chưa cài app — hiện khi bật lọc "Chưa cài app". */
   missingNames?: string[];
+  /** Ghi chú mẫu số, vd: "2 hồ sơ chưa có tài khoản không tính". */
+  note?: string;
 }
 
 export const AppInstallSummary = ({
@@ -49,13 +51,15 @@ export const AppInstallSummary = ({
   onlyMissing,
   onToggle,
   missingNames,
+  note,
 }: SummaryProps) => {
   const pct = total ? Math.round((installed / total) * 100) : 0;
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border/80 bg-card px-4 py-2.5 text-[12px]">
       <Smartphone className="h-4 w-4 text-primary" />
       <span>
-        Đã cài app: <b>{installed}</b>/{total} ({pct}%)
+        Đã cài app: <b>{installed}</b>/{total} người có tài khoản ({pct}%)
+        {note ? <span className="ml-1 text-muted-foreground">· {note}</span> : null}
       </span>
       <div className="h-1.5 w-28 overflow-hidden rounded-full bg-muted">
         <div className="h-full bg-success" style={{ width: `${pct}%` }} />

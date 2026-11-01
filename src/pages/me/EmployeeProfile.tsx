@@ -32,6 +32,8 @@ const LINKS = [
   { to: "/toi/thiet-bi", label: "Thiết bị của tôi", icon: Smartphone },
 ] as const;
 
+const ALWAYS_SHOWN = ["Phòng ban", "Chức danh", "Điện thoại", "Ngày vào làm"];
+
 export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
@@ -63,12 +65,17 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
         ["Chức danh", me?.position],
         ["Điện thoại", me?.phone],
         ["Email", me?.work_email || profile?.email || user?.email],
-        ["Ngày vào", me?.hire_date ? formatDate(me.hire_date) : null],
+        ["Ngày vào làm", me?.hire_date ? formatDate(me.hire_date) : null],
         ["Thường trú", me?.permanent_address],
         ["Tạm trú", me?.current_address],
         ["Liên hệ khẩn cấp", [me?.emergency_contact_name, me?.emergency_contact_phone].filter(Boolean).join(" · ")],
         ["Ngân hàng", [me?.bank_name, me?.bank_account].filter(Boolean).join(" · ")],
-      ].filter((row): row is [string, string] => Boolean(row[1])),
+      ]
+        // SĐT, ngày vào, phòng ban, chức danh luôn hiện (chỉ đọc) kể cả khi hồ sơ chưa có.
+        .map(([label, value]) =>
+          ALWAYS_SHOWN.includes(label as string) && !value ? [label, "Chưa cập nhật"] : [label, value],
+        )
+        .filter((row): row is [string, string] => Boolean(row[1])),
     [me, profile?.email, user?.email],
   );
 

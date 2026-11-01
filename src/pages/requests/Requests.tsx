@@ -78,7 +78,7 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "cancelled", label: "Đã huỷ" },
 ];
 
-const formatDay = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN");
+const formatDay = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 const shortTime = (value: string | null) => (value ? value.slice(0, 5) : "");
 
 const Requests = () => {

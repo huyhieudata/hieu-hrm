@@ -253,7 +253,7 @@ const ContactsTab = ({ employeeId, companyId, canManage }: ContactsTabProps) => 
                       }`}
                     >
                       <CalendarClock className="h-3.5 w-3.5" />
-                      {new Date(`${row.contact_date}T00:00:00`).toLocaleDateString("vi-VN")}
+                      {new Date(`${row.contact_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-[12.5px] font-medium text-foreground">
@@ -378,7 +378,7 @@ const ContactsTab = ({ employeeId, companyId, canManage }: ContactsTabProps) => 
           <DialogHeader>
             <DialogTitle>Chi tiết liên lạc</DialogTitle>
             <DialogDescription>
-              {detail ? new Date(`${detail.contact_date}T00:00:00`).toLocaleDateString("vi-VN") : ""} ·{" "}
+              {detail ? new Date(`${detail.contact_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : ""} ·{" "}
               {detail ? CHANNEL_LABELS[detail.channel] ?? detail.channel : ""}
             </DialogDescription>
           </DialogHeader>

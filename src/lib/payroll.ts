@@ -222,7 +222,7 @@ const payslipBody = (input: { companyName: string; period: PayrollPeriod; item: 
   <table><thead><tr><th>Khoản mục</th><th class="num">Số tiền</th></tr></thead><tbody>${deductions || '<tr><td colspan="2">Không có khấu trừ</td></tr>'}</tbody></table>
   <div class="net"><span>Thực nhận</span><span class="amount">${money(item.net_salary)}</span></div>
   ${item.note ? `<div class="note">Ghi chú: ${escapeHtml(item.note)}</div>` : ""}
-  <div class="footer">Phiếu lương được tạo tự động bởi ONHRM · ${new Date().toLocaleDateString("vi-VN")}</div>`;
+  <div class="footer">Phiếu lương được tạo tự động bởi ONHRM · ${new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}</div>`;
 };
 
 export const buildPayslipHtml = (input: {

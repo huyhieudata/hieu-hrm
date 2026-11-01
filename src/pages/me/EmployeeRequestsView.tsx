@@ -40,9 +40,9 @@ const FILTERS = [
 ];
 
 const formatRange = (request: EmployeeRequest) => {
-  const start = new Date(`${request.start_date}T00:00:00`).toLocaleDateString("vi-VN");
+  const start = new Date(`${request.start_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
   if (request.start_date === request.end_date) return start;
-  const end = new Date(`${request.end_date}T00:00:00`).toLocaleDateString("vi-VN");
+  const end = new Date(`${request.end_date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
   return `${start} – ${end}`;
 };
 

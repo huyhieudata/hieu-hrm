@@ -112,6 +112,19 @@ export const FieldDialog = ({
   // Bản ghi vừa tạo nhanh: thêm ngay vào danh sách chọn để tự chọn được, không chờ tải lại.
   const [createdOptions, setCreatedOptions] = useState<Record<string, { value: string; label: string }[]>>({});
 
+  const pendingSelect = useRef<{ name: string; value: string } | null>(null);
+  // Radix Select có thể bắn onValueChange("") / giá trị cũ khi danh sách item thay đổi → áp lại lựa chọn mới.
+  useEffect(() => {
+    const pending = pendingSelect.current;
+    if (!pending) return;
+    if (values[pending.name] !== pending.value) {
+      setValues((prev) => ({ ...prev, [pending.name]: pending.value }));
+      return;
+    }
+    const timer = window.setTimeout(() => { pendingSelect.current = null; }, 800);
+    return () => window.clearTimeout(timer);
+  }, [values, fields]);
+
   const submitCreate = async () => {
     if (!createFor?.onCreate) return;
     const name = createName.trim();
@@ -124,8 +137,10 @@ export const FieldDialog = ({
         ...prev,
         [createFor.name]: [...(prev[createFor.name] ?? []), { value: created, label: created }],
       }));
+      // Chọn sau khi danh sách đã có bản ghi mới (áp ở effect bên dưới) + chọn ngay lần đầu.
+      pendingSelect.current = { name: createFor.name, value: created };
       setField(createFor.name, created);
-      toast.success(`Đã tạo “${created}”`);
+      toast.success(`Đã tạo và chọn “${created}”`);
       setCreateFor(null);
     } catch (caught) {
       setCreateError(getErrorMessage(caught));
@@ -350,6 +365,12 @@ export const FieldDialog = ({
                               <Select
                                 value={current || "none"}
                                 onValueChange={(value) => {
+                                  // Bỏ qua sự kiện rỗng giả (Radix) khi item vừa thêm chưa kịp đăng ký.
+                                  if (!value) return;
+                                  if (value === "none" && pendingSelect.current?.name === field.name) return;
+                                  if (pendingSelect.current?.name === field.name && value !== pendingSelect.current.value) {
+                                    pendingSelect.current = null;
+                                  }
                                   if (value === "__create__") {
                                     setCreateFor(field);
                                     setCreateName("");
