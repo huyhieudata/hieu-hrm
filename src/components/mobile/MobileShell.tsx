@@ -52,6 +52,7 @@ const screenMeta = (pathname: string): ScreenMeta => {
   if (pathname.startsWith("/don-tu")) return { title: "Đơn từ", tab: "work", variant: "page", back: true };
   if (pathname.startsWith("/toi/bang-cong") || pathname.startsWith("/cham-cong/bang-cong"))
     return { title: "Bảng công", tab: "work", variant: "page", back: true };
+  if (pathname.startsWith("/toi/quet-qr")) return { title: "Quét QR chấm công", tab: "home", variant: "page", back: true };
   if (pathname.startsWith("/toi/khao-sat")) return { title: "Khảo sát", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/tai-lieu")) return { title: "Tài liệu", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/phieu-luong")) return { title: "Phiếu lương", tab: "apps", variant: "page", back: true };
@@ -133,7 +134,7 @@ export const MobileShell = ({ children, frame }: MobileShellProps) => {
       frame.onScan();
       return;
     }
-    navigate("/cham-cong");
+    navigate("/toi/quet-qr");
   };
 
   return (

@@ -356,13 +356,16 @@ export interface PunchInput {
   session: string;
   gps: GpsFix | null;
   photoPath: string | null;
+  /** Mã QR đã quét — chỉ là điều kiện THÊM, server vẫn kiểm đủ thiết bị/GPS/ảnh. */
+  qrToken?: string | null;
 }
 
 export type PunchResult = { ok: true; record: Record<string, unknown> } | { ok: false; reason: string };
 
 export const punchAttendance = async (input: PunchInput): Promise<PunchResult> => {
   const hash = await getDeviceHash();
-  const { data, error } = await db.rpc("attendance_punch", {
+  const { data, error } = await db.rpc(input.qrToken ? "attendance_punch_qr" : "attendance_punch", {
+    ...(input.qrToken ? { p_qr_token: input.qrToken } : {}),
     p_company_id: input.companyId,
     p_action: input.action,
     p_session: input.session,
@@ -374,4 +377,20 @@ export const punchAttendance = async (input: PunchInput): Promise<PunchResult> =
   });
   if (error) throw new Error(error.message ?? "Không chấm công được.");
   return data as PunchResult;
+};
+
+/* ------------------------------ QR chấm công ------------------------------ */
+
+export const QR_PREFIX = "HRMQR1.";
+export const isAttendanceQr = (text: string) => /^HRMQR1\.[0-9a-f-]{36}\.[0-9]{1,12}\.[0-9a-f]{24}$/.test(text.trim());
+
+export const issueAttendanceQr = async (locationId: string) => {
+  const { data, error } = await db.rpc("attendance_qr_issue", { p_location_id: locationId });
+  if (error) throw new Error(error.message ?? "Không tạo được mã QR.");
+  return data as { token: string; expires_at: string; location_name: string };
+};
+
+export const rotateAttendanceQr = async (locationId: string) => {
+  const { error } = await db.rpc("attendance_qr_rotate", { p_location_id: locationId });
+  if (error) throw new Error(error.message ?? "Không đổi được khoá QR.");
 };

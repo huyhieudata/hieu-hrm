@@ -11,6 +11,7 @@ import {
   Smartphone,
   Wifi,
 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -93,6 +94,20 @@ const CheckIn = ({ personal = false }: { personal?: boolean }) => {
   const [loading, setLoading] = useState(true);
   const [busySession, setBusySession] = useState<string | null>(null);
   const [punchFlash, setPunchFlash] = useState<PunchFlash | null>(null);
+  // Mã QR vừa quét (từ /toi/quet-qr). Chỉ là điều kiện THÊM — server vẫn kiểm đủ thiết bị/GPS/ảnh.
+  const routerLocation = useLocation();
+  const navigateTo = useNavigate();
+  const [qrToken, setQrToken] = useState<string | null>(null);
+  useEffect(() => {
+    const state = routerLocation.state as { qrToken?: string; qrAt?: number } | null;
+    if (!state?.qrToken) return;
+    if (Date.now() - (state.qrAt ?? 0) > 80_000) toast.error("Mã QR đã quá hạn, hãy quét lại.");
+    else {
+      setQrToken(state.qrToken);
+      toast.success("Đã quét QR điểm chấm công", { description: "Bấm chấm công vào/ra như bình thường để hoàn tất." });
+    }
+    navigateTo(routerLocation.pathname, { replace: true, state: null });
+  }, [routerLocation.state, routerLocation.pathname, navigateTo]);
 
   const today = todayIso();
   const monthStart = `${currentMonthIso()}-01`;
@@ -199,7 +214,8 @@ const CheckIn = ({ personal = false }: { personal?: boolean }) => {
         photoPath = await uploadAttendancePhoto(companyId, me.id, photo);
       }
       setStep("Đang xác thực…");
-      const result = await punchAttendance({ companyId, action, session, gps, photoPath });
+      const result = await punchAttendance({ companyId, action, session, gps, photoPath, qrToken });
+      setQrToken(null);
       if (result.ok === false) {
         toast.error("Chấm công bị từ chối", { description: result.reason });
         return;

@@ -175,7 +175,7 @@ const AdminMobileShell = ({ children }: { children: ReactNode }) => {
         initials={home ? initials(name) : undefined}
         onBack={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
         onNotify={() => navigate("/tin-tuc")}
-        onScan={home ? () => navigate("/toi/cham-cong") : undefined}
+        onScan={home ? () => navigate("/toi/quet-qr") : undefined}
         onSearch={home ? () => navigate(canDo("employees", "view") ? "/employees" : "/tin-tuc") : undefined}
       />
       <main

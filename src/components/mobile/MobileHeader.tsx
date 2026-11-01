@@ -67,7 +67,7 @@ export const MobileHeader = ({
             <p className="min-w-0 truncate font-display text-[22px] font-bold tracking-tight">{companyName || "ONHRM"}</p>
             <div className="flex items-center gap-1">
               {onScan ? (
-                <IconButton label="Mở chấm công" onClick={onScan} light>
+                <IconButton label="Quét QR chấm công" onClick={onScan} light>
                   <ScanLine className="h-5 w-5" strokeWidth={1.8} />
                 </IconButton>
               ) : null}
