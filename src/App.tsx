@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RouteErrorBoundary } from "./components/error-boundary/route-error-boundary";
 import { InstallPrompt } from "./components/pwa/install-prompt";
+import { InstallReporter } from "./components/pwa/install-reporter";
 import { routers } from "./router";
 import { AuthProvider } from "./lib/auth-provider";
 import { CompanyProvider } from "./lib/company-provider";
@@ -28,6 +29,7 @@ const App = () => {
         <AuthProvider>
           <CompanyProvider>
             <RouterProvider router={router} />
+            <InstallReporter />
           </CompanyProvider>
           <InstallPrompt />
         </AuthProvider>
