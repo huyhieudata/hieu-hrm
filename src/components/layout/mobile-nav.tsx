@@ -79,8 +79,8 @@ export const MobileNav = () => {
     else if (canDo("attendance", "view"))
       tabs.push({ to: "/cham-cong", label: "Chấm công", icon: Fingerprint, match: (path) => path.startsWith("/cham-cong") });
     if (canDo("requests", "view"))
-      tabs.push({ to: "/don-tu", label: "Duyệt đơn", icon: FileText, match: (path) => path.startsWith("/don-tu") });
-    tabs.push({ to: "/tin-tuc", label: "Thông báo", icon: Bell, match: (path) => path.startsWith("/tin-tuc") });
+      tabs.push({ to: "/don-tu", label: "Duyệt", icon: FileText, match: (path) => path.startsWith("/don-tu") });
+    tabs.push({ to: "/tin-tuc", label: "Tin báo", icon: Bell, match: (path) => path.startsWith("/tin-tuc") });
     return tabs.filter((tab) => canEnterStaffPath(tab.to, role, canManageModule));
   }, [canDo, canManageModule, role]);
 
@@ -119,12 +119,12 @@ export const MobileNav = () => {
                 onClick={() => go(tab.to)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10.5px] font-medium leading-tight",
+                  "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10px] font-medium leading-tight tracking-tight",
                   active ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
                 )}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
-                <span className={cn("max-w-full truncate whitespace-nowrap", active && "font-semibold")}>{tab.label}</span>
+                <span className={cn("whitespace-nowrap", active && "font-semibold")}>{tab.label}</span>
               </button>
             );
             // Nút tròn Chấm công nổi ở giữa thanh dưới (cam ONHRM, vùng chạm 60px).
@@ -150,7 +150,7 @@ export const MobileNav = () => {
             aria-expanded={moreOpen}
             aria-label="Mở tất cả tính năng"
             className={cn(
-              "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10.5px] font-medium leading-tight",
+              "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10px] font-medium leading-tight tracking-tight",
               moreOpen ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
             )}
           >

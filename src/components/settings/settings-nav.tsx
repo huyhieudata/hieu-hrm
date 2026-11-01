@@ -21,12 +21,16 @@ export const SettingsNav = () => {
     );
   return (
     <>
-      <nav className="no-scrollbar flex gap-1 overflow-x-auto pb-1 lg:hidden">
-        <NavLink to="/cai-dat" end className={linkCls}>Tổng quan</NavLink>
-        {groups.flatMap((g) => g.items).map((i) => (
-          <NavLink key={i.to} to={i.to} className={linkCls}>{i.label}</NavLink>
-        ))}
-      </nav>
+      {/* Mép phải mờ dần + padding phải: báo hiệu kéo ngang được, tab cuối không bị cắt chữ. */}
+      <div className="relative lg:hidden">
+        <nav className="no-scrollbar flex gap-1 overflow-x-auto pb-1 pr-10">
+          <NavLink to="/cai-dat" end className={linkCls}>Tổng quan</NavLink>
+          {groups.flatMap((g) => g.items).map((i) => (
+            <NavLink key={i.to} to={i.to} className={linkCls}>{i.label}</NavLink>
+          ))}
+        </nav>
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent" />
+      </div>
       <aside className="sticky top-20 hidden w-60 shrink-0 self-start lg:block">
         <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-brand-orange">Cài đặt</p>
         <NavLink to="/cai-dat" end className={linkCls}>Tổng quan</NavLink>
