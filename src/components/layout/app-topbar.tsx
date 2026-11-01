@@ -67,6 +67,7 @@ const routeMeta: Record<string, { group: string; label: string }> = {
   "/cai-dat/cham-cong": { group: "Cài đặt", label: "Cài đặt chấm công" },
   "/cai-dat/thiet-bi-cham-cong": { group: "Cài đặt", label: "Thiết bị chấm công" },
   "/cai-dat/bieu-mau-danh-gia": { group: "Cài đặt", label: "Biểu mẫu đánh giá" },
+  "/bao-cao/nhan-su": { group: "Báo cáo", label: "Biến động nhân sự" },
   "/hoach-dinh/dinh-bien": { group: "Hoạch định", label: "Định biên nhân sự" },
   "/tuyen-dung": { group: "Tuyển dụng", label: "Tổng quan tuyển dụng" },
   "/tuyen-dung/mo-ta": { group: "Tuyển dụng", label: "Mô tả công việc" },

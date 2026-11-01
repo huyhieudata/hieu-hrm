@@ -248,6 +248,16 @@ export const buildNavGroups = ({
       ].filter(Boolean) as NavItem[],
     },
     {
+      label: "Báo cáo",
+      items: [
+        role && role !== "employee" && {
+          label: "Biến động nhân sự",
+          to: "/bao-cao/nhan-su",
+          icon: Target,
+        },
+      ].filter(Boolean) as NavItem[],
+    },
+    {
       label: "Hoạch định",
       items: [
         canDo("planning", "view") && {

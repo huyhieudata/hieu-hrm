@@ -13,6 +13,8 @@ const STAFF_PREFIXES: { prefix: string; module: string | null }[] = [
   { prefix: "/tuyen-dung", module: "recruitment" },
   // Khớp menu: Nghỉ phép chỉ hiện khi quản lý được module leave.
   { prefix: "/nghi-phep", module: "leave" },
+  // Báo cáo: chỉ Owner/Admin/HR/Quản lý (RPC tự giới hạn phạm vi).
+  { prefix: "/bao-cao", module: null },
 ];
 
 /** Trang cấu hình chỉ Owner/Admin/HR (Quản lý cũng không vào). */
