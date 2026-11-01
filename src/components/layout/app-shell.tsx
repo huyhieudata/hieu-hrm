@@ -64,8 +64,8 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         />
         <div
           className={cn(
-            "absolute inset-y-0 left-0 shadow-overlay transition-transform duration-300 ease-expo",
-            mobileOpen ? "translate-x-0" : "-translate-x-full",
+            "absolute inset-y-0 left-0 transition-transform duration-300 ease-expo",
+            mobileOpen ? "translate-x-0 shadow-overlay" : "-translate-x-full shadow-none",
           )}
         >
           <AppSidebar
@@ -86,6 +86,8 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                 <SettingsNav />
                 <div className="min-w-0 flex-1 space-y-6">{children}</div>
               </div>
+            ) : pathname === "/toi" || pathname.startsWith("/toi/") ? (
+              <div className="mx-auto w-full max-w-2xl space-y-3 pt-2">{children}</div>
             ) : (
               children
             )}

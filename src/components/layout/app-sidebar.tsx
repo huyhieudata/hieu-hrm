@@ -43,6 +43,7 @@ import {
   Laptop,
   MapPinned,
   Smartphone,
+  UserRound,
 } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
@@ -113,6 +114,16 @@ export const buildNavGroups = ({
           icon: Newspaper,
         },
       ].filter(Boolean) as NavItem[],
+    },
+    {
+      label: "Của tôi",
+      items: [
+        { label: "Chấm công của tôi", to: "/cham-cong", icon: Fingerprint, exact: true },
+        { label: "Thiết bị chấm công", to: "/toi/thiet-bi", icon: Smartphone },
+        { label: "Bảng công của tôi", to: "/toi/bang-cong", icon: CalendarDays },
+        { label: "Phiếu lương", to: "/toi/phieu-luong", icon: Wallet },
+        { label: "Hồ sơ cá nhân", to: "/toi", icon: UserRound, exact: true },
+      ] as NavItem[],
     },
     {
       label: "Quản lý nhân sự",

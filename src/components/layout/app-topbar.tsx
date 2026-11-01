@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Bell,
+  Download,
   Building2,
   ChevronDown,
   Command,
@@ -28,6 +29,13 @@ import { ROLE_LABELS } from "@/lib/roles";
 
 const routeMeta: Record<string, { group: string; label: string }> = {
   "/": { group: "Không gian làm việc", label: "Bảng điều khiển" },
+  "/toi": { group: "Của tôi", label: "Hồ sơ cá nhân" },
+  "/toi/ho-so": { group: "Của tôi", label: "Thông tin cá nhân" },
+  "/toi/thiet-bi": { group: "Của tôi", label: "Thiết bị chấm công" },
+  "/toi/bang-cong": { group: "Của tôi", label: "Bảng công của tôi" },
+  "/toi/phieu-luong": { group: "Của tôi", label: "Phiếu lương" },
+  "/toi/tin-tuc": { group: "Của tôi", label: "Tin tức" },
+  "/tin-tuc": { group: "Tổng quan", label: "Tin nội bộ" },
   "/employees": { group: "Nhân sự", label: "Hồ sơ nhân viên" },
   "/employees/:id": { group: "Nhân sự", label: "Hồ sơ nhân viên 360°" },
   "/bao-hiem": { group: "Nhân sự", label: "Bảo hiểm xã hội" },
@@ -114,7 +122,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
           type="button"
           onClick={onOpenSidebar}
           aria-label="Mở menu điều hướng"
-          className="flex h-9 w-9 items-center justify-center rounded-sm border border-border bg-card text-foreground shadow-soft transition-colors hover:bg-muted lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-sm border border-border bg-card text-foreground shadow-soft transition-colors hover:bg-muted touch:h-11 touch:w-11 lg:hidden"
         >
           <Menu className="h-4 w-4" />
         </button>
@@ -170,7 +178,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
               <button
                 type="button"
                 aria-label="Thông báo"
-                className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:shadow-focus"
+                className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors touch:h-11 touch:w-11 hover:bg-muted hover:text-foreground focus-visible:shadow-focus"
               >
                 <Bell className="h-[18px] w-[18px]" />
               </button>
@@ -222,6 +230,12 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="gap-2.5" onSelect={() => navigate("/cong-ty")}>
                 <Building2 className="h-4 w-4" /> Chuyển công ty
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="gap-2.5"
+                onSelect={() => window.dispatchEvent(new CustomEvent("onhrm:install"))}
+              >
+                <Download className="h-4 w-4" /> Cài ứng dụng ONHRM
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

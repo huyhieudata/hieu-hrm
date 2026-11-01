@@ -53,7 +53,8 @@ export const RequirePermission = ({
   permission: Parameters<ReturnType<typeof useCompany>["can"]>[0];
   children: ReactNode;
 }) => {
-  const { can } = useCompany();
+  const { can, loading } = useCompany();
+  if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
   if (!can(permission)) return <Navigate to="/" replace />;
   return <>{children}</>;
 };

@@ -2,10 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
-  CalendarDays,
-  Smartphone,
-  UserRound,
-  Wallet,
   Download,
   Fingerprint,
   LayoutDashboard,
@@ -31,14 +27,6 @@ interface PrimaryTab {
   icon: typeof Users;
   match: (pathname: string) => boolean;
 }
-
-const MY_LINKS = [
-  { to: "/cham-cong", label: "Chấm công của tôi", icon: Fingerprint },
-  { to: "/toi/thiet-bi", label: "Thiết bị chấm công", icon: Smartphone },
-  { to: "/toi/bang-cong", label: "Bảng công", icon: CalendarDays },
-  { to: "/toi/phieu-luong", label: "Phiếu lương", icon: Wallet },
-  { to: "/toi", label: "Hồ sơ cá nhân", icon: UserRound },
-];
 
 const isRouteActive = (pathname: string, to: string) =>
   to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
@@ -215,32 +203,6 @@ export const MobileNav = () => {
                   </button>
                 </div>
               )}
-
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Của tôi</p>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {MY_LINKS.map((item) => {
-                    const Icon = item.icon;
-                    const active = isRouteActive(pathname, item.to);
-                    return (
-                      <button
-                        key={item.to}
-                        type="button"
-                        onClick={() => go(item.to)}
-                        className={cn(
-                          "flex min-h-[88px] flex-col items-start gap-2 rounded-xl border p-2.5 text-left transition-colors",
-                          active ? "border-primary/30 bg-primary-subtle" : "border-border/70 bg-card hover:bg-muted/40",
-                        )}
-                      >
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-orange/10 text-brand-orange">
-                          <Icon className="h-4 w-4" strokeWidth={1.9} />
-                        </span>
-                        <span className="line-clamp-2 text-[11px] font-medium leading-4 text-foreground">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
 
               {groups.map((group) => {
                 const items = group.items.filter((item) => item.to);

@@ -438,7 +438,7 @@ const Contracts = () => {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card className="p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Tổng hợp đồng

@@ -80,6 +80,9 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // userId whose memberships finished loading. Guards stay in "loading" until this matches,
+  // otherwise a deep link (/employees) renders once with no role and gets redirected to "/".
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
 
   const loadMemberships = useCallback(async (id: string) => {
     setLoading(true);
@@ -100,6 +103,7 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
       setMemberships([]);
     } finally {
       setLoading(false);
+      setLoadedFor(id);
     }
   }, []);
 
@@ -275,7 +279,12 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
       activeMembership,
       activeCompany: activeMembership?.company ?? null,
       role,
-      loading: loading || permissionLoading || (Boolean(userId && activeId) && !permissionsReady),
+      loading:
+        loading ||
+        permissionLoading ||
+        (Boolean(userId) && loadedFor !== userId) ||
+        (memberships.length > 0 && !activeMembership) ||
+        (Boolean(userId && activeId) && !permissionsReady),
       can,
       canDo,
       canManageModule,
@@ -293,6 +302,7 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
       canManageModule,
       createCompany,
       loading,
+      loadedFor,
       memberships,
       permissionKeys,
       permissionLoading,

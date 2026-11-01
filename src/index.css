@@ -364,3 +364,33 @@
     bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom)) !important;
   }
 }
+
+/* v3-D: vùng chạm tối thiểu 44px trên thiết bị cảm ứng */
+@media (max-width: 1023px) and (pointer: coarse) {
+  main button:not([role="checkbox"]):not([role="switch"]),
+  main [role="tab"],
+  header button {
+    min-height: 44px;
+  }
+  main button.h-8.w-8,
+  main button.h-9.w-9,
+  main button.h-7.w-7 {
+    min-width: 44px;
+  }
+  main [role="checkbox"],
+  main input[type="checkbox"] {
+    position: relative;
+  }
+  main [role="checkbox"]::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
+  main a.text-xs,
+  main a.text-sm,
+  main a[class*="text-[1"] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

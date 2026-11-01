@@ -652,7 +652,7 @@ const Onboarding = () => {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           { label: "Chờ hội nhập", value: stats.pending, tone: "text-warning" },
           { label: "Đang hội nhập", value: stats.inProgress, tone: "text-info" },
@@ -738,7 +738,7 @@ const Onboarding = () => {
             setFromDate(event.target.value);
             setPage(1);
           }}
-          className="h-9 w-[150px] text-[12px]"
+          className="h-9 min-w-0 flex-1 basis-[140px] text-[12px] sm:w-[150px] sm:flex-none touch:h-11"
           aria-label="Ngày nhận việc từ"
         />
         <Input
@@ -748,7 +748,7 @@ const Onboarding = () => {
             setToDate(event.target.value);
             setPage(1);
           }}
-          className="h-9 w-[150px] text-[12px]"
+          className="h-9 min-w-0 flex-1 basis-[140px] text-[12px] sm:w-[150px] sm:flex-none touch:h-11"
           aria-label="Ngày nhận việc đến"
         />
 

@@ -132,8 +132,12 @@ export const InstallPrompt = () => {
     if (forceGuide) {
       setInstructions(true);
       setOpen(true);
-    } else if (!readKey(INSTALL_NEVER_KEY) && !dismissedRecently()) {
-      // Hiện sau khi đăng nhập, trên cả điện thoại và máy tính; bỏ qua nếu đang ở trang công khai.
+    } else if (
+      !readKey(INSTALL_NEVER_KEY) &&
+      !dismissedRecently() &&
+      window.matchMedia("(pointer: coarse)").matches
+    ) {
+      // Tự hiện chỉ trên điện thoại/máy tính bảng (cảm ứng). Máy tính có chuột cài qua menu.
       timer = window.setTimeout(() => {
         if (!isStandalone() && !onHiddenPath()) setOpen(true);
       }, 1500);
