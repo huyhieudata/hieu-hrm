@@ -47,4 +47,26 @@ jobs:
         if: steps.check.outputs.ok == 'true'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase functions deploy provision-workspace-admin --project-ref "$PROJECT_REF" --use-api
+        run: |
+          supabase functions deploy provision-workspace-admin --project-ref "$PROJECT_REF" --use-api
+          supabase functions deploy send-invite-email --project-ref "$PROJECT_REF" --use-api
+      - name: Đặt secret gửi email cho edge function
+        if: steps.check.outputs.ok == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_FROM_NAME: ${{ secrets.MAIL_FROM_NAME }}
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          umask 077
+          f="$(mktemp)"
+          for k in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS MAIL_FROM MAIL_FROM_NAME APP_URL; do
+            v="${!k}"
+            if [ -n "$v" ]; then printf '%s=%s\n' "$k" "$v" >> "$f"; else echo "Bỏ qua $k (chưa có secret)"; fi
+          done
+          if [ -s "$f" ]; then supabase secrets set --env-file "$f" --project-ref "$PROJECT_REF" >/dev/null && echo "Đã cập nhật secret email"; fi
+          rm -f "$f"
