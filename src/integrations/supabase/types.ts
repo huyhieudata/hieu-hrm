@@ -5362,6 +5362,7 @@ export type Database = {
           current_address: string | null
           date_of_birth: string | null
           department: string | null
+          department_id: string | null
           dependents_count: number | null
           education_level: string | null
           emergency_contact_name: string | null
@@ -5411,6 +5412,7 @@ export type Database = {
           current_address?: string | null
           date_of_birth?: string | null
           department?: string | null
+          department_id?: string | null
           dependents_count?: number | null
           education_level?: string | null
           emergency_contact_name?: string | null
@@ -5460,6 +5462,7 @@ export type Database = {
           current_address?: string | null
           date_of_birth?: string | null
           department?: string | null
+          department_id?: string | null
           dependents_count?: number | null
           education_level?: string | null
           emergency_contact_name?: string | null
