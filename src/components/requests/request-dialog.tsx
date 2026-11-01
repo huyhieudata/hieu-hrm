@@ -137,8 +137,9 @@ const RequestDialog = ({
       setError("Ngày kết thúc phải sau ngày bắt đầu.");
       return;
     }
-    if (selectedType.max_days && listDates(startDate, endDate).length > selectedType.max_days) {
-      setError(`Loại đơn này tối đa ${selectedType.max_days} ngày.`);
+    const limitDays = category === "leave" ? leaveDayCount : listDates(startDate, endDate).length;
+    if (selectedType.max_days && limitDays > selectedType.max_days) {
+      setError(`Loại đơn này tối đa ${selectedType.max_days} ngày${category === "leave" ? " làm việc" : ""} (đơn đang tính ${limitDays} ngày).`);
       return;
     }
     if (category === "overtime" && (!startTime || !endTime)) {
