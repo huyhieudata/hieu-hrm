@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { CONTRACT_TYPE_LABELS, daysUntil, type ContractAppendixRecord, type EmployeeRecord } from "@/lib/employee-records";
 
@@ -124,15 +125,23 @@ export const buildContractVars = (
 });
 
 /** Thay {{bien}} bằng giá trị (đã escape); biến trống ⇒ dòng chấm để điền tay. */
+/** SEC-09: làm sạch HTML mẫu hợp đồng (preview / in / xuất Word) – bỏ script, on*, iframe, form… */
+export const sanitizeContractHtml = (html: string) =>
+  DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    ADD_ATTR: ["style", "align", "colspan", "rowspan", "width"],
+    FORBID_TAGS: ["script", "iframe", "object", "embed", "form", "input", "button", "textarea", "select", "link", "meta", "base"],
+  });
+
 export const renderContractTemplate = (body: string, vars: Record<string, string>) =>
-  body.replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_, key: string) =>
+  sanitizeContractHtml(body).replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_, key: string) =>
     vars[key] ? escapeHtml(vars[key]) : "……………………",
   );
 
 const wrapDocument = (title: string, bodyHtml: string) => `<!DOCTYPE html>
 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"/><title>${escapeHtml(title)}</title>
 <style>@page{size:A4;margin:2cm 2cm 2cm 3cm}body{font-family:"Times New Roman",serif;font-size:13pt;line-height:1.5;color:#000}h2{font-size:15pt;margin:12px 0}p{margin:6px 0}</style>
-</head><body>${bodyHtml}</body></html>`;
+</head><body>${sanitizeContractHtml(bodyHtml)}</body></html>`;
 
 /** Xuất Word (.doc dạng HTML – Word/LibreOffice/Google Docs mở được, không cần thư viện nặng). */
 export const downloadContractWord = (fileName: string, bodyHtml: string) => {
