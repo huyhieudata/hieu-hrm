@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { CheckInButton, type CheckInButtonMode } from "@/components/attendance/CheckInButton";
 import { CheckInSteps, type CheckStepItem, type CheckStepState } from "@/components/attendance/CheckInSteps";
@@ -332,7 +333,7 @@ export const EmployeeCheckInView = ({
           )}
         </section>
         {!offDay && blocked ? (
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          <div className="fixed inset-x-0 bottom-[var(--fixed-bar-offset,0px)] z-40 border-t border-border bg-card px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
             <div className="mx-auto flex max-w-md flex-col gap-2">
               {deviceBlocked && device?.status !== "pending" ? (
                 <button type="button" onClick={() => navigate("/toi/thiet-bi")} className="flex h-12 items-center justify-center rounded-[14px] bg-brand-navy text-[15px] font-semibold text-white">
@@ -373,7 +374,7 @@ export const EmployeeCheckInView = ({
   }
 
   return (
-    <div className="space-y-3 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))]">
+    <div className={cn("space-y-3", !offDay && blocked ? "pb-[calc(var(--fixed-bar-offset,0px)+190px)]" : "pb-4")}>
       <ShiftCard name={shift?.name ?? "Chưa phân ca"} range={shiftRangeLabel} dateLabel={dateLabel} />
 
       {offDay ? (

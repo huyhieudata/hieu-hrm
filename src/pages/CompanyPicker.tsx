@@ -78,7 +78,7 @@ const CompanyPicker = () => {
 
       <div className="relative mx-auto w-full max-w-[1120px] px-5 py-8 sm:px-8">
         <header className="flex items-center justify-between">
-          <Logo subtitle="People Platform" />
+          <Logo subtitle="Quản trị nhân sự" />
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-[12.5px] font-semibold leading-4 text-foreground">

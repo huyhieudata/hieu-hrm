@@ -21,7 +21,7 @@ export const SettingsNav = () => {
     );
   return (
     <>
-      <nav className="-mx-1 flex gap-1 overflow-x-auto pb-1 lg:hidden">
+      <nav className="no-scrollbar flex gap-1 overflow-x-auto pb-1 lg:hidden">
         <NavLink to="/cai-dat" end className={linkCls}>Tổng quan</NavLink>
         {groups.flatMap((g) => g.items).map((i) => (
           <NavLink key={i.to} to={i.to} className={linkCls}>{i.label}</NavLink>

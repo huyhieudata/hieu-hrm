@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -35,7 +35,7 @@ const EmployeeTimesheet = () => {
   const [month, setMonth] = useState(currentMonthIso());
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [leaveRemaining, setLeaveRemaining] = useState<number | null>(null);
+  const [leaveRemaining, setLeaveRemaining] = useState<number | null | "none" | "error">(null);
 
   const monthEnd = useMemo(() => {
     const [year, monthValue] = month.split("-").map(Number);
@@ -52,7 +52,7 @@ const EmployeeTimesheet = () => {
         setRecords([]);
         return;
       }
-      void loadMyLeaveRemaining(companyId, employee).then(setLeaveRemaining).catch(() => setLeaveRemaining(null));
+      void loadMyLeaveRemaining(companyId, employee).then((v) => setLeaveRemaining(v ?? "none")).catch(() => setLeaveRemaining("error"));
       const rows = await listRecordsBetween(companyId, `${month}-01`, monthEnd);
       setRecords(rows.filter((row) => row.employee_id === employee.id));
     } catch (error) {
@@ -110,10 +110,13 @@ const EmployeeTimesheet = () => {
                 [String(worked), "Ngày công"],
                 [String(late), "Đi muộn"],
                 [String(leave), "Nghỉ phép"],
-                [leaveRemaining == null ? "—" : String(leaveRemaining), "Còn lại"],
+                [
+                  leaveRemaining === "none" ? "Chưa có chính sách phép" : leaveRemaining === "error" ? "Không tải được" : leaveRemaining == null ? "…" : String(leaveRemaining),
+                  "Còn lại",
+                ],
               ].map(([value, caption], index) => (
                 <div key={caption} className={index ? "border-l border-border" : ""}>
-                  <b className="block text-[20px] font-bold">{value}</b>
+                  <b className={value.length > 6 ? "block px-1 text-[11.5px] font-semibold leading-tight text-muted-foreground" : "block text-[20px] font-bold"}>{value}</b>
                   <span className="text-[12px] text-muted-foreground">{caption}</span>
                 </div>
               ))}
@@ -153,27 +156,28 @@ const EmployeeTimesheet = () => {
                             : "empty";
                   const tone =
                     kind === "ok"
-                      ? "bg-primary-subtle text-brand-navy"
+                      ? "bg-success-subtle text-brand-navy ring-1 ring-success/40"
                       : kind === "late"
-                        ? "bg-accent text-accent-foreground"
+                        ? "bg-warning-subtle text-warning ring-1 ring-warning/40"
                         : kind === "leave"
-                          ? "bg-secondary text-foreground"
+                          ? "bg-primary-subtle text-brand-navy ring-1 ring-brand-navy/30"
                           : kind === "future"
                             ? "text-muted-foreground ring-1 ring-border"
                             : kind === "weekend"
                               ? "text-muted-foreground"
                               : "bg-secondary text-foreground";
                   return (
-                    <div key={iso} className={`flex h-9 items-center justify-center rounded-[10px] text-[13px] font-medium ${tone} ${isToday ? "ring-2 ring-brand-navy" : ""}`}>
+                    <div key={iso} className={`relative flex h-9 items-center justify-center rounded-[10px] text-[13px] font-medium ${tone} ${isToday ? "ring-2 ring-brand-navy" : ""}`}>
                       {day}
+                      {kind === "ok" ? <Check aria-label="Đủ công" className="absolute right-0.5 top-0.5 h-2.5 w-2.5 stroke-[3] text-success" /> : null}
                     </div>
                   );
                 })}
               </div>
-              <div className="mt-3.5 flex flex-wrap gap-4 text-[12px] text-muted-foreground">
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-primary-subtle ring-1 ring-brand-navy/30" /> Đủ công</span>
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-accent" /> Đi muộn</span>
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-secondary ring-1 ring-border" /> Nghỉ phép</span>
+              <div className="mt-3.5 flex flex-wrap gap-4 text-[12px] font-medium text-foreground/80">
+                <span className="flex items-center gap-1.5"><i className="flex h-3.5 w-3.5 items-center justify-center rounded-[4px] bg-success-subtle ring-1 ring-success/60"><Check className="h-2.5 w-2.5 stroke-[3] text-success" /></i> Đủ công</span>
+                <span className="flex items-center gap-1.5"><i className="h-3.5 w-3.5 rounded-[4px] bg-warning-subtle ring-1 ring-warning/60" /> Đi muộn</span>
+                <span className="flex items-center gap-1.5"><i className="h-3.5 w-3.5 rounded-[4px] bg-primary-subtle ring-1 ring-brand-navy/50" /> Nghỉ phép</span>
               </div>
             </section>
           )}

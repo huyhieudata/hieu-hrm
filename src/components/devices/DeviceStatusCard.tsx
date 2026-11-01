@@ -41,7 +41,7 @@ export const DeviceStatusCard = ({ name, detail, status, note, current, actionLa
           <Smartphone className="h-4 w-4 shrink-0" />
           <span className="truncate">{name}</span>
         </p>
-        <Badge variant={VARIANT[status]}>{label}</Badge>
+        <Badge variant={VARIANT[status]} className="text-[12px]">{label}</Badge>
       </div>
       {detail ? <p className="mt-1 text-[12px] text-muted-foreground">{detail}</p> : null}
       {current ? <p className="mt-1 text-[12px] font-semibold text-foreground">Thiết bị này</p> : null}

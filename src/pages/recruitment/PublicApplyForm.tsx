@@ -138,7 +138,7 @@ const PublicApplyForm = () => {
 
       <div className="relative mx-auto w-full max-w-[720px] px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))]">
         <div className="flex justify-center">
-          <Logo subtitle="People Platform" />
+          <Logo subtitle="Quản trị nhân sự" />
         </div>
 
         {loading ? (

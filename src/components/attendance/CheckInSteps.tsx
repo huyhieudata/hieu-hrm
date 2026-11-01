@@ -74,7 +74,7 @@ export const CheckInSteps = ({ steps, variant = "cards" }: CheckInStepsProps) =>
               </span>
               <span className="min-w-0 flex-1 text-left">
                 <span className="block text-[14px] font-semibold">{step.label}</span>
-                <span className={cn("mt-0.5 block truncate text-[12px]", step.state === "bad" ? "text-destructive" : "text-muted-foreground")}>{step.note}</span>
+                <span className={cn("mt-0.5 block break-words text-[12px] leading-[1.35]", step.state === "bad" ? "text-destructive" : "text-muted-foreground")}>{step.note}</span>
               </span>
               <span className={cn("shrink-0 text-[12px] font-semibold", STATUS_TONE[step.state])}>{STATUS_LABEL[step.state]}</span>
             </li>
@@ -95,7 +95,7 @@ export const CheckInSteps = ({ steps, variant = "cards" }: CheckInStepsProps) =>
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[13px] font-bold text-foreground">{step.label}</span>
-            <span className="block truncate text-[12px] text-muted-foreground">{step.note}</span>
+            <span className="block break-words text-[12px] leading-[1.35] text-muted-foreground">{step.note}</span>
           </span>
           {step.state === "ok" ? <Check className="h-4 w-4 shrink-0 text-success" aria-label="Đạt" /> : null}
         </li>

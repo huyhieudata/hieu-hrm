@@ -28,7 +28,7 @@ export const SettingsShell = ({
 }: SettingsShellProps) => (
   <AppShell>
     <PageHeader eyebrow={eyebrow} title={title} description={description} actions={actions} />
-    <div className="scrollbar-slim flex gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1.5 shadow-xs">
+    <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1.5 shadow-xs">
       {(tabItems ?? tabs).map((tab) => {
         const Icon = tab.icon;
         return (

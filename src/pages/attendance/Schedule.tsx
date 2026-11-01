@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/common/page-header";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCompany } from "@/lib/company-provider";
@@ -188,11 +189,11 @@ const Schedule = () => {
           <label className="inline-flex items-center gap-2 text-[12px] text-muted-foreground">
             <CalendarDays className="h-4 w-4" /> Tháng
           </label>
-          <input
+          <Input
             type="month"
             value={month}
             onChange={(event) => setMonth(event.target.value)}
-            className="h-9 rounded-md border border-border bg-card px-3 text-[12.5px] text-foreground shadow-xs outline-none focus:border-primary"
+            className="h-9 w-auto min-w-[150px] rounded-md border border-border bg-card px-3 text-[12.5px] text-foreground shadow-xs outline-none focus:border-primary"
           />
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />

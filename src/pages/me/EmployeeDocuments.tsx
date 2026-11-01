@@ -60,9 +60,9 @@ const EmployeeDocuments = () => {
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm tài liệu..." className="h-11 w-full bg-transparent text-base text-foreground outline-none" />
       </label>
       {isHr && (
-        <Button className="mt-3 w-full gap-1.5 rounded-full bg-brand-orange text-white hover:bg-brand-orange/90" onClick={() => setUploading(true)}>
+        <div className="flex justify-end"><Button size="sm" className="mt-3 h-10 gap-1.5 rounded-full px-4 bg-brand-orange text-white hover:bg-brand-orange/90" onClick={() => setUploading(true)}>
           <Upload className="h-4 w-4" /> Tải lên tài liệu
-        </Button>
+        </Button></div>
       )}
       {!loading && groups.length === 0 ? (
         <div className="mt-4"><EmptyState emoji="📁" title="Chưa có tài liệu" description="Nội quy, quy trình, biểu mẫu công ty sẽ hiển thị ở đây." /></div>
