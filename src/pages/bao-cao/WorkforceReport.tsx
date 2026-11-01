@@ -169,7 +169,7 @@ const WorkforceReport = () => {
                       <span className="font-medium">{p.full_name}</span>
                       {p.code ? ` · ${p.code}` : ""} — thiếu {p.missing.map((m) => MISSING_LABELS[m] ?? m).join(", ")}
                     </span>
-                    <Link to={`/employees/${p.id}`} className="text-primary underline-offset-2 hover:underline">
+                    <Link to={`/employees/${p.id}?edit=1`} className="text-primary underline-offset-2 hover:underline">
                       Sửa hồ sơ
                     </Link>
                   </li>
