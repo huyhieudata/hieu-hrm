@@ -44,6 +44,7 @@ import {
   RequireCompany,
   RequireModule,
   RequireStaffPath,
+  RequirePlatformAdmin,
 } from "./components/auth/route-guards";
 import { PageSuspense } from "./components/layout/page-suspense";
 import NotFound from "./pages/NotFound";
@@ -149,6 +150,7 @@ const SettingsHome = lazy("/cai-dat", () => import("./pages/settings/SettingsHom
 const EmailSettings = lazy("/cai-dat/email", () => import("./pages/settings/email/EmailSettings"));
 
 const authenticated = (node: ReactNode) => <RequireAuth>{node}</RequireAuth>;
+const platformOnly = (node: ReactNode) => authenticated(<RequirePlatformAdmin>{node}</RequirePlatformAdmin>);
 
 const companyScoped = (node: ReactNode, moduleKey?: string) => (
   <RequireAuth>
@@ -301,7 +303,7 @@ export const routers = [
   {
     path: "/cai-dat/he-thong/workspace",
     name: "workspaces",
-    element: authenticated(
+    element: platformOnly(
       <PageSuspense>
         <Workspaces />
       </PageSuspense>,
@@ -310,7 +312,7 @@ export const routers = [
   {
     path: "/cai-dat/he-thong/phan-quyen",
     name: "permission-groups",
-    element: authenticated(
+    element: platformOnly(
       <PageSuspense>
         <PermissionGroups />
       </PageSuspense>,
@@ -319,7 +321,7 @@ export const routers = [
   {
     path: "/cai-dat/he-thong/goi-dich-vu",
     name: "service-plans",
-    element: authenticated(
+    element: platformOnly(
       <PageSuspense>
         <ServicePlans />
       </PageSuspense>,
