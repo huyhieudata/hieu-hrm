@@ -8,7 +8,8 @@ import { useAuth } from "@/lib/auth-provider";
 import { findMyEmployee } from "@/lib/attendance";
 import { useCompany } from "@/lib/company-provider";
 import { useDeviceMode } from "@/hooks/use-device-mode";
-import { listPayrollItems, listPayrollPeriods, PAYROLL_STATUS_LABELS, type PayrollItem, type PayrollPeriod } from "@/lib/payroll";
+import { listMyPayslips, PAYROLL_STATUS_LABELS, type PayrollItem, type PayrollPeriod } from "@/lib/payroll";
+import { exportPdf } from "@/lib/export-utils";
 import { getErrorMessage } from "@/lib/utils";
 
 const money = (value: number) => new Intl.NumberFormat("vi-VN").format(Math.round(value));
@@ -35,8 +36,8 @@ const EmployeePayslip = () => {
         setItems([]);
         return;
       }
-      const [periodRows, itemRows] = await Promise.all([listPayrollPeriods(companyId), listPayrollItems(companyId)]);
-      const mine = itemRows.filter((item) => item.employee_id === employee.id);
+      // Chỉ phiếu của chính mình ở kỳ đã chốt/đã chi trả (RPC my_payslips).
+      const { items: mine, periods: periodRows } = await listMyPayslips(companyId);
       setPeriods(periodRows);
       setItems(mine);
       setSelected(mine[0]?.period_id ?? null);
@@ -57,6 +58,28 @@ const EmployeePayslip = () => {
   const allowance = current ? current.position_allowance + current.responsibility_allowance + current.other_allowance : 0;
   const mobile = useDeviceMode() === "mobile";
   const periodIndex = current ? items.findIndex((item) => item.period_id === current.period_id) : -1;
+
+  const downloadPdf = () => {
+    if (!current) return;
+    const rows: string[][] = [
+      ["Lương cơ bản", money(current.base_salary)],
+      ["Phụ cấp chức vụ", money(current.position_allowance)],
+      ["Phụ cấp trách nhiệm", money(current.responsibility_allowance)],
+      ["Phụ cấp khác", money(current.other_allowance)],
+      ["Tổng thu nhập", money(current.gross_salary)],
+      ["BHXH, BHYT, BHTN", `-${money(current.insurance_employee)}`],
+      ["Thuế TNCN", `-${money(current.tax_amount)}`],
+      ["Khấu trừ khác", `-${money(current.other_deduction)}`],
+      ["Thực nhận", money(current.net_salary)],
+      ["Ngày công", `${current.attendance_days}/${current.work_days}`],
+    ];
+    exportPdf(
+      `Phiếu lương ${period ? `tháng ${period.month}/${period.year}` : ""}`,
+      `${current.employee_name}${current.employee_code ? ` · ${current.employee_code}` : ""} · ${activeCompany?.name ?? ""}`,
+      ["Khoản", "Số tiền (đ)"],
+      rows,
+    );
+  };
 
   if (mobile) {
     const lines = current
@@ -158,6 +181,11 @@ const EmployeePayslip = () => {
               ) : (
                 <p className="text-center text-[12px] text-muted-foreground">Chi tiết hiện sau khi bạn chạm để xem số tiền.</p>
               )}
+              {revealed ? (
+                <button type="button" onClick={downloadPdf} className="h-11 w-full rounded-full bg-card text-[14px] font-semibold text-brand-navy shadow-card-soft">
+                  Tải phiếu lương (PDF)
+                </button>
+              ) : null}
             </>
           ) : null}
         </div>

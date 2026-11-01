@@ -350,3 +350,31 @@ export const summarizeLeave = (options: {
     remaining: round1(entitlement - used),
   };
 };
+
+/** Phép năm còn lại của một nhân viên (dùng cho Bảng công/Trang chủ trên mobile). Trả null nếu không tải được. */
+export const loadMyLeaveRemaining = async (companyId: string, employee: EmployeeRecord): Promise<number | null> => {
+  const year = new Date().getFullYear();
+  const [{ listRequests, listRequestTypes }, { listCompanyContracts }] = await Promise.all([
+    import("@/lib/requests"),
+    import("@/lib/contracts"),
+  ]);
+  const [requests, types, policies, items, balances, contracts] = await Promise.all([
+    listRequests(companyId),
+    listRequestTypes(companyId),
+    listLeavePolicies(companyId),
+    listLeavePolicyItems(companyId),
+    listLeaveBalances(companyId, year),
+    listCompanyContracts(companyId).catch(() => []),
+  ]);
+  if (!policies.some((policy) => policy.year === year)) return null;
+  return summarizeLeave({
+    employee,
+    year,
+    policies,
+    items,
+    balances,
+    requests: requests.filter((request) => request.employee_id === employee.id),
+    types,
+    contracts: contracts.filter((contract) => contract.employee_id === employee.id),
+  }).remaining;
+};
