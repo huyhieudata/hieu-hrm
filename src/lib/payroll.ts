@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { applyPayrollParameters, type PayrollParameterRow } from "@/lib/payroll-calc";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -57,6 +58,8 @@ export {
   applyPayrollAdjustment,
   calculatePayroll,
   payrollPeriodRange,
+  applyPayrollParameters,
+  type PayrollParameterRow,
   type PayrollAdjustmentInput,
   type PayrollWarning,
   type PayrollWarningCode,
@@ -247,3 +250,42 @@ export const buildPayslipBatchHtml = (input: {
       )
       .join(""),
   );
+
+/** Tham số lương có ngày hiệu lực (bảng payroll_parameters): mặc định hệ thống + riêng công ty. */
+export interface PayrollParameter extends PayrollParameterRow {
+  id: string;
+  note: string | null;
+}
+
+export const listPayrollParameters = async (companyId: string): Promise<PayrollParameter[]> => {
+  const { data, error } = await db
+    .from("payroll_parameters")
+    .select("*")
+    .or(`company_id.is.null,company_id.eq.${companyId}`)
+    .order("effective_date", { ascending: true });
+  if (error) throw new Error(error.message ?? "Không tải được tham số lương.");
+  return (data ?? []) as PayrollParameter[];
+};
+
+/** Nạp tham số của công ty vào bộ tính lương phía giao diện (cùng quy tắc với máy chủ). */
+export const loadPayrollParameters = async (companyId: string) => {
+  const rows = await listPayrollParameters(companyId);
+  applyPayrollParameters(rows);
+  return rows;
+};
+
+export const savePayrollParameter = async (values: Record<string, unknown>, id?: string) => {
+  const query = id
+    ? db.from("payroll_parameters").update(values).eq("id", id)
+    : db.from("payroll_parameters").insert(values);
+  const { error } = await query;
+  if (error) {
+    if (error.code === "23505") throw new Error("Đã có bộ tham số cho ngày hiệu lực này.");
+    throw new Error(error.message ?? "Không lưu được tham số lương.");
+  }
+};
+
+export const deletePayrollParameter = async (id: string) => {
+  const { error } = await db.from("payroll_parameters").delete().eq("id", id);
+  if (error) throw new Error(error.message ?? "Không xoá được tham số lương.");
+};

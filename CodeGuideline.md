@@ -151,3 +151,7 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Biểu mẫu: `evaluation_templates` + `evaluation_criteria`, quyền module `evaluations.*`. Phiếu đánh giá ứng viên vẫn là `candidate_evaluations` và dùng quyền `recruitment.*`.
 - Câu trả lời lưu trong cột `answers` (jsonb `{ "<criterion_id>": { "score", "comment" } }`) thay vì bảng riêng, để nộp phiếu là một thao tác nguyên tử. Trigger `validate_candidate_evaluation` kiểm tra thang điểm, tiêu chí, khoá phiếu đã nộp và tự tính `total_score` (máy chủ là nguồn đúng; `src/lib/evaluation-score.ts` chỉ để hiển thị, kiểm bằng `pnpm test:evaluations`).
 - Biểu mẫu đã có phiếu dùng thì khoá tiêu chí/thang điểm (BR-4.1); đổi cấu trúc qua RPC `create_evaluation_template_version`.
+
+## Tham số lương (payroll_parameters)
+- Thuế TNCN, giảm trừ gia cảnh, lương cơ sở, tỷ lệ/trần BH nằm trong bảng `payroll_parameters` theo `effective_date` (bản ghi đầy đủ). `company_id null` = mặc định hệ thống (chỉ đổi bằng migration khi luật đổi); kế toán thêm bộ riêng công ty ở `/tinh-luong/tham-so` (quyền payroll.manage).
+- SQL: `payroll_params(ngày, company)` + các hàm `payroll_*(…, company)`; trigger `validate_payroll_item` dùng tham số của công ty. Giao diện: `loadPayrollParameters(companyId)` → `applyPayrollParameters` trước khi tính. Hằng số trong `payroll-calc.ts` chỉ là mặc định dự phòng, phải khớp bản ghi hệ thống.

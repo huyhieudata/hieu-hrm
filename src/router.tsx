@@ -26,6 +26,7 @@ const AttendanceSettings = lazy(() => import("./pages/attendance/AttendanceSetti
 const Contracts = lazy(() => import("./pages/Contracts"));
 const Assets = lazy(() => import("./pages/Assets"));
 const News = lazy(() => import("./pages/News"));
+const PayrollParameters = lazy(() => import("@/pages/payroll/PayrollParameters"));
 const EvaluationTemplates = lazy(() => import("@/pages/evaluations/EvaluationTemplates"));
 const Payroll = lazy(() => import("./pages/payroll/Payroll"));
 const Workspaces = lazy(() => import("./pages/admin/Workspaces"));
@@ -266,6 +267,16 @@ export const routers = [
     element: companyScoped(
       <PageSuspense>
         <Payroll />
+      </PageSuspense>,
+      "payroll",
+    ),
+  },
+  {
+    path: "/tinh-luong/tham-so",
+    name: "payroll-parameters",
+    element: companyScoped(
+      <PageSuspense>
+        <PayrollParameters />
       </PageSuspense>,
       "payroll",
     ),

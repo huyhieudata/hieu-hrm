@@ -83,6 +83,7 @@ import {
   listPayrollPeriods,
   payrollPeriodRange,
   replacePayrollItems,
+  loadPayrollParameters,
   updatePayrollItem,
   updatePayrollPeriod,
   type PayrollAttendanceInput,
@@ -265,6 +266,7 @@ const Payroll = () => {
       const [periodRows, itemRows] = await Promise.all([
         listPayrollPeriods(companyId),
         listPayrollItems(companyId),
+        loadPayrollParameters(companyId),
       ]);
       setPeriods(periodRows);
       setItems(itemRows);
@@ -480,6 +482,7 @@ const Payroll = () => {
     setBusyId(period.id);
     try {
       const { start, end } = payrollPeriodRange(period.year, period.month);
+      await loadPayrollParameters(companyId);
       const employeeRows = await listEmployees(companyId);
 
       const [salaryResult, attendanceResult, shiftResult, typeResult, leaveResult] = await Promise.all([

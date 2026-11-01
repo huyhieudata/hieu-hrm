@@ -124,6 +124,7 @@ export const buildNavGroups = ({ canDo, canManageModule, isPlatformAdmin, role }
       label: "Tính lương",
       items: [
         canDo("payroll", "view") && { label: "Kỳ lương", to: "/tinh-luong", icon: Calculator },
+        canDo("payroll", "view") && { label: "Tham số lương", to: "/tinh-luong/tham-so", icon: Calculator },
       ].filter(Boolean) as NavItem[],
     },
     {

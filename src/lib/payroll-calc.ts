@@ -63,7 +63,15 @@ export const PIT_RULES: PitRule[] = [
 ];
 
 /** Mức lương cơ sở theo ngày hiệu lực (NĐ 73/2024/NĐ-CP, NĐ 161/2026/NĐ-CP). */
-export const BASE_WAGE_RULES: { effectiveFrom: string; amount: number }[] = [
+export interface BaseWageRule {
+  effectiveFrom: string;
+  amount: number;
+  capMultiplier?: number;
+  employeeRate?: number;
+  unpaidDaysExempt?: number;
+}
+
+export const BASE_WAGE_RULES: BaseWageRule[] = [
   { effectiveFrom: "1900-01-01", amount: 2_340_000 },
   { effectiveFrom: "2026-07-01", amount: 2_530_000 },
 ];
@@ -82,8 +90,64 @@ const pickRule = <T extends { effectiveFrom: string }>(rules: T[], key: string) 
 export const getPitRule = (year?: number, month?: number) => pickRule(PIT_RULES, periodKey(year, month));
 
 /** Trần lương đóng bảo hiểm của kỳ lương. */
-export const getInsuranceCap = (year?: number, month?: number) =>
-  pickRule(BASE_WAGE_RULES, periodKey(year, month)).amount * INSURANCE_CAP_MULTIPLIER;
+export const getInsuranceCap = (year?: number, month?: number) => {
+  const rule = pickRule(BASE_WAGE_RULES, periodKey(year, month));
+  return rule.amount * (rule.capMultiplier ?? INSURANCE_CAP_MULTIPLIER);
+};
+
+/** Một dòng bảng public.payroll_parameters (company_id null = mặc định hệ thống). */
+export interface PayrollParameterRow {
+  company_id: string | null;
+  effective_date: string;
+  personal_deduction: number;
+  dependent_deduction: number;
+  base_wage: number;
+  insurance_cap_multiplier: number;
+  employee_insurance_rate: number;
+  insurance_unpaid_days_exempt: number;
+  pit_brackets: { up_to: number | null; rate: number }[];
+  source?: string | null;
+}
+
+/**
+ * Nạp tham số từ bảng payroll_parameters (cùng quy tắc chọn với hàm SQL payroll_params:
+ * ngày hiệu lực mới nhất <= kỳ, cùng ngày thì ưu tiên bản ghi của công ty).
+ * Thay nội dung PIT_RULES/BASE_WAGE_RULES để mọi hàm tính dùng chung tham số với máy chủ.
+ */
+export const applyPayrollParameters = (rows: PayrollParameterRow[]) => {
+  if (!rows.length) return;
+  const byDate = new Map<string, PayrollParameterRow>();
+  for (const row of rows) {
+    const current = byDate.get(row.effective_date);
+    if (!current || (current.company_id === null && row.company_id !== null)) byDate.set(row.effective_date, row);
+  }
+  const sorted = [...byDate.values()].sort((a, b) => a.effective_date.localeCompare(b.effective_date));
+  PIT_RULES.splice(
+    0,
+    PIT_RULES.length,
+    ...sorted.map((row) => ({
+      effectiveFrom: row.effective_date,
+      personalDeduction: Number(row.personal_deduction),
+      dependentDeduction: Number(row.dependent_deduction),
+      brackets: row.pit_brackets.map((b) => ({
+        upTo: b.up_to === null ? Number.POSITIVE_INFINITY : Number(b.up_to),
+        rate: Number(b.rate),
+      })),
+      source: row.source ?? "",
+    })),
+  );
+  BASE_WAGE_RULES.splice(
+    0,
+    BASE_WAGE_RULES.length,
+    ...sorted.map((row) => ({
+      effectiveFrom: row.effective_date,
+      amount: Number(row.base_wage),
+      capMultiplier: Number(row.insurance_cap_multiplier),
+      employeeRate: Number(row.employee_insurance_rate),
+      unpaidDaysExempt: Number(row.insurance_unpaid_days_exempt),
+    })),
+  );
+};
 
 /** Giảm trừ theo kỳ hiện tại, giữ để tương thích chỗ hiển thị cũ. */
 export const PERSONAL_DEDUCTION = getPitRule().personalDeduction;
@@ -112,9 +176,10 @@ export const computeEmployeeInsurance = (input: {
   year?: number;
   month?: number;
 }) => {
-  if (input.unpaidDays >= INSURANCE_UNPAID_DAYS_EXEMPT) return 0;
+  const rule = pickRule(BASE_WAGE_RULES, periodKey(input.year, input.month));
+  if (input.unpaidDays >= (rule.unpaidDaysExempt ?? INSURANCE_UNPAID_DAYS_EXEMPT)) return 0;
   const base = Math.min(Math.max(input.insuranceSalary, 0), getInsuranceCap(input.year, input.month));
-  return Math.round(base * INSURANCE_EMPLOYEE_RATE);
+  return Math.round(base * (rule.employeeRate ?? INSURANCE_EMPLOYEE_RATE));
 };
 
 export interface PayrollPeriodInput {
