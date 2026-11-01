@@ -1,33 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  Bell,
-  Download,
-  Fingerprint,
-  LayoutDashboard,
-  LayoutGrid,
-  LogOut,
-  Users,
-  X,
-  FileText,
-} from "lucide-react";
+import { Bell, Download, Fingerprint, LayoutGrid, LogOut, X } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/logo";
 import { Avatar } from "@/components/common/avatar";
 import { buildNavGroups, type NavItem } from "@/components/layout/app-sidebar";
+import { buildAdminMobileTabs, type AdminMobileTab } from "@/components/layout/admin-mobile-tabs";
 import { useAuth, displayName } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { usePlatformAdmin } from "@/lib/platform";
 import { isStandalone } from "@/lib/pwa";
 import { cn } from "@/lib/utils";
-import { canEnterStaffPath } from "@/lib/staff-routes";
-
-interface PrimaryTab {
-  to: string;
-  label: string;
-  icon: typeof Users;
-  match: (pathname: string) => boolean;
-}
 
 const itemMatches = (pathname: string, item: NavItem) => {
   if (!item.to) return false;
@@ -69,20 +52,14 @@ export const MobileNav = () => {
     [canDo, canManageModule, isPlatformAdmin, role],
   );
 
-  // Tab theo vai trò: Trang chủ, Nhân sự (hoặc Chấm công), Duyệt đơn, Thông báo, Thêm.
-  const primary = useMemo<PrimaryTab[]>(() => {
-    const tabs: PrimaryTab[] = [
-      { to: "/", label: "Trang chủ", icon: LayoutDashboard, match: (path) => path === "/" },
-    ];
-    if (canDo("employees", "view"))
-      tabs.push({ to: "/employees", label: "Nhân sự", icon: Users, match: (path) => path.startsWith("/employees") });
-    else if (canDo("attendance", "view"))
-      tabs.push({ to: "/cham-cong", label: "Chấm công", icon: Fingerprint, match: (path) => path.startsWith("/cham-cong") });
-    if (canDo("requests", "view"))
-      tabs.push({ to: "/don-tu", label: "Duyệt", icon: FileText, match: (path) => path.startsWith("/don-tu") });
-    tabs.push({ to: "/tin-tuc", label: "Tin báo", icon: Bell, match: (path) => path.startsWith("/tin-tuc") });
-    return tabs.filter((tab) => canEnterStaffPath(tab.to, role, canManageModule));
-  }, [canDo, canManageModule, role]);
+  // 2 tab | nút chấm công | 2 tab. Owner: Trang chủ, Nhân sự | Duyệt, Thêm. Tin báo ở chuông và sheet Thêm.
+  const { left, right } = useMemo(
+    () => buildAdminMobileTabs(canDo, role, canManageModule),
+    [canDo, canManageModule, role],
+  );
+  const newsOnBar = left.some((tab) => tab.to === "/tin-tuc") || right.some((tab) => tab.to === "/tin-tuc");
+  const balanced = left.length === right.length + 1;
+  const columns = left.length + right.length + 2;
 
   const name = displayName(profile, user?.email);
   const navItems = groups
@@ -99,6 +76,58 @@ export const MobileNav = () => {
     navigate(to);
   };
 
+  const tabButton = (tab: AdminMobileTab) => {
+    const Icon = tab.icon;
+    const active = tab.match(pathname);
+    return (
+      <button
+        key={tab.to}
+        type="button"
+        onClick={() => go(tab.to)}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "flex h-full min-h-11 min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10px] font-medium leading-tight tracking-tight",
+          active ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
+        )}
+      >
+        <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
+        <span className={cn("whitespace-nowrap", active && "font-semibold")}>{tab.label}</span>
+      </button>
+    );
+  };
+
+  const moreButton = (
+    <button
+      key="more"
+      type="button"
+      onClick={() => setMoreOpen(true)}
+      aria-expanded={moreOpen}
+      aria-label="Mở tất cả tính năng"
+      className={cn(
+        "flex h-full min-h-11 min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10px] font-medium leading-tight tracking-tight",
+        moreOpen ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
+      )}
+    >
+      <LayoutGrid className="h-[18px] w-[18px] shrink-0" strokeWidth={1.9} />
+      <span className={cn("whitespace-nowrap", moreOpen && "font-semibold")}>Thêm</span>
+    </button>
+  );
+
+  // Nút tuyệt đối để cột giữa không bị bề rộng 60px kéo lệch; tâm nút trùng tâm cột.
+  const punchButton = (
+    <div className={cn("relative min-w-0", balanced ? "h-full" : "h-full w-[72px] shrink-0")}>
+      <button
+        type="button"
+        data-checkin-fab=""
+        onClick={() => go("/toi/cham-cong")}
+        aria-label="Chấm công"
+        className="absolute left-1/2 top-1/2 z-10 flex h-[60px] w-[60px] -translate-x-1/2 -translate-y-[calc(50%+26px)] items-center justify-center rounded-full border-4 border-card bg-brand-orange text-white shadow-primary-glow active:scale-95"
+      >
+        <Fingerprint className="h-6 w-6" strokeWidth={2.2} />
+      </button>
+    </div>
+  );
+
   return (
     <>
       <nav
@@ -106,57 +135,29 @@ export const MobileNav = () => {
         aria-label="Điều hướng di động"
       >
         <div
-          className="shadow-tab pointer-events-auto mx-auto grid h-16 max-w-md items-stretch rounded-full bg-card px-1.5"
-          style={{ gridTemplateColumns: `repeat(${primary.length + 2}, minmax(0, 1fr))` }}
+          className={cn(
+            "shadow-tab pointer-events-auto mx-auto h-16 max-w-md rounded-full bg-card px-1.5",
+            balanced ? "grid" : "flex",
+          )}
+          style={balanced ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : undefined}
         >
-          {primary.flatMap((tab, index) => {
-            const Icon = tab.icon;
-            const active = tab.match(pathname);
-            const node = (
-              <button
-                key={tab.to}
-                type="button"
-                onClick={() => go(tab.to)}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10px] font-medium leading-tight tracking-tight",
-                  active ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
-                )}
-              >
-                <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
-                <span className={cn("whitespace-nowrap", active && "font-semibold")}>{tab.label}</span>
-              </button>
-            );
-            // Nút tròn Chấm công nổi ở giữa thanh dưới (cam ONHRM, vùng chạm 60px).
-            if (index !== Math.floor((primary.length + 1) / 2) - 1) return [node];
-            return [
-              node,
-              <div key="punch-fab" className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => go("/toi/cham-cong")}
-                  aria-label="Chấm công"
-                  className="-mt-[26px] flex h-[60px] w-[60px] items-center justify-center rounded-full border-4 border-card bg-brand-orange text-white shadow-primary-glow active:scale-95"
-                >
-                  <Fingerprint className="h-6 w-6" strokeWidth={2.2} />
-                </button>
-              </div>,
-            ];
-          })}
-
-          <button
-            type="button"
-            onClick={() => setMoreOpen(true)}
-            aria-expanded={moreOpen}
-            aria-label="Mở tất cả tính năng"
-            className={cn(
-              "flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 text-[10px] font-medium leading-tight tracking-tight",
-              moreOpen ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
-            )}
-          >
-            <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={1.9} />
-            <span className={cn("whitespace-nowrap", moreOpen && "font-semibold")}>Thêm</span>
-          </button>
+          {balanced ? (
+            <>
+              {left.map(tabButton)}
+              {punchButton}
+              {right.map(tabButton)}
+              {moreButton}
+            </>
+          ) : (
+            <>
+              <div className="flex min-w-0 flex-1">{left.map(tabButton)}</div>
+              {punchButton}
+              <div className="flex min-w-0 flex-1">
+                {right.map(tabButton)}
+                {moreButton}
+              </div>
+            </>
+          )}
         </div>
       </nav>
 
@@ -188,6 +189,28 @@ export const MobileNav = () => {
             </div>
 
             <div className="space-y-5 px-4 pt-4">
+              {!newsOnBar && (
+                <button
+                  type="button"
+                  onClick={() => go("/tin-tuc")}
+                  aria-current={pathname.startsWith("/tin-tuc") ? "page" : undefined}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left",
+                    pathname.startsWith("/tin-tuc") && "ring-2 ring-brand-navy/30",
+                  )}
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-subtle text-brand-navy">
+                    <Bell className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[12.5px] font-semibold text-foreground">Tin báo</span>
+                    <span className="block text-[11px] leading-4 text-muted-foreground">
+                      Thông báo và tin nội bộ
+                    </span>
+                  </span>
+                </button>
+              )}
+
               {!standalone && (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -217,7 +240,7 @@ export const MobileNav = () => {
               )}
 
               {groups.map((group) => {
-                const items = group.items.filter((item) => item.to);
+                const items = group.items.filter((item) => item.to && (newsOnBar || item.to !== "/tin-tuc"));
                 if (items.length === 0) return null;
                 return (
                   <div key={group.label}>
