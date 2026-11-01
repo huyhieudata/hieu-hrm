@@ -24,3 +24,6 @@ reports
 *.sln
 *.sw?
 code_template.zip
+
+# TypeScript incremental
+*.tsbuildinfo
