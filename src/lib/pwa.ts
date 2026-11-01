@@ -32,3 +32,25 @@ export const registerServiceWorker = () => {
     navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).catch(() => undefined);
   });
 };
+
+export interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
+
+/** Bắt beforeinstallprompt ngay khi tải module (trước khi React mount) để nút cài không bị "chết". */
+let deferredInstall: BeforeInstallPromptEvent | null = null;
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstall = event as BeforeInstallPromptEvent;
+    window.dispatchEvent(new CustomEvent("onhrm:install-ready"));
+  });
+  window.addEventListener("appinstalled", () => {
+    deferredInstall = null;
+  });
+}
+export const getDeferredInstall = () => deferredInstall;
+export const clearDeferredInstall = () => {
+  deferredInstall = null;
+};
