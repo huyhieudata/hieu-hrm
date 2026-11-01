@@ -98,7 +98,7 @@ export const MobileShell = ({ children, frame }: MobileShellProps) => {
         onBack={onBack}
         onNotify={onNotify}
       />
-      <main className="mx-auto w-full max-w-md px-4 pb-[calc(var(--tabbar-h)+28px+env(safe-area-inset-bottom))] pt-4">
+      <main className="mx-auto w-full max-w-md px-4 pb-[calc(var(--tabbar-h)+48px+env(safe-area-inset-bottom))] pt-4">
         <div key={frame ? meta.tab + meta.title : pathname} className="animate-fade-up space-y-3">
           {children}
         </div>

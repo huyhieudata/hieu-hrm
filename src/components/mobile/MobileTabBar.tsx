@@ -23,7 +23,7 @@ export const MobileTabBar = ({ tabs = EMPLOYEE_TABS, activeId, onSelect }: Mobil
             type="button"
             onClick={() => onSelect(tab.id)}
             aria-current={active ? "page" : undefined}
-            className="flex min-h-12 flex-1 flex-col items-center justify-end gap-0.5 pb-1.5 text-[10px] font-semibold"
+            className="flex min-h-12 flex-1 flex-col items-center justify-end gap-0.5 pb-1.5 text-[11px] font-semibold"
           >
             {tab.featured ? (
               <span

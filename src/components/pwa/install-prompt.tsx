@@ -21,21 +21,21 @@ interface BeforeInstallPromptEvent extends Event {
 
 /** Minh hoạ Safari iOS: thanh dưới có nút Chia sẻ → mục “Thêm vào Màn hình chính”. */
 const IosShareIllustration = () => (
-  <div className="flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-[#0e2d58] to-[#16467f] p-3 text-white">
+  <div className="flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-brand-navy to-brand-navy/80 p-3 text-white">
     <div className="w-[118px] rounded-[18px] border-2 border-white/40 bg-white/10 p-1.5">
       <div className="h-14 rounded-lg bg-white/15" />
       <div className="mt-1.5 flex items-center justify-around rounded-md bg-white/20 py-1">
         <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#f47b20] ring-2 ring-white">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-orange ring-2 ring-white">
           <Share className="h-3.5 w-3.5" />
         </span>
         <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
       </div>
     </div>
-    <span className="text-[18px] font-bold text-[#f47b20]">→</span>
-    <div className="w-[128px] space-y-1 rounded-xl bg-white p-2 text-[10px] font-semibold text-[#0e2d58]">
+    <span className="text-[18px] font-bold text-brand-orange">→</span>
+    <div className="w-[128px] space-y-1 rounded-xl bg-white p-2 text-[10px] font-semibold text-brand-navy">
       <div className="rounded-md bg-muted px-2 py-1 text-muted-foreground">Sao chép</div>
-      <div className="flex items-center justify-between rounded-md bg-[#fff1e6] px-2 py-1 ring-1 ring-[#f47b20]">
+      <div className="flex items-center justify-between rounded-md bg-brand-orange/10 px-2 py-1 ring-1 ring-brand-orange">
         Thêm vào MH chính <span className="text-[12px]">＋</span>
       </div>
       <div className="rounded-md bg-muted px-2 py-1 text-muted-foreground">Dấu trang</div>
@@ -218,7 +218,7 @@ export const InstallPrompt = () => {
             type="button"
             onClick={dismiss}
             aria-label="Đóng"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -303,15 +303,15 @@ export const InstallPrompt = () => {
                 {deferred ? "Cài đặt ngay" : "Thêm vào màn hình chính"}
               </Button>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="h-9 text-[12px]" onClick={dismiss}>
+                <Button variant="outline" className="h-11 text-[13px]" onClick={dismiss}>
                   Để sau
                 </Button>
-                <Button variant="ghost" className="h-9 text-[12px] text-muted-foreground" onClick={never}>
+                <Button variant="ghost" className="h-11 text-[13px] text-muted-foreground" onClick={never}>
                   Không hiện lại
                 </Button>
               </div>
             </div>
-            <p className="mt-3 text-center text-[10px] leading-4 text-muted-foreground">
+            <p className="mt-3 text-center text-[11px] leading-4 text-muted-foreground">
               Không cần App Store hay CH Play. “Để sau” sẽ nhắc lại sau 3 ngày.
             </p>
           </>

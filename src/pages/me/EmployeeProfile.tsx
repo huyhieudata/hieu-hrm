@@ -120,7 +120,7 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
       )}
 
       {!infoOnly ? (
-        <button type="button" onClick={() => void logout()} className="flex min-h-12 w-full items-center justify-center gap-2 text-[14px] font-bold text-destructive">
+        <button type="button" onClick={() => void logout()} className="shadow-mobile mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-3xl border border-destructive/20 bg-card text-[14px] font-bold text-destructive active:bg-destructive/5">
           <LogOut className="h-4 w-4" /> Đăng xuất
         </button>
       ) : null}

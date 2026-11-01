@@ -209,7 +209,7 @@ export const EmployeeCheckInView = ({
   const history = [...records].sort((a, b) => (a.work_date === b.work_date ? a.session.localeCompare(b.session) : b.work_date.localeCompare(a.work_date)));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))]">
       <ShiftCard name={shift?.name ?? "Chưa phân ca"} range={shiftRangeLabel} dateLabel={dateLabel} />
 
       {offDay ? (

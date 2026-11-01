@@ -175,7 +175,7 @@ export const InviteEmployeeDialog = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 gap-1"
+                    className="h-11 gap-1"
                     onClick={() =>
                       void navigator.clipboard
                         .writeText(inviteUrl(c.token))
@@ -187,7 +187,7 @@ export const InviteEmployeeDialog = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 gap-1"
+                    className="h-11 gap-1"
                     asChild
                   >
                     <a href={inviteMailto(c.email, c.token, companyName)}>
@@ -214,8 +214,9 @@ export const InviteEmployeeDialog = ({
             {single ? (
               <>
                 <div className="space-y-1">
-                  <Label>Email nhận lời mời *</Label>
+                  <Label htmlFor="invite-email">Email nhận lời mời *</Label>
                   <Input
+                    id="invite-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -230,8 +231,9 @@ export const InviteEmployeeDialog = ({
                 <OrgEmptyHint org={org} />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1">
-                    <Label>Phòng ban</Label>
+                    <Label htmlFor="invite-department">Phòng ban</Label>
                     <DepartmentSelect
+                      id="invite-department"
                       org={org}
                       value={department}
                       onChange={(v) => {
@@ -241,8 +243,9 @@ export const InviteEmployeeDialog = ({
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label>Vị trí / chức danh</Label>
+                    <Label htmlFor="invite-position">Vị trí / chức danh</Label>
                     <PositionSelect
+                      id="invite-position"
                       org={org}
                       department={department}
                       value={jobTitle}
@@ -258,14 +261,14 @@ export const InviteEmployeeDialog = ({
               </p>
             )}
             <div className="space-y-1">
-              <Label>Quyền khi tham gia</Label>
-              <div className="flex flex-wrap gap-2">
+              <Label id="invite-role-label">Quyền khi tham gia</Label>
+              <div className="flex flex-wrap gap-2" role="group" aria-labelledby="invite-role-label">
                 {allowedRoles.map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setRole(r)}
-                    className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold ${
+                    className={`min-h-11 rounded-full border px-4 text-[13px] font-semibold ${
                       role === r
                         ? "border-primary bg-primary-subtle text-primary"
                         : "border-border text-muted-foreground"
@@ -276,12 +279,12 @@ export const InviteEmployeeDialog = ({
                 ))}
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            <DialogFooter className="sticky -bottom-6 -mx-6 gap-2 border-t bg-card px-6 pb-6 pt-3">
+              <Button variant="ghost" className="h-11" onClick={() => onOpenChange(false)}>
                 Để sau
               </Button>
               <Button
-                className="gap-2"
+                className="h-11 gap-2"
                 disabled={busy || targets.length === 0}
                 onClick={() => void submit()}
               >

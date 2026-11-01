@@ -17,7 +17,7 @@ export const SettingsNav = () => {
   const linkCls = ({ isActive }: { isActive: boolean }) =>
     cn(
       "flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] transition-colors",
-      isActive ? "bg-[#0e2d58] text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      isActive ? "bg-brand-navy text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground",
     );
   return (
     <>
@@ -28,7 +28,7 @@ export const SettingsNav = () => {
         ))}
       </nav>
       <aside className="sticky top-20 hidden w-60 shrink-0 self-start lg:block">
-        <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-[#fc600b]">Cài đặt</p>
+        <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-brand-orange">Cài đặt</p>
         <NavLink to="/cai-dat" end className={linkCls}>Tổng quan</NavLink>
         {groups.map((g) => (
           <div key={g.label} className="mt-3">

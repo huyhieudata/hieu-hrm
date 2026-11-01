@@ -147,13 +147,13 @@ const EmployeeDevices = () => {
             onChange={(event) => setName(event.target.value)}
             placeholder={info?.suggestedName || "Điện thoại cá nhân"}
             maxLength={80}
-            className="min-h-11 w-full rounded-2xl bg-background px-3 text-[14px] outline-none ring-primary focus:ring-2"
+            className="min-h-11 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none ring-primary focus:border-primary focus:ring-2 sm:text-sm"
           />
           <button
             type="button"
             disabled={busy}
             onClick={() => void submit()}
-            className="bg-gradient-primary min-h-12 w-full rounded-2xl text-[14px] font-bold text-white disabled:opacity-60"
+            className="min-h-12 w-full rounded-2xl bg-brand-navy text-[14px] font-bold text-white disabled:opacity-60"
           >
             {busy ? "Đang gửi…" : current?.status === "rejected" ? "Gửi lại yêu cầu" : "Gửi yêu cầu đăng ký"}
           </button>

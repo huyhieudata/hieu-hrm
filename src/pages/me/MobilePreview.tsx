@@ -160,7 +160,7 @@ const MobilePreview = () => {
               <span className="flex-1">Giao diện tối</span>
             </div>
           </section>
-          <p className="py-2 text-center text-[14px] font-bold text-destructive">Đăng xuất</p>
+          <p className="shadow-mobile mt-3 flex min-h-12 items-center justify-center rounded-3xl border border-destructive/20 bg-card text-[14px] font-bold text-destructive">Đăng xuất</p>
         </div>
       ) : null}
 

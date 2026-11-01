@@ -26,8 +26,8 @@ export default {
         mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
-        "brand-navy": token("brand-navy"),
-        "brand-orange": token("brand-orange"),
+        "brand-navy": tokenAlpha("brand-navy"),
+        "brand-orange": tokenAlpha("brand-orange"),
         border: tokenAlpha("border"),
         input: tokenAlpha("input"),
         ring: token("ring"),

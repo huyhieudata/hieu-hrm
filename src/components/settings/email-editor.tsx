@@ -61,7 +61,7 @@ export const EmailEditor = ({ value, onChange, variables }: Props) => {
   if (!editor) return null;
   const tb = (active: boolean, onClick: () => void, Icon: typeof Bold, title: string) => (
     <Button type="button" size="icon" variant="ghost" title={title} aria-label={title} onClick={onClick}
-      className={cn("h-9 w-9", active && "bg-muted text-[#0e2d58]")}>
+      className={cn("h-9 w-9", active && "bg-muted text-brand-navy")}>
       <Icon className="h-4 w-4" />
     </Button>
   );

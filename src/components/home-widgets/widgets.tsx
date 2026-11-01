@@ -82,8 +82,8 @@ const ClockWidget = ({ surface, size }: WidgetProps) => {
     <section
       className={
         surface === "mobile"
-          ? "shadow-mobile flex h-full flex-col justify-center rounded-3xl bg-gradient-to-br from-[#0e2d58] to-[#16467f] p-4 text-white"
-          : "flex h-full flex-col justify-center rounded-xl bg-gradient-to-br from-[#0e2d58] to-[#16467f] p-5 text-white shadow-sm"
+          ? "shadow-mobile flex h-full flex-col justify-center rounded-3xl bg-gradient-to-br from-brand-navy to-brand-navy/80 p-4 text-white"
+          : "flex h-full flex-col justify-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-navy/80 p-5 text-white shadow-sm"
       }
     >
       <p className="flex items-center gap-1.5 text-[12px] font-semibold text-white/70">
@@ -95,7 +95,7 @@ const ClockWidget = ({ surface, size }: WidgetProps) => {
         {time}
       </p>
       <p className="text-[13px] capitalize text-white/85">{date}</p>
-      <span className="mt-2 h-1 w-10 rounded-full bg-[#f47b20]" />
+      <span className="mt-2 h-1 w-10 rounded-full bg-brand-orange" />
     </section>
   );
 };
@@ -660,7 +660,7 @@ const DepartmentsWidget = ({ surface, summary }: WidgetProps) => {
               </div>
               <div className="mt-1 h-2 rounded-full bg-muted">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-[#0e2d58] to-[#f47b20]"
+                  className="h-2 rounded-full bg-gradient-to-r from-brand-navy to-brand-orange"
                   style={{ width: `${(d.count / max) * 100}%` }}
                 />
               </div>
@@ -716,7 +716,7 @@ const AppInstallsWidget = ({ surface, companyId, audience }: WidgetProps) => {
           </p>
           <div className="mt-2 h-2 rounded-full bg-muted">
             <div
-              className="h-2 rounded-full bg-gradient-to-r from-[#0e2d58] to-[#f47b20]"
+              className="h-2 rounded-full bg-gradient-to-r from-brand-navy to-brand-orange"
               style={{ width: `${pct}%` }}
             />
           </div>

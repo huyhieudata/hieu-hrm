@@ -120,7 +120,7 @@ const TemplatesTab = ({ companyId }: { companyId: string }) => {
                 </div>
               </div>
               {preview ? (
-                <div className="rounded-lg border bg-white p-4 text-[#0e2d58]">
+                <div className="rounded-lg border bg-white p-4 text-brand-navy">
                   <p className="mb-2 border-b pb-2 text-sm"><b>Tiêu đề:</b> {renderTemplate(edit.subject ?? "", SAMPLE_VARS, false)}</p>
                   <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
                 </div>
@@ -154,7 +154,7 @@ const MultiPick = ({ label, options, value, onChange }: { label: string; options
         const on = value.includes(o);
         return (
           <button key={o} type="button" onClick={() => onChange(on ? value.filter((x) => x !== o) : [...value, o])}
-            className={`min-h-[36px] rounded-full border px-3 text-xs ${on ? "border-[#0e2d58] bg-[#0e2d58] text-white" : "hover:bg-muted"}`}>{o}</button>
+            className={`min-h-[36px] rounded-full border px-3 text-xs ${on ? "border-brand-navy bg-brand-navy text-white" : "hover:bg-muted"}`}>{o}</button>
         );
       })}
     </div>
@@ -206,7 +206,7 @@ const RulesTab = ({ companyId }: { companyId: string }) => {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-semibold">{r.name}</p>
-                  <p className="text-xs text-[#fc600b]">{d?.label}{d?.offsetLabel && r.offset_days ? ` · trước ${r.offset_days} ngày` : ""}{d?.threshold ? ` · ≥ ${r.threshold} lần` : ""}</p>
+                  <p className="text-xs text-brand-orange">{d?.label}{d?.offsetLabel && r.offset_days ? ` · trước ${r.offset_days} ngày` : ""}{d?.threshold ? ` · ≥ ${r.threshold} lần` : ""}</p>
                 </div>
                 <Switch checked={r.active} aria-label="Bật/tắt luồng" onCheckedChange={async (v) => { try { await saveRule({ id: r.id, company_id: companyId, active: v }); void load(); } catch (e) { toast.error(getErrorMessage(e)); } }} />
               </div>
@@ -324,7 +324,7 @@ const ConfigTab = ({ companyId }: { companyId: string }) => {
       <Button onClick={async () => { const r = await invokeMailer({ mode: "process", company_id: companyId }); setRes(r.error ? String(r.error) : r.configured ? `Đã cấu hình. Xử lý ${r.processed} thư.` : "Chưa cấu hình SMTP/Brevo — thư sẽ ghi lỗi NOT_CONFIGURED."); }}>
         Kiểm tra cấu hình & xử lý hàng đợi
       </Button>
-      {res && <p className="font-medium text-[#0e2d58]">{res}</p>}
+      {res && <p className="font-medium text-brand-navy">{res}</p>}
     </div>
   );
 };
@@ -338,7 +338,7 @@ const EmailSettings = () => {
       <PageHeader eyebrow="Cài đặt · Email" title="Email" description="Mẫu email, luồng gửi tự động và nhật ký gửi." />
       <div className="flex gap-1 overflow-x-auto border-b">
         {TABS.map(([k, l]) => (
-          <NavLink key={k} to={`/cai-dat/email/${k}`} className={({ isActive }) => `min-h-[44px] whitespace-nowrap border-b-2 px-3 py-2.5 text-sm ${isActive ? "border-[#fc600b] font-semibold text-[#0e2d58]" : "border-transparent text-muted-foreground"}`}>{l}</NavLink>
+          <NavLink key={k} to={`/cai-dat/email/${k}`} className={({ isActive }) => `min-h-[44px] whitespace-nowrap border-b-2 px-3 py-2.5 text-sm ${isActive ? "border-brand-orange font-semibold text-brand-navy" : "border-transparent text-muted-foreground"}`}>{l}</NavLink>
         ))}
       </div>
       {!allowed || !activeCompany ? <p className="text-sm text-muted-foreground">Chỉ chủ sở hữu, quản trị viên hoặc HR được cấu hình email.</p>

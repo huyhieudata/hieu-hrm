@@ -58,7 +58,7 @@ export const GeofenceStatus = ({
           {tone === "outside" ? "Ngoài vùng chấm công" : tone === "weak" ? "Vị trí chưa đủ chính xác" : "Chưa lấy được vị trí"}
         </p>
         {tone === "outside" ? (
-          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-bold text-destructive">Bị chặn</span>
+          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-bold text-destructive">Bị chặn</span>
         ) : null}
       </div>
       {placeName ? <p className="mt-1 text-[13px] font-semibold">{placeName}</p> : null}

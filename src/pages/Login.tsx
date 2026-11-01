@@ -349,13 +349,8 @@ const Login = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-2 border-t border-border/60 pt-4 text-[10.5px] text-muted-foreground sm:flex-row">
+        <div className="flex items-center justify-center border-t border-border/60 pt-4 text-[12px] text-muted-foreground">
           <span>© 2026 ONHRM</span>
-          <div className="flex items-center gap-4">
-            <span>Bảo mật</span>
-            <span>Điều khoản</span>
-            <span>Trạng thái hệ thống</span>
-          </div>
         </div>
       </section>
     </div>

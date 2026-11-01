@@ -29,6 +29,18 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      // Cấm màu hex tuỳ ý trong class Tailwind (vd. bg-[#f47b20]); dùng token brand-navy/brand-orange.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/\\[#[0-9a-fA-F]{3,8}\\]/]",
+          message: "Không dùng màu hex tuỳ ý trong class; dùng token (brand-navy, brand-orange, primary…).",
+        },
+        {
+          selector: "TemplateElement[value.raw=/\\[#[0-9a-fA-F]{3,8}\\]/]",
+          message: "Không dùng màu hex tuỳ ý trong class; dùng token (brand-navy, brand-orange, primary…).",
+        },
+      ],
     },
   }
 );

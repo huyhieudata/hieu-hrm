@@ -47,7 +47,7 @@ export const DeviceStatusCard = ({ name, detail, status, note, current, actionLa
       {current ? <p className="mt-1 text-[12px] font-semibold text-foreground">Thiết bị này</p> : null}
       {note ? <p className="mt-1 text-[12.5px] leading-5 text-foreground/80">{note}</p> : null}
       {actionLabel && onAction ? (
-        <button type="button" onClick={onAction} className="touch-target mt-2 text-[13px] font-bold text-primary">
+        <button type="button" onClick={onAction} className="mt-3 flex min-h-11 w-full items-center justify-center rounded-2xl bg-brand-navy px-4 text-[14px] font-bold text-white active:opacity-90">
           {actionLabel}
         </button>
       ) : null}

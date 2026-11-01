@@ -82,7 +82,7 @@ export const SelfieCameraDialog = ({ open, title, onCancel, onConfirm }: Props) 
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>Đặt khuôn mặt vào khung, đủ sáng. Ảnh chụp trực tiếp từ camera trước.</DialogDescription>
           </DialogHeader>
-          <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-[#0b1a33]">
+          <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-brand-navy">
             {shot ? (
               <img src={shot.url} alt="Ảnh vừa chụp" className="h-full w-full -scale-x-100 object-cover" />
             ) : (
