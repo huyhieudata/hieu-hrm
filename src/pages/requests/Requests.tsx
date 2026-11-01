@@ -173,10 +173,16 @@ const Requests = () => {
     () =>
       new Set(
         employees
-          .filter((employee) => myEmployeeId && employee.manager_id === myEmployeeId)
+          // Quản lý: danh sách nhân viên đã được RLS giới hạn theo phạm vi (cấp dưới trực tiếp + cùng phòng/phòng mình phụ trách).
+          .filter(
+            (employee) =>
+              myEmployeeId &&
+              employee.id !== myEmployeeId &&
+              (employee.manager_id === myEmployeeId || role === "manager"),
+          )
           .map((employee) => employee.id),
       ),
-    [employees, myEmployeeId],
+    [employees, myEmployeeId, role],
   );
 
   const inScope = useCallback(

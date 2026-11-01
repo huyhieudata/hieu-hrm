@@ -115,6 +115,9 @@ const RequestDialog = ({
   const employee = employees.find((item) => item.id === employeeId) ?? null;
   const leaveInfo = employeeId ? leaveSummaries?.[employeeId] ?? null : null;
 
+  const overLeave = Boolean(
+    category === "leave" && selectedType?.deduct_leave && leaveInfo && leaveDayCount > leaveInfo.remaining,
+  );
   const submit = async () => {
     setError(null);
     if (!employeeId) {
@@ -372,12 +375,19 @@ const RequestDialog = ({
               {leaveInfo && (
                 <p className="mt-1">
                   Phép năm {new Date().getFullYear()}: đã dùng {leaveInfo.used}/{leaveInfo.entitlement} ngày · còn{" "}
-                  <span className={leaveInfo.remaining - leaveDayCount < 0 ? "font-semibold text-destructive" : "font-semibold text-success"}>
+                  <span className={overLeave ? "font-semibold text-destructive" : "font-semibold text-success"}>
                     {Number((leaveInfo.remaining - (selectedType.deduct_leave ? leaveDayCount : 0)).toFixed(1))} ngày
                   </span>
                 </p>
               )}
             </div>
+          )}
+
+          {overLeave && (
+            <p className="rounded-md border border-destructive/30 bg-destructive-subtle px-3 py-2 text-[11.5px] text-destructive">
+              Vượt quỹ phép còn lại ({Number(leaveInfo?.remaining.toFixed(1) ?? 0)} ngày). Giảm số ngày hoặc đổi sang loại nghỉ không trừ
+              phép (vd. Nghỉ không lương) ở ô "Loại đơn" phía trên.
+            </p>
           )}
 
           {error && (
@@ -391,7 +401,7 @@ const RequestDialog = ({
           <Button variant="outline" className="h-9" onClick={() => onOpenChange(false)} disabled={saving}>
             Huỷ
           </Button>
-          <Button className="h-9 gap-2" onClick={() => void submit()} disabled={saving}>
+          <Button className="h-9 gap-2" onClick={() => void submit()} disabled={saving || overLeave}>
             {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Gửi đơn
           </Button>

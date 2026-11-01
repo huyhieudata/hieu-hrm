@@ -9,6 +9,7 @@ import { useCompany } from "@/lib/company-provider";
 import { fetchMustChangePassword } from "@/lib/employee-accounts";
 import { ForcePasswordChange } from "@/components/auth/force-password-change";
 import { MfaGate } from "@/components/auth/mfa";
+import { usePlatformAdmin } from "@/lib/platform";
 
 export const FullPageLoader = ({ label = "Đang tải không gian làm việc…" }: { label?: string }) => (
   <BootSkeleton label={label} />
@@ -79,6 +80,14 @@ export const RequirePermission = ({
   const { can, loading } = useCompany();
   if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
   if (!can(permission)) return <DeniedRedirect />;
+  return <>{children}</>;
+};
+
+/** Trang quản trị nền tảng (/cai-dat/he-thong/*, /quan-tri): chỉ quản trị viên nền tảng. */
+export const RequirePlatformAdmin = ({ children }: { children: ReactNode }) => {
+  const { isPlatformAdmin, loading } = usePlatformAdmin();
+  if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
+  if (!isPlatformAdmin) return <DeniedRedirect />;
   return <>{children}</>;
 };
 
