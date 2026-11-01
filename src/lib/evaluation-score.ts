@@ -47,3 +47,57 @@ export const validateTemplateDraft = (draft: DraftLike): string | null => {
   return null;
 };
 
+
+interface TemplateLike {
+  id: string;
+  name: string;
+  kind: string;
+  version: number;
+  is_active: boolean;
+}
+
+/**
+ * Biểu mẫu dùng được để chấm phiếu mới: đang dùng, đúng loại, và chỉ giữ phiên bản mới nhất
+ * của mỗi tên biểu mẫu (BR-4.1 – bản cũ thường đã bị ngừng khi tạo phiên bản mới).
+ */
+export const selectableTemplates = <T extends TemplateLike>(templates: T[], kinds: readonly string[]): T[] => {
+  const latest = new Map<string, T>();
+  templates.forEach((template) => {
+    if (!template.is_active || !kinds.includes(template.kind)) return;
+    const key = `${template.kind}|${template.name.trim().toLowerCase()}`;
+    const current = latest.get(key);
+    if (!current || template.version > current.version) latest.set(key, template);
+  });
+  return Array.from(latest.values()).sort(
+    (a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name, "vi"),
+  );
+};
+
+/** Số tiêu chí chưa có điểm (phiếu chỉ nộp được khi bằng 0 – khớp trigger máy chủ). */
+export const missingCriteriaCount = (criteria: { id: string }[], answers: EvaluationAnswers): number =>
+  criteria.filter((criterion) => typeof answers[criterion.id]?.score !== "number").length;
+
+/** Điểm hợp lệ: số nguyên từ 1 đến thang tối đa của biểu mẫu. */
+export const isValidScore = (score: unknown, scaleMax: number): boolean =>
+  typeof score === "number" && Number.isInteger(score) && score >= 1 && score <= scaleMax;
+
+/**
+ * BR-4.2: phiếu nháp chỉ người chấm sửa được (người có recruitment.edit cũng sửa được);
+ * phiếu đã nộp chỉ người có recruitment.edit sửa được.
+ */
+export const canEditEvaluation = (
+  evaluation: { status?: string | null; reviewer_id: string | null },
+  userId: string | null | undefined,
+  hasRecruitmentEdit: boolean,
+): boolean => {
+  if (hasRecruitmentEdit) return true;
+  return (evaluation.status ?? "submitted") === "draft" && !!userId && evaluation.reviewer_id === userId;
+};
+
+/** Khớp policy evaluations_delete: quyền xoá tuyển dụng, hoặc phiếu nháp của chính mình. */
+export const canDeleteEvaluation = (
+  evaluation: { status?: string | null; reviewer_id: string | null },
+  userId: string | null | undefined,
+  hasRecruitmentDelete: boolean,
+): boolean =>
+  hasRecruitmentDelete || ((evaluation.status ?? "submitted") === "draft" && !!userId && evaluation.reviewer_id === userId);

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { EvaluationAnswers } from "./evaluation-score.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -37,8 +38,24 @@ export interface EvaluationCriterion {
 }
 
 
-export { validateTemplateDraft, weightedEvaluationScore } from "./evaluation-score.ts";
+export {
+  canDeleteEvaluation,
+  canEditEvaluation,
+  isValidScore,
+  missingCriteriaCount,
+  selectableTemplates,
+  validateTemplateDraft,
+  weightedEvaluationScore,
+} from "./evaluation-score.ts";
 export type { EvaluationAnswer, EvaluationAnswers } from "./evaluation-score.ts";
+
+/** Loại biểu mẫu được chấm trong hồ sơ ứng viên ở bản đầu (KPI/360 làm sau). */
+export const CANDIDATE_EVALUATION_KINDS: readonly EvaluationKind[] = ["interview", "probation", "periodic"];
+
+export const EVALUATION_STATUS_LABELS: Record<"draft" | "submitted", string> = {
+  draft: "Nháp",
+  submitted: "Đã nộp",
+};
 
 export interface CriterionDraft {
   id?: string;
@@ -160,5 +177,66 @@ export const createEvaluationTemplateVersion = async (templateId: string): Promi
 
 export const deleteEvaluationTemplate = async (templateId: string) => {
   const { error } = await db.from("evaluation_templates").delete().eq("id", templateId);
+  if (error) throw error;
+};
+
+export interface CandidateEvaluationDraft {
+  template_id: string;
+  interview_id: string | null;
+  answers: EvaluationAnswers;
+  recommendation: string;
+  strengths: string;
+  weaknesses: string;
+  note: string;
+  status: "draft" | "submitted";
+}
+
+/** Chỉ giữ câu trả lời có điểm hoặc nhận xét, cắt khoảng trắng. */
+const cleanAnswers = (answers: EvaluationAnswers): EvaluationAnswers => {
+  const result: EvaluationAnswers = {};
+  Object.entries(answers).forEach(([key, answer]) => {
+    const score = typeof answer?.score === "number" ? answer.score : null;
+    const comment = answer?.comment?.trim() || null;
+    if (score !== null || comment) result[key] = { score, comment };
+  });
+  return result;
+};
+
+/**
+ * Lưu phiếu đánh giá theo biểu mẫu (tạo mới hoặc cập nhật). Máy chủ tự tính `total_score`,
+ * kiểm tra thang điểm/đủ tiêu chí khi nộp và khoá phiếu đã nộp (BR-4.2).
+ */
+export const saveCandidateEvaluation = async (
+  params: {
+    companyId: string;
+    candidateId: string;
+    reviewerId: string | null;
+    reviewerName: string;
+    evaluationId: string | null;
+  },
+  draft: CandidateEvaluationDraft,
+) => {
+  const values = {
+    interview_id: draft.interview_id,
+    answers: cleanAnswers(draft.answers),
+    recommendation: draft.recommendation || "hold",
+    strengths: draft.strengths.trim() || null,
+    weaknesses: draft.weaknesses.trim() || null,
+    note: draft.note.trim() || null,
+    status: draft.status,
+  };
+  if (params.evaluationId) {
+    const { error } = await db.from("candidate_evaluations").update(values).eq("id", params.evaluationId);
+    if (error) throw error;
+    return;
+  }
+  const { error } = await db.from("candidate_evaluations").insert({
+    ...values,
+    company_id: params.companyId,
+    candidate_id: params.candidateId,
+    template_id: draft.template_id,
+    reviewer_id: params.reviewerId,
+    reviewer_name: params.reviewerName,
+  });
   if (error) throw error;
 };
