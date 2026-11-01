@@ -1,7 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { withCors } from "../_shared/cors.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://hieu-hrm.vercel.app", // ghi đè bởi withCors
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -25,7 +26,7 @@ const generatePassword = (length = 16) => {
   return chars.join("");
 };
 
-Deno.serve(async (req) => {
+Deno.serve(withCors(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -132,6 +133,6 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error("provision-workspace-admin failed", error);
-    return json({ error: error instanceof Error ? error.message : "Lỗi không xác định." }, 500);
+    return json({ error: "Lỗi máy chủ khi cấp tài khoản workspace." }, 500);
   }
-});
+}));

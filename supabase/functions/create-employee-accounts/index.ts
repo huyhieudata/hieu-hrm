@@ -5,9 +5,10 @@
 // mật khẩu chỉ trả về client khi gửi email thất bại (để admin tải CSV một lần).
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { renderTemplate, sendMail, wrapEmail } from "../_shared/mailer.ts";
+import { withCors } from "../_shared/cors.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://hieu-hrm.vercel.app", // ghi đè bởi withCors
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 const json = (body: unknown, status = 200) =>
@@ -15,7 +16,7 @@ const json = (body: unknown, status = 200) =>
 
 const MAX_ROWS = 200;
 const RATE_WINDOW_MIN = 10;
-const RATE_MAX = 400;
+const RATE_MAX = 300;
 const EMAIL_RE = /^[a-z0-9._+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
 
 /** Mật khẩu tạm dễ đọc: 3 nhóm 4 ký tự, bỏ ký tự dễ nhầm (0/O, 1/l/I). Ví dụ: Kx7m-Qp3d-Wr9t */
@@ -51,7 +52,7 @@ const DEFAULT_SUBJECT = "Tài khoản ONHRM của bạn tại {{ten_cong_ty}}";
 const DEFAULT_BODY =
   "<h2>Tài khoản ONHRM của bạn</h2><p>Xin chào {{ten_nhan_vien}},</p><p><strong>{{ten_cong_ty}}</strong> đã tạo tài khoản ONHRM cho bạn.</p><p>Tên đăng nhập: <strong>{{ten_dang_nhap}}</strong><br/>Mật khẩu tạm: <strong>{{mat_khau_tam}}</strong></p><p><a href=\"{{link_dang_nhap}}\">Đăng nhập ngay</a></p><p><strong>Hệ thống sẽ yêu cầu bạn đổi mật khẩu ngay ở lần đăng nhập đầu tiên.</strong></p>";
 
-Deno.serve(async (req) => {
+Deno.serve(withCors(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const url = Deno.env.get("SUPABASE_URL");
@@ -82,7 +83,9 @@ Deno.serve(async (req) => {
     const { count } = await admin
       .from("account_provision_logs").select("id", { count: "exact", head: true })
       .eq("actor_id", actor.id).gte("created_at", since);
-    if ((count ?? 0) >= RATE_MAX)
+    // SEC-10: tính cả số dòng của lần gọi này để không vượt hạn mức bằng một lô lớn.
+    const pendingRows = Array.isArray(body?.rows) ? Math.min(body.rows.length, MAX_ROWS) : 1;
+    if ((count ?? 0) + pendingRows > RATE_MAX)
       return json({ error: `Bạn đã tạo quá nhiều tài khoản trong ${RATE_WINDOW_MIN} phút. Vui lòng thử lại sau.` }, 429);
 
     const { data: company } = await admin.from("companies").select("name").eq("id", companyId).maybeSingle();
@@ -137,7 +140,7 @@ Deno.serve(async (req) => {
     console.error("create-employee-accounts failed", (err as Error)?.message);
     return json({ error: "Lỗi máy chủ khi tạo tài khoản." }, 500);
   }
-});
+}));
 
 type Ctx = {
   admin: SupabaseClient;
@@ -181,7 +184,7 @@ async function ensureMembership(ctx: Ctx, userId: string, jobTitle: string | nul
   const { error } = await ctx.admin.from("company_members").insert({
     company_id: ctx.companyId, user_id: userId, role, job_title: jobTitle, invited_by: ctx.actorId,
   });
-  if (error) throw new Error(`Không thêm được vào công ty: ${error.message}`);
+  if (error) { console.error("member insert", error); throw new Error("Không thêm được vào công ty."); }
 }
 
 async function applyGroup(ctx: Ctx, employeeId: string | null, groupId: string | null | undefined) {
@@ -252,7 +255,7 @@ async function createOne(ctx: Ctx, row: Row, seen: Set<string>): Promise<Result>
     await applyGroup(ctx, emp?.id ?? null, row.group_id);
     if (emp) {
       const { error } = await ctx.admin.from("employees").update({ user_id: targetUserId }).eq("id", emp.id).is("user_id", null);
-      if (error) throw new Error(`Đã tạo tài khoản nhưng chưa gắn được hồ sơ: ${error.message}`);
+      if (error) { console.error("link employee", error); throw new Error("Đã tạo tài khoản nhưng chưa gắn được hồ sơ."); }
     }
     r.result = "created";
     r.mail_status = await sendCredentials(ctx, r.email, r.full_name, password);
@@ -294,7 +297,7 @@ async function resetOne(ctx: Ctx, employeeId: string): Promise<Result> {
     if (!r.email) throw new Error("Tài khoản không có email.");
     const password = generatePassword();
     const { error } = await ctx.admin.auth.admin.updateUserById(uid, { password });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("reset password", error); throw new Error("Không đặt lại được mật khẩu."); }
     await ctx.admin.from("profiles").update({ must_change_password: true }).eq("id", targetUserId);
     r.result = "reset";
     r.mail_status = await sendCredentials(ctx, r.email, r.full_name, password);
