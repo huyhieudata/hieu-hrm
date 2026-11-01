@@ -86,6 +86,12 @@ const formatMoney = (value: number | null) =>
     ? "—"
     : `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
 
+const nextDayIso = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+};
+
 const Contracts = () => {
   const { activeCompany, can, canManageModule } = useCompany();
   const companyId = activeCompany?.id ?? null;
@@ -100,6 +106,7 @@ const Contracts = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CompanyContract | null>(null);
+  const [renewFrom, setRenewFrom] = useState<CompanyContract | null>(null);
   const [pendingDelete, setPendingDelete] = useState<CompanyContract | null>(
     null,
   );
@@ -225,11 +232,27 @@ const Contracts = () => {
       return days !== null && days >= 0 && days <= 30;
     });
     const ended = contracts.filter((contract) => contract.status !== "active");
+    // Nhắc gia hạn: HĐ đang hiệu lực còn ≤30 ngày hoặc đã quá hạn mà chưa có HĐ mới của cùng nhân sự.
+    const renewals = active
+      .filter((contract) => {
+        const days = contractDaysLeft(contract);
+        if (days === null || days > 30) return false;
+        return !contracts.some(
+          (other) =>
+            other.id !== contract.id &&
+            other.employee_id === contract.employee_id &&
+            other.start_date &&
+            contract.end_date &&
+            other.start_date > contract.end_date,
+        );
+      })
+      .sort((a, b) => String(a.end_date).localeCompare(String(b.end_date)));
     return {
       total: contracts.length,
       active: active.length,
       expiring: expiring.length,
       ended: ended.length,
+      renewals,
     };
   }, [contracts]);
 
@@ -290,6 +313,7 @@ const Contracts = () => {
       }
       setFormOpen(false);
       setEditing(null);
+      setRenewFrom(null);
       await load();
     } catch (error) {
       throw new Error(getErrorMessage(error));
@@ -493,6 +517,42 @@ const Contracts = () => {
           </p>
         </Card>
       </div>
+
+      {canManage && stats.renewals.length > 0 && (
+        <Card className="border-warning/40 bg-warning/5 p-4">
+          <p className="text-sm font-semibold text-foreground">
+            Nhắc gia hạn: {stats.renewals.length} hợp đồng sắp/đã hết hạn chưa có hợp đồng mới
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {stats.renewals.slice(0, 10).map((contract) => {
+              const days = contractDaysLeft(contract) ?? 0;
+              return (
+                <li key={contract.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <span>
+                    <span className="font-medium">{contract.employee_name ?? "—"}</span>
+                    {" · "}
+                    {contract.contract_no || "HĐ"} · hết hạn {contract.end_date ? formatDay(contract.end_date) : "—"}
+                    <span className={days < 0 ? " text-destructive" : " text-warning"}>
+                      {days < 0 ? ` (quá hạn ${-days} ngày)` : ` (còn ${days} ngày)`}
+                    </span>
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditing(null);
+                      setRenewFrom(contract);
+                      setFormOpen(true);
+                    }}
+                  >
+                    Gia hạn
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
 
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -978,9 +1038,12 @@ const Contracts = () => {
         open={formOpen}
         onOpenChange={(open) => {
           setFormOpen(open);
-          if (!open) setEditing(null);
+          if (!open) {
+            setEditing(null);
+            setRenewFrom(null);
+          }
         }}
-        title={editing ? "Sửa hợp đồng" : "Thêm hợp đồng"}
+        title={editing ? "Sửa hợp đồng" : renewFrom ? "Gia hạn hợp đồng" : "Thêm hợp đồng"}
         description="Hợp đồng được lưu trong hồ sơ nhân sự và dùng cho cảnh báo hết hạn."
         fields={fields}
         onFieldChange={(name, value, current) => {
@@ -1000,11 +1063,25 @@ const Contracts = () => {
                 contract_type: editing.contract_type,
                 status: editing.status,
               }
-            : {
-                contract_type: "fixed_term",
-                status: "active",
-                start_date: todayIso(),
-              }
+            : renewFrom
+              ? {
+                  employee_id: renewFrom.employee_id,
+                  contract_type: renewFrom.contract_type,
+                  status: "active",
+                  start_date: renewFrom.end_date ? nextDayIso(renewFrom.end_date) : todayIso(),
+                  position: renewFrom.position,
+                  department: renewFrom.department,
+                  work_location: renewFrom.work_location,
+                  base_salary: renewFrom.base_salary,
+                  allowance: renewFrom.allowance,
+                  insurance_salary: renewFrom.insurance_salary,
+                  note: `Gia hạn từ HĐ ${renewFrom.contract_no ?? ""}`.trim(),
+                }
+              : {
+                  contract_type: "fixed_term",
+                  status: "active",
+                  start_date: todayIso(),
+                }
         }
         submitLabel={editing ? "Lưu thay đổi" : "Thêm hợp đồng"}
         onSubmit={handleSubmit}
