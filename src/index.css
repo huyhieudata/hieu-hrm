@@ -113,7 +113,7 @@
     /* Dark: lift the gradient end so navy surfaces separate from the page. */
     --brand-navy-2: 214 55% 38%;
     --brand-orange-2: 22 100% 58%;
-    --gradient-ok: linear-gradient(135deg, hsl(var(--brand-navy-2)) 0%, hsl(156 76% 30%) 100%);
+    --gradient-ok: linear-gradient(135deg, hsl(var(--brand-navy-2)) 0%, hsl(var(--success) / 0.75) 100%);
     --canvas-glow: hsl(var(--brand-orange) / 0.08);
     --shadow-glow: 0 14px 30px -10px rgb(0 0 0 / 0.6);
     --primary: 216 57% 72%;
@@ -334,4 +334,33 @@
   }
   .mobile-cards table:not([data-keep-table]) tbody td[colspan] { justify-content: center; text-align: center; }
   .mobile-cards .overflow-x-auto:has(> table) { overflow: visible; }
+}
+
+/* iOS chỉ không zoom khi ô nhập >= 16px: ép cho mọi trang trên điện thoại. */
+@media (max-width: 767px), (max-width: 1023px) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+@layer components {
+  /* Ô chọn / thao tác không có tiêu đề: gom gọn một hàng, không nhãn. */
+  .mobile-cards table:not([data-keep-table]) tbody td[data-label=""] { justify-content: flex-end; min-height: 0; }
+  .mobile-cards table:not([data-keep-table]) tbody td:has(> input[type="checkbox"]),
+  .mobile-cards table:not([data-keep-table]) tbody td:has(> button[role="checkbox"]) {
+    justify-content: flex-start;
+    border-top: 0 !important;
+  }
+  .mobile-cards table[data-keep-table] { display: table; }
+  .mobile-cards div:has(> table[data-keep-table]) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* Toast và thanh thao tác cố định không bị tab bar che trên điện thoại. */
+@media (max-width: 1023px) and (pointer: coarse) {
+  [data-sonner-toaster],
+  ol[class*="fixed"][class*="z-[100]"] {
+    bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom)) !important;
+  }
 }

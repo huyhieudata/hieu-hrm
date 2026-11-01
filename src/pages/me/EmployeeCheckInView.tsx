@@ -314,7 +314,8 @@ export const EmployeeCheckInView = ({
         </div>
       ) : null}
 
-      {!offDay ? (
+      {/* Ngoài vùng: thẻ cảnh báo thay nút khoá để tab bar không che. */}
+      {!offDay && tone !== "outside" ? (
         <CheckInButton
           mode={mode}
           label={buttonLabel}

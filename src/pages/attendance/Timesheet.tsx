@@ -342,7 +342,7 @@ const Timesheet = () => {
       ) : (
         <Card className="overflow-hidden p-0">
           <div className="scrollbar-slim overflow-x-auto">
-            <table className="w-full min-w-[1100px] border-collapse text-[11.5px]">
+            <table data-keep-table className="w-full min-w-[1100px] border-collapse text-[11.5px]">
               <thead>
                 <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   <th className="sticky left-0 z-10 min-w-[210px] bg-muted/40 px-4 py-2.5 text-left font-semibold">

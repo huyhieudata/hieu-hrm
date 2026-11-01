@@ -20,6 +20,7 @@ export default {
       screens: { "2xl": "1440px" },
     },
     extend: {
+      screens: { touch: { raw: "(max-width: 1023px) and (pointer: coarse)" } },
       fontFamily: {
         sans: ["Inter", "Be Vietnam Pro", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["Be Vietnam Pro", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],

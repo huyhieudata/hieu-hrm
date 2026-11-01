@@ -147,7 +147,7 @@ const EmployeeDevices = () => {
             onChange={(event) => setName(event.target.value)}
             placeholder={info?.suggestedName || "Điện thoại cá nhân"}
             maxLength={80}
-            className="min-h-11 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none ring-primary focus:border-primary focus:ring-2 sm:text-sm"
+            className="min-h-11 w-full rounded-2xl border-2 border-input bg-card px-3 shadow-xs text-base outline-none ring-primary focus:border-primary focus:ring-2 sm:text-sm"
           />
           <button
             type="button"

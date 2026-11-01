@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 
 /**
  * Chọn giao diện theo thiết bị, không theo vai trò.
- * Mobile: màn hẹp (< 768px) hoặc màn cảm ứng không có chuột (pointer: coarse) dưới 1024px.
+ * Mobile: thiết bị cảm ứng (pointer: coarse) có màn dưới 1024px. Máy có chuột kéo hẹp
+ * cửa sổ vẫn giữ shell desktop, nên không dựng lại trang và không mất dữ liệu đang nhập.
  * Lắng nghe matchMedia nên xoay máy/đổi kích thước cửa sổ là đổi ngay, URL giữ nguyên.
  */
-const MOBILE_QUERY = "(max-width: 767px), (max-width: 1023px) and (pointer: coarse)";
+const MOBILE_QUERY = "(max-width: 1023px) and (pointer: coarse)";
 
 const read = () => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
 

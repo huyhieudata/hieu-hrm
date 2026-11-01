@@ -79,7 +79,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         <AppTopbar onOpenSidebar={() => setMobileOpen(true)} />
-        <main className="flex-1 px-4 pb-[calc(88px+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:pb-12 lg:pt-6 xl:px-8">
+        <main className="flex-1 px-4 pb-12 pt-5 sm:px-6 lg:pb-12 lg:pt-6 xl:px-8">
           <div key={pathname} className="mx-auto w-full max-w-[1440px] space-y-6 animate-fade-up">
             {pathname === "/cai-dat" || pathname.startsWith("/cai-dat/") ? (
               <div className="flex flex-col gap-4 lg:flex-row lg:gap-8">

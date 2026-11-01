@@ -202,7 +202,7 @@ const Login = () => {
                     setError(null);
                   }}
                   className={cn(
-                    "flex-1 rounded-[9px] px-2 py-2 text-[12px] font-medium transition-all duration-200",
+                    "min-h-11 flex-1 rounded-[9px] px-2 py-2 text-[13px] font-medium transition-all duration-200",
                     mode === tab.id
                       ? "bg-card font-semibold text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground",
@@ -273,7 +273,7 @@ const Login = () => {
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                    className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -325,7 +325,7 @@ const Login = () => {
                       setMode("signup");
                       setError(null);
                     }}
-                    className="font-semibold text-primary hover:underline"
+                    className="inline-flex min-h-11 items-center px-1 font-semibold text-primary hover:underline"
                   >
                     Tạo tài khoản mới
                   </button>
@@ -339,7 +339,7 @@ const Login = () => {
                       setMode("signin");
                       setError(null);
                     }}
-                    className="font-semibold text-primary hover:underline"
+                    className="inline-flex min-h-11 items-center px-1 font-semibold text-primary hover:underline"
                   >
                     Đăng nhập
                   </button>

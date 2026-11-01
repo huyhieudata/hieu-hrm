@@ -59,7 +59,7 @@ export const EmployeeRequestsView = ({
   const visible = mine.filter((request) => status === "all" || request.status === status);
 
   return (
-    <div className="space-y-3 pb-20">
+    <div className="space-y-3 pb-28">
       <div className="flex flex-wrap gap-1.5">
         {FILTERS.map((filter) => (
           <button key={filter.value} type="button" aria-pressed={status === filter.value} className="flex min-h-11 items-center" onClick={() => onStatus(filter.value)}>

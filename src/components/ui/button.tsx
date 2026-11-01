@@ -25,11 +25,11 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-sm px-3 text-[13px]",
+        sm: "h-8 rounded-sm px-3 text-[13px] touch:min-h-11",
         lg: "h-11 rounded-md px-6",
         xl: "h-12 rounded-md px-7 text-[15px]",
-        icon: "h-9 w-9",
-        "icon-sm": "h-8 w-8 rounded-sm",
+        icon: "h-9 w-9 touch:min-h-11 touch:min-w-11",
+        "icon-sm": "h-8 w-8 rounded-sm touch:min-h-11 touch:min-w-11",
       },
     },
     defaultVariants: {
