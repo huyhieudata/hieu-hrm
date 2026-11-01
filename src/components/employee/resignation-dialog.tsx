@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,16 @@ const RESIGNATION_REASONS = [
 
 const today = todayIso;
 
+/** Checklist offboarding (ngoài tài sản/công nợ đã chặn ở server) — phải tick đủ mới hoàn tất. */
+const OFFBOARDING_ITEMS = [
+  "Bàn giao công việc, tài liệu cho người tiếp nhận",
+  "Thu hồi email, tài khoản phần mềm, quyền truy cập",
+  "Ra quyết định chấm dứt hợp đồng lao động",
+  "Quyết toán lương, phép năm còn lại",
+  "Chốt sổ BHXH, trả hồ sơ cho người lao động",
+  "Phỏng vấn nghỉ việc (exit interview)",
+];
+
 const contractState = (contract: ContractRecord) => {
   if (contract.status !== "active") {
     return { label: "Đã chấm dứt", tone: "muted" as const };
@@ -88,6 +99,7 @@ export const ResignationDialog = ({
   const [reason, setReason] = useState(RESIGNATION_REASONS[0]);
   const [resignDate, setResignDate] = useState(today());
   const [note, setNote] = useState("");
+  const [checked, setChecked] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +128,7 @@ export const ResignationDialog = ({
     setReason(RESIGNATION_REASONS[0]);
     setResignDate(today());
     setNote("");
+    setChecked(new Set());
     void load();
   }, [load, open]);
 
@@ -150,6 +163,12 @@ export const ResignationDialog = ({
       return;
     }
 
+    const missing = OFFBOARDING_ITEMS.filter((_, i) => !checked.has(i));
+    if (missing.length > 0) {
+      setError(`Còn ${missing.length} mục checklist nghỉ việc chưa hoàn tất: ${missing.join("; ")}.`);
+      return;
+    }
+
     if (!resignDate) {
       setError("Vui lòng chọn ngày nghỉ việc.");
       return;
@@ -166,7 +185,7 @@ export const ResignationDialog = ({
         position: employee.position,
         location: employee.work_location,
         start_date: resignDate,
-        note: note.trim() || `Lý do nghỉ việc: ${reason}`,
+        note: [note.trim() || `Lý do nghỉ việc: ${reason}`, `Checklist đã hoàn tất: ${OFFBOARDING_ITEMS.join("; ")}.`].join("\n"),
       });
 
       await updateEmployee(employee.id, { resignation_reason: reason });
@@ -379,6 +398,36 @@ export const ResignationDialog = ({
               )}
             </section>
 
+            <section>
+              <div className="flex items-center justify-between">
+                <h4 className="text-[12px] font-semibold text-foreground">Checklist nghỉ việc</h4>
+                <span className="text-[11px] text-muted-foreground">
+                  {checked.size}/{OFFBOARDING_ITEMS.length} mục
+                </span>
+              </div>
+              <ul className="mt-2 space-y-1.5">
+                {OFFBOARDING_ITEMS.map((item, index) => (
+                  <li key={item}>
+                    <label className="flex items-start gap-2 rounded-md border border-border px-3 py-2 text-[12px]">
+                      <Checkbox
+                        className="mt-0.5"
+                        checked={checked.has(index)}
+                        onCheckedChange={(value) =>
+                          setChecked((set) => {
+                            const next = new Set(set);
+                            if (value) next.add(index);
+                            else next.delete(index);
+                            return next;
+                          })
+                        }
+                      />
+                      {item}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
             <section className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-[12px]">
@@ -441,7 +490,7 @@ export const ResignationDialog = ({
           </Button>
           <Button
             className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            disabled={loading || submitting}
+            disabled={loading || submitting || checked.size < OFFBOARDING_ITEMS.length}
             onClick={() => void handleSubmit()}
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <DoorOpen className="h-4 w-4" />}
