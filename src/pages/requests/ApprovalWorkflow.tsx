@@ -65,9 +65,10 @@ const defaultStep = (index: number): StepDraft => ({
 });
 
 const ApprovalWorkflow = () => {
-  const { activeCompany, can, canManageModule } = useCompany();
+  const { activeCompany, can, canManageModule, role } = useCompany();
   const companyId = activeCompany?.id ?? null;
-  const canManage = canManageModule("requests");
+  // Cấu hình quy trình duyệt chỉ dành cho Owner/Admin/HR (server cũng chặn bằng RLS).
+  const canManage = (role === "owner" || role === "admin" || role === "hr") && canManageModule("requests");
 
   const [types, setTypes] = useState<RequestType[]>([]);
   const [steps, setSteps] = useState<ApprovalStep[]>([]);
