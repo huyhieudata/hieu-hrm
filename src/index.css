@@ -88,11 +88,16 @@
     --touch-min: 44px;
     --tabbar-h: 64px;
     --header-h: 56px;
-    --gradient-primary: linear-gradient(135deg, #0e2d58 0%, #1d4a84 100%);
-    --gradient-accent: linear-gradient(135deg, #fc600b 0%, #ff8a3d 100%);
-    --gradient-ok: linear-gradient(135deg, #0e2d58 0%, #12875a 100%);
-    --shadow-mobile: 0 8px 24px -12px rgb(14 45 88 / 0.25), 0 1px 2px rgb(15 23 42 / 0.04);
-    --shadow-glow: 0 14px 30px -10px rgb(14 45 88 / 0.6);
+    /* Gradients built from brand tokens so .dark can retune them. */
+    --brand-navy-2: 214 64% 32%;
+    --brand-orange-2: 23 100% 62%;
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-navy)) 0%, hsl(var(--brand-navy-2)) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(var(--brand-orange)) 0%, hsl(var(--brand-orange-2)) 100%);
+    --gradient-ok: linear-gradient(135deg, hsl(var(--brand-navy)) 0%, hsl(var(--success)) 100%);
+    --gradient-panel: linear-gradient(155deg, hsl(var(--primary-subtle)) 0%, hsl(var(--background)) 55%, hsl(var(--accent)) 100%);
+    --canvas-glow: hsl(var(--primary-subtle));
+    --shadow-mobile: 0 8px 24px -12px hsl(var(--brand-navy) / 0.25), 0 1px 2px rgb(15 23 42 / 0.04);
+    --shadow-glow: 0 14px 30px -10px hsl(var(--brand-navy) / 0.6);
   }
 
   .dark {
@@ -105,6 +110,12 @@
     --overlay: 214 71% 6%;
     --brand-navy: 215 73% 20%;
     --brand-orange: 21 98% 52%;
+    /* Dark: lift the gradient end so navy surfaces separate from the page. */
+    --brand-navy-2: 214 55% 38%;
+    --brand-orange-2: 22 100% 58%;
+    --gradient-ok: linear-gradient(135deg, hsl(var(--brand-navy-2)) 0%, hsl(156 76% 30%) 100%);
+    --canvas-glow: hsl(var(--brand-orange) / 0.08);
+    --shadow-glow: 0 14px 30px -10px rgb(0 0 0 / 0.6);
     --primary: 216 57% 72%;
     --primary-foreground: 214 71% 9%;
     --primary-hover: 216 57% 78%;
@@ -258,13 +269,13 @@
 
   .employee-canvas {
     background:
-      radial-gradient(120% 60% at 100% 0%, #e4ecf7 0%, transparent 55%),
+      radial-gradient(120% 60% at 100% 0%, var(--canvas-glow) 0%, transparent 55%),
       hsl(var(--background));
   }
 
   .dark .employee-canvas {
     background:
-      radial-gradient(90% 40% at 100% 0%, rgb(252 96 11 / 0.08) 0%, transparent 50%),
+      radial-gradient(90% 40% at 100% 0%, var(--canvas-glow) 0%, transparent 50%),
       hsl(var(--background));
   }
 

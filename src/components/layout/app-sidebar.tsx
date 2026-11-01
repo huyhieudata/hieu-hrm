@@ -353,7 +353,7 @@ export const AppSidebar = ({
               )}
               aria-label="Chuyển công ty"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-brand text-[13px] font-semibold text-primary-foreground shadow-primary-glow">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-brand text-[13px] font-semibold text-white shadow-primary-glow">
                 {companyInitials(activeCompany?.name)}
               </span>
               {!isCollapsed && (

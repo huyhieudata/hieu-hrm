@@ -117,16 +117,15 @@ export default {
         focus: "0 0 0 3px hsl(var(--ring) / 0.18)",
         "primary-glow": "0 12px 28px -12px hsl(var(--primary) / 0.55)",
         brand: "0 12px 26px -14px hsl(var(--brand-navy) / 0.55)",
-        glow: "0 14px 30px -10px rgb(14 45 88 / 0.6)",
+        glow: "var(--shadow-glow)",
       },
       backgroundImage: {
-        brand: "linear-gradient(135deg, #0e2d58 0%, #1d4a84 100%)",
-        "gradient-primary": "linear-gradient(135deg, #0e2d58 0%, #1d4a84 100%)",
-        "gradient-accent": "linear-gradient(135deg, #fc600b 0%, #ff8a3d 100%)",
+        brand: "var(--gradient-primary)",
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-accent": "var(--gradient-accent)",
         "brand-soft":
-          "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(21 98% 52% / 0.12) 100%)",
-        panel:
-          "linear-gradient(155deg, hsl(214 100% 97%) 0%, hsl(221 92% 93%) 45%, hsl(258 96% 96%) 100%)",
+          "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--brand-orange) / 0.12) 100%)",
+        panel: "var(--gradient-panel)",
         sheen: "linear-gradient(180deg, hsl(0 0% 100% / 0.7), hsl(0 0% 100% / 0))",
         "hairline-x": "linear-gradient(90deg, hsl(var(--border)), hsl(var(--border) / 0))",
       },

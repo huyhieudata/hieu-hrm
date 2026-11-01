@@ -150,7 +150,7 @@ const CompanyPicker = () => {
                             : "border-border hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-soft",
                         )}
                       >
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-brand text-[13px] font-semibold text-primary-foreground shadow-primary-glow">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-brand text-[13px] font-semibold text-white shadow-primary-glow">
                           {companyInitials(membership.company.name)}
                         </span>
                         <span className="min-w-0 flex-1">
