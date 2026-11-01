@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import {
   CalendarDays,
+  ClipboardList,
   FileText,
   FolderOpen,
   Megaphone,
@@ -43,7 +44,11 @@ const EmployeeApps = () => {
         { label: "Thiết bị", to: "/toi/thiet-bi", icon: Smartphone, group: "mine" },
       );
     }
-    const apps: AppTile[] = [{ label: "Tin nội bộ", to: "/toi/tin-tuc", icon: Newspaper, group: "apps" }];
+    const apps: AppTile[] = [
+      { label: "Tin nội bộ", to: "/toi/tin-tuc", icon: Newspaper, group: "apps" },
+      { label: "Khảo sát", to: "/toi/khao-sat", icon: ClipboardList, group: "apps" },
+      { label: "Tài liệu", to: "/toi/tai-lieu", icon: FolderOpen, group: "apps" },
+    ];
     if (canDo("employees", "view")) apps.push({ label: "Danh bạ", to: "/employees", icon: Users, group: "apps" });
     if (canDo("assets", "view")) apps.push({ label: "Tài sản", to: "/tai-san", icon: FolderOpen, group: "apps" });
     if (canDo("insurance", "view")) apps.push({ label: "Bảo hiểm", to: "/bao-hiem", icon: Shield, group: "apps" });

@@ -52,6 +52,8 @@ const screenMeta = (pathname: string): ScreenMeta => {
   if (pathname.startsWith("/don-tu")) return { title: "Đơn từ", tab: "work", variant: "page", back: true };
   if (pathname.startsWith("/toi/bang-cong") || pathname.startsWith("/cham-cong/bang-cong"))
     return { title: "Bảng công", tab: "work", variant: "page", back: true };
+  if (pathname.startsWith("/toi/khao-sat")) return { title: "Khảo sát", tab: "apps", variant: "page", back: true };
+  if (pathname.startsWith("/toi/tai-lieu")) return { title: "Tài liệu", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/phieu-luong")) return { title: "Phiếu lương", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/ho-so")) return { title: "Thông tin cá nhân", tab: "apps", variant: "page", back: true };
   if (pathname.startsWith("/toi/thiet-bi") || pathname === "/cai-dat/thiet-bi-cham-cong")
