@@ -118,6 +118,7 @@ const ServicePlans = lazy("/cai-dat/he-thong/goi-dich-vu", () => import("./pages
 const PermissionGroups = lazy("/cai-dat/he-thong/phan-quyen", () => import("./pages/admin/PermissionGroups"));
 const Requests = lazy("/don-tu", () => import("./pages/requests/Requests"), true);
 const ActivityLogPage = lazy("/cai-dat/nhat-ky-hoat-dong", () => import("./pages/settings/ActivityLog"));
+const PerformanceOverview = lazy("/danh-gia", () => import("./pages/evaluations/PerformanceOverview"));
 const RequestTypes = lazy("/cai-dat/loai-don", () => import("./pages/requests/RequestTypes"));
 const LeavePolicies = lazy(
   ["/nghi-phep", "/cai-dat/chinh-sach-phep"],
@@ -427,6 +428,16 @@ export const routers = [
         <News />
       </PageSuspense>,
       "news",
+    ),
+  },
+  {
+    path: "/danh-gia",
+    name: "performance-overview",
+    element: companyScoped(
+      <PageSuspense>
+        <PerformanceOverview />
+      </PageSuspense>,
+      "evaluations",
     ),
   },
   {

@@ -15,6 +15,7 @@ const STAFF_PREFIXES: { prefix: string; module: string | null }[] = [
   { prefix: "/nghi-phep", module: "leave" },
   // Báo cáo: chỉ Owner/Admin/HR/Quản lý (RPC tự giới hạn phạm vi).
   { prefix: "/bao-cao", module: null },
+  { prefix: "/danh-gia", module: "evaluations" },
 ];
 
 /** Trang cấu hình chỉ Owner/Admin/HR (Quản lý cũng không vào). */
