@@ -106,12 +106,12 @@ export const MobileNav = () => {
       >
         <div
           className="shadow-tab pointer-events-auto mx-auto grid h-16 max-w-md items-stretch rounded-full bg-card px-1.5"
-          style={{ gridTemplateColumns: `repeat(${primary.length + 1}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${primary.length + 2}, minmax(0, 1fr))` }}
         >
-          {primary.map((tab) => {
+          {primary.flatMap((tab, index) => {
             const Icon = tab.icon;
             const active = tab.match(pathname);
-            return (
+            const node = (
               <button
                 key={tab.to}
                 type="button"
@@ -126,6 +126,21 @@ export const MobileNav = () => {
                 <span className={active ? "font-bold" : ""}>{tab.label}</span>
               </button>
             );
+            // Nút tròn Chấm công nổi ở giữa thanh dưới (cam ONHRM, vùng chạm 60px).
+            if (index !== Math.floor((primary.length + 1) / 2) - 1) return [node];
+            return [
+              node,
+              <div key="punch-fab" className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => go("/toi/cham-cong")}
+                  aria-label="Chấm công"
+                  className="-mt-[26px] flex h-[60px] w-[60px] items-center justify-center rounded-full border-4 border-card bg-brand-orange text-white shadow-primary-glow active:scale-95"
+                >
+                  <Fingerprint className="h-6 w-6" strokeWidth={2.2} />
+                </button>
+              </div>,
+            ];
           })}
 
           <button

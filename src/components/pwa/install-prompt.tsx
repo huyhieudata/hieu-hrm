@@ -12,12 +12,10 @@ import {
   isInAppBrowser,
   isIosDevice,
   isStandalone,
+  clearDeferredInstall,
+  getDeferredInstall,
+  type BeforeInstallPromptEvent,
 } from "@/lib/pwa";
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
-}
 
 /** Minh hoạ Safari iOS: thanh dưới có nút Chia sẻ → mục “Thêm vào Màn hình chính”. */
 const IosShareIllustration = () => (
@@ -97,23 +95,46 @@ export const InstallPrompt = () => {
     setInstructions(false);
   }, []);
 
-  // Luôn lắng nghe để không lỡ sự kiện beforeinstallprompt (bắn sớm, trước khi đăng nhập xong).
+  // Sự kiện được bắt sớm trong lib/pwa (trước khi React mount); ở đây chỉ đồng bộ trạng thái.
   useEffect(() => {
-    const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
-      setDeferred(event as BeforeInstallPromptEvent);
-    };
+    setDeferred(getDeferredInstall());
+    const onReady = () => setDeferred(getDeferredInstall());
     const onInstalled = () => {
       writeKey(INSTALL_DONE_KEY, "1");
       setDeferred(null);
       setOpen(false);
       setInstructions(false);
     };
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
+    // Nút "Thêm ONHRM ra màn hình chính" ở mọi nơi: luôn có phản hồi (prompt thật nếu được, không thì hướng dẫn).
+    const onReopen = () => {
+      if (isStandalone()) return;
+      const event = getDeferredInstall();
+      if (event) {
+        // Gọi prompt() ngay trong cùng cú chạm của người dùng.
+        void event.prompt().then(() => event.userChoice).then((choice) => {
+          clearDeferredInstall();
+          setDeferred(null);
+          if (choice.outcome === "accepted") writeKey(INSTALL_DONE_KEY, "1");
+          else {
+            setInstructions(true);
+            setOpen(true);
+          }
+        }).catch(() => {
+          setInstructions(true);
+          setOpen(true);
+        });
+        return;
+      }
+      setInstructions(true);
+      setOpen(true);
+    };
+    window.addEventListener("onhrm:install-ready", onReady);
     window.addEventListener("appinstalled", onInstalled);
+    window.addEventListener(INSTALL_REOPEN_EVENT, onReopen);
     return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+      window.removeEventListener("onhrm:install-ready", onReady);
       window.removeEventListener("appinstalled", onInstalled);
+      window.removeEventListener(INSTALL_REOPEN_EVENT, onReopen);
     };
   }, []);
 
@@ -143,20 +164,13 @@ export const InstallPrompt = () => {
       }, 1500);
     }
 
-    const onReopen = () => {
-      if (isStandalone()) return;
-      setInstructions(false);
-      setOpen(true);
-    };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
 
-    window.addEventListener(INSTALL_REOPEN_EVENT, onReopen);
     window.addEventListener("keydown", onKeyDown);
     return () => {
       if (timer) window.clearTimeout(timer);
-      window.removeEventListener(INSTALL_REOPEN_EVENT, onReopen);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [signedIn]);
@@ -190,6 +204,7 @@ export const InstallPrompt = () => {
     } finally {
       setInstalling(false);
       setDeferred(null);
+      clearDeferredInstall();
     }
   };
 
@@ -263,7 +278,7 @@ export const InstallPrompt = () => {
               <ol className="space-y-2.5">
                 {[
                   { title: "Mở menu trình duyệt", detail: "Nhấn dấu ba chấm ở góc trên bên phải." },
-                  { title: "Chọn “Cài đặt ứng dụng”", detail: "Hoặc “Thêm vào màn hình chính” tùy trình duyệt." },
+                  { title: "Chọn “Thêm vào màn hình chính”", detail: "Trên Chrome: menu ⋮ → “Thêm vào màn hình chính” hoặc “Cài đặt ứng dụng”." },
                   { title: "Xác nhận cài đặt", detail: "ONHRM sẽ nằm cùng các ứng dụng khác trên máy." },
                 ].map((step, index) => (
                   <li key={step.title} className="flex gap-3 rounded-xl border border-border/70 bg-muted/20 p-3">
