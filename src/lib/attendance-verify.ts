@@ -21,7 +21,7 @@ export interface AttendancePolicy {
 export const DEFAULT_POLICY: Omit<AttendancePolicy, "company_id"> = {
   require_photo: true,
   require_gps: true,
-  gps_mode: "flag",
+  gps_mode: "reject",
   max_accuracy_m: 150,
   require_device: true,
   max_devices: 1,
@@ -216,7 +216,8 @@ export const getPolicy = async (companyId: string): Promise<AttendancePolicy> =>
 export const savePolicy = async (policy: AttendancePolicy) => {
   const { error } = await db
     .from("attendance_policies")
-    .upsert({ ...policy, updated_at: new Date().toISOString() }, { onConflict: "company_id" });
+    // Chặn cứng: luôn bắt buộc GPS, đúng vùng và đúng thiết bị.
+    .upsert({ ...policy, gps_mode: "reject", require_gps: true, require_device: true, updated_at: new Date().toISOString() }, { onConflict: "company_id" });
   if (error) throw new Error(error.message ?? "Không lưu được cấu hình.");
 };
 
