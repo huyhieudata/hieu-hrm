@@ -1,4 +1,4 @@
-import { Bell, FileText, Home, ScanFace, User, type LucideIcon } from "lucide-react";
+import { Briefcase, Home, LayoutGrid, Newspaper, type LucideIcon } from "lucide-react";
 
 export interface MobileTab {
   id: string;
@@ -9,8 +9,8 @@ export interface MobileTab {
 
 export const EMPLOYEE_TABS: MobileTab[] = [
   { id: "home", label: "Trang chủ", icon: Home },
-  { id: "checkin", label: "Chấm công", icon: ScanFace, featured: true },
-  { id: "requests", label: "Đơn từ", icon: FileText },
-  { id: "news", label: "Tin tức", icon: Bell },
-  { id: "me", label: "Cá nhân", icon: User },
+  { id: "work", label: "Công việc", icon: Briefcase },
+  { id: "punch", label: "Chấm công", icon: Home, featured: true },
+  { id: "internal", label: "Nội bộ", icon: Newspaper },
+  { id: "apps", label: "Ứng dụng", icon: LayoutGrid },
 ];

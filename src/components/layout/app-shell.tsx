@@ -2,11 +2,15 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { MobileHeader } from "@/components/mobile/MobileHeader";
+import { useKeyboardOpen } from "@/components/mobile/use-keyboard-open";
 import { useTableCards } from "@/components/mobile/use-table-cards";
 import { useDeviceMode } from "@/hooks/use-device-mode";
 
 import { MobileShell } from "@/components/mobile/MobileShell";
+import { displayName, useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
+import { initials } from "@/lib/format";
+import { ROLE_LABELS } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 import { SettingsNav } from "@/components/settings/settings-nav";
@@ -135,6 +139,8 @@ const mobileTitle = (pathname: string) => {
   if (pathname.startsWith("/cai-dat")) return "Cài đặt";
   if (pathname.startsWith("/tinh-luong")) return "Tính lương";
   if (pathname.startsWith("/tuyen-dung")) return "Tuyển dụng";
+  if (pathname.startsWith("/cong-viec")) return "Công việc";
+  if (pathname.startsWith("/ung-dung")) return "Ứng dụng";
   return "ONHRM";
 };
 
@@ -146,18 +152,31 @@ const AdminMobileShell = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const mainRef = useRef<HTMLElement>(null);
   useTableCards(mainRef);
+  const keyboard = useKeyboardOpen();
+  const { profile, user } = useAuth();
+  const { activeCompany, role, canDo } = useCompany();
   const title = mobileTitle(pathname);
   const isRoot = ROOT_TABS.includes(pathname);
+  const home = pathname === "/";
   const inSettings = pathname === "/cai-dat" || pathname.startsWith("/cai-dat/");
+  const hideTabs = keyboard || pathname.startsWith("/toi/cham-cong");
+  const name = displayName(profile, user?.email);
 
   return (
-    <div className="employee-canvas relative min-h-[100dvh] w-full text-foreground">
+    <div className="employee-canvas font-display relative min-h-[100dvh] w-full text-foreground">
       <MobileHeader
-        title={title}
-        hello={pathname === "/"}
-        back={!isRoot}
+        variant={home ? "hero" : "bar"}
+        compact
+        title={title || "ONHRM"}
+        back={!isRoot && !home}
+        companyName={activeCompany?.name ?? "ONHRM"}
+        personName={home ? name : undefined}
+        personMeta={home && role ? ROLE_LABELS[role] : undefined}
+        initials={home ? initials(name) : undefined}
         onBack={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
         onNotify={() => navigate("/tin-tuc")}
+        onScan={home ? () => navigate("/toi/cham-cong") : undefined}
+        onSearch={home ? () => navigate(canDo("employees", "view") ? "/employees" : "/tin-tuc") : undefined}
       />
       <main
         ref={mainRef}
@@ -174,7 +193,7 @@ const AdminMobileShell = ({ children }: { children: ReactNode }) => {
           )}
         </div>
       </main>
-      <MobileNav />
+      {hideTabs ? null : <MobileNav />}
     </div>
   );
 };

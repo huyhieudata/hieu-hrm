@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Check, FileText, Loader2, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -102,6 +103,10 @@ const Requests = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
+  const [params] = useSearchParams();
+  useEffect(() => {
+    if (params.get("tao") === "1") setFormOpen(true);
+  }, [params]);
   const [decision, setDecision] = useState<{ request: EmployeeRequest; status: "approved" | "rejected" } | null>(
     null,
   );

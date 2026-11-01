@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -15,6 +16,7 @@ import {
   type AttendanceRecord,
 } from "@/lib/attendance";
 import { useCompany } from "@/lib/company-provider";
+import { useDeviceMode } from "@/hooks/use-device-mode";
 import { getErrorMessage } from "@/lib/utils";
 
 const CELL: Record<string, string> = {
@@ -78,6 +80,105 @@ const EmployeeTimesheet = () => {
   };
 
   const list = [...records].sort((a, b) => b.work_date.localeCompare(a.work_date) || a.session.localeCompare(b.session));
+  const mobile = useDeviceMode() === "mobile";
+
+  if (mobile) {
+    const first = new Date(`${month}-01T00:00:00`);
+    const lead = (first.getDay() + 6) % 7;
+    const worked = new Set([...byDay.keys()].filter((iso) => (byDay.get(iso) ?? []).some((row) => row.check_in))).size;
+    const late = [...byDay.values()].filter((rows) => rows.some((row) => row.status === "late" || row.status === "early_leave")).length;
+    const leave = [...byDay.values()].filter((rows) => rows.some((row) => row.status === "leave")).length;
+    const monthTitle = first.toLocaleDateString("vi-VN", { month: "long", year: "numeric" });
+    return (
+      <AppShell>
+        <div className="space-y-3">
+          <div className="flex h-11 items-center justify-between">
+            <button type="button" aria-label="Tháng trước" className="flex h-11 w-11 items-center justify-center rounded-full bg-card shadow-card-soft" onClick={() => shiftMonth(-1)}>
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <p className="font-display text-[16px] font-bold capitalize">{monthTitle}</p>
+            <button type="button" aria-label="Tháng sau" className="flex h-11 w-11 items-center justify-center rounded-full bg-card shadow-card-soft" onClick={() => shiftMonth(1)}>
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+          <section className="shadow-card-soft rounded-[20px] bg-card px-3 py-4">
+            <div className="grid grid-cols-4 text-center">
+              {[
+                [String(worked), "Ngày công"],
+                [String(late), "Đi muộn"],
+                [String(leave), "Nghỉ phép"],
+                ["—", "Còn lại"],
+              ].map(([value, caption], index) => (
+                <div key={caption} className={index ? "border-l border-border" : ""}>
+                  <b className="block text-[20px] font-bold">{value}</b>
+                  <span className="text-[12px] text-muted-foreground">{caption}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+          {loading ? (
+            <div className="h-64 animate-pulse rounded-[20px] bg-card" />
+          ) : (
+            <section className="shadow-card-soft rounded-[20px] bg-card p-3">
+              <div className="grid grid-cols-7 gap-1.5">
+                {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((name) => (
+                  <div key={name} className="pb-1 text-center text-[11px] font-semibold text-muted-foreground">
+                    {name}
+                  </div>
+                ))}
+                {Array.from({ length: lead }, (_, index) => (
+                  <div key={`e-${index}`} className="h-9" />
+                ))}
+                {Array.from({ length: days }, (_, index) => {
+                  const day = index + 1;
+                  const iso = `${month}-${String(day).padStart(2, "0")}`;
+                  const dayRecords = byDay.get(iso) ?? [];
+                  const dow = new Date(`${iso}T00:00:00`).getDay();
+                  const weekend = dow === 0 || dow === 6;
+                  const isToday = iso === today;
+                  const future = iso > today;
+                  const kind = dayRecords.some((row) => row.status === "leave")
+                    ? "leave"
+                    : dayRecords.some((row) => row.status === "late" || row.status === "early_leave")
+                      ? "late"
+                      : dayRecords.some((row) => row.check_in)
+                        ? "ok"
+                        : future
+                          ? "future"
+                          : weekend
+                            ? "weekend"
+                            : "empty";
+                  const tone =
+                    kind === "ok"
+                      ? "bg-primary-subtle text-brand-navy"
+                      : kind === "late"
+                        ? "bg-accent text-accent-foreground"
+                        : kind === "leave"
+                          ? "bg-secondary text-foreground"
+                          : kind === "future"
+                            ? "text-muted-foreground ring-1 ring-border"
+                            : kind === "weekend"
+                              ? "text-muted-foreground"
+                              : "bg-secondary text-foreground";
+                  return (
+                    <div key={iso} className={`flex h-9 items-center justify-center rounded-[10px] text-[13px] font-medium ${tone} ${isToday ? "ring-2 ring-brand-navy" : ""}`}>
+                      {day}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-3.5 flex flex-wrap gap-4 text-[12px] text-muted-foreground">
+                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-primary-subtle ring-1 ring-brand-navy/30" /> Đủ công</span>
+                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-accent" /> Đi muộn</span>
+                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-secondary ring-1 ring-border" /> Nghỉ phép</span>
+              </div>
+            </section>
+          )}
+          {list.length === 0 && !loading ? <EmptyState emoji="🗓️" title="Tháng này chưa có công" description="Các lần chấm công hợp lệ sẽ hiện theo ngày." /> : null}
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

@@ -93,11 +93,11 @@ export const MobileNav = () => {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-card/95 pb-[max(0.35rem,env(safe-area-inset-bottom))] backdrop-blur-xl"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-4 pb-[max(12px,env(safe-area-inset-bottom))]"
         aria-label="Điều hướng di động"
       >
         <div
-          className="mx-auto grid max-w-md items-stretch px-1 pt-1.5"
+          className="shadow-tab pointer-events-auto mx-auto grid h-16 max-w-md items-stretch rounded-full bg-card px-1.5"
           style={{ gridTemplateColumns: `repeat(${primary.length + 1}, minmax(0, 1fr))` }}
         >
           {primary.map((tab) => {
@@ -109,21 +109,13 @@ export const MobileNav = () => {
                 type="button"
                 onClick={() => go(tab.to)}
                 aria-current={active ? "page" : undefined}
-                className="flex min-h-[54px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] font-medium transition-colors"
+                className={cn(
+                  "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] font-medium",
+                  active ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
+                )}
               >
-                <span
-                  className={cn(
-                    "flex h-8 w-12 items-center justify-center rounded-full transition-all duration-200",
-                    active
-                      ? "bg-primary-subtle text-primary shadow-xs"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
-                </span>
-                <span className={active ? "font-semibold text-primary" : "text-muted-foreground"}>
-                  {tab.label}
-                </span>
+                <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
+                <span className={active ? "font-bold" : ""}>{tab.label}</span>
               </button>
             );
           })}
@@ -133,17 +125,13 @@ export const MobileNav = () => {
             onClick={() => setMoreOpen(true)}
             aria-expanded={moreOpen}
             aria-label="Mở tất cả tính năng"
-            className="flex min-h-[54px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] font-medium"
+            className={cn(
+              "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] font-medium",
+              moreOpen ? "bg-primary-subtle text-brand-navy" : "text-muted-foreground",
+            )}
           >
-            <span
-              className={cn(
-                "flex h-8 w-12 items-center justify-center rounded-full transition-colors",
-                moreOpen ? "bg-primary-subtle text-primary" : "text-muted-foreground",
-              )}
-            >
-              <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={1.9} />
-            </span>
-            <span className="text-muted-foreground">Thêm</span>
+            <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            <span className={moreOpen ? "font-bold" : ""}>Thêm</span>
           </button>
         </div>
       </nav>
@@ -222,20 +210,11 @@ export const MobileNav = () => {
                             type="button"
                             onClick={() => item.to && go(item.to)}
                             className={cn(
-                              "flex min-h-[88px] flex-col items-start gap-2 rounded-xl border p-2.5 text-left transition-colors",
-                              active
-                                ? "border-primary/30 bg-primary-subtle"
-                                : "border-border/70 bg-card hover:bg-muted/40",
+                              "shadow-card-soft flex min-h-[96px] flex-col items-center justify-center gap-2 rounded-[20px] bg-card p-2.5 text-center",
+                              active && "ring-2 ring-brand-navy/30",
                             )}
                           >
-                            <span
-                              className={cn(
-                                "flex h-8 w-8 items-center justify-center rounded-lg",
-                                active
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted text-muted-foreground",
-                              )}
-                            >
+                            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-subtle text-brand-navy">
                               <Icon className="h-4 w-4" strokeWidth={1.9} />
                             </span>
                             <span className="line-clamp-2 text-[11px] font-medium leading-4 text-foreground">
