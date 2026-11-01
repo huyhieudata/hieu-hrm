@@ -401,7 +401,7 @@ const EmployeeProfile = () => {
   const canManage = canManageModule("employees");
   // SEC-02: chỉ Owner/Admin gán quyền; Admin không tự sửa quyền của chính mình (DB cũng chặn).
   const canManagePermissions =
-    role === "owner" || (role === "admin" && employee?.user_id !== user?.id);
+    role === "owner" || role === "admin";
   const canDelete = isManagerial(role);
 
   const [employee, setEmployee] = useState<EmployeeRecord | null>(null);
@@ -1860,7 +1860,7 @@ const EmployeeProfile = () => {
         <PermissionsTab
           employeeId={employee.id}
           companyId={activeCompany.id}
-          canManage={canManagePermissions}
+          canManage={canManagePermissions && (role === "owner" || employee.user_id !== user?.id)}
         />
       )}
 
