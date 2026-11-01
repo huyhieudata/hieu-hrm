@@ -63,8 +63,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { buildEmployeeFields } from "@/lib/employee-fields";
+import { useOrgStructure, withOrgFields } from "@/lib/use-org-structure";
 import {
-  DEPARTMENTS,
   EMPLOYEE_STATUS_META,
   CONTRACT_TYPE_LABELS,
   createEmployee,
@@ -152,8 +152,9 @@ const Employees = () => {
   const [bulkInviteOpen, setBulkInviteOpen] = useState(false);
   const [positionOptionsByDepartment, setPositionOptionsByDepartment] =
     useState<Record<string, { value: string; label: string }[]>>({});
-  const [departmentNameOptions, setDepartmentNameOptions] =
-    useState<string[]>(DEPARTMENTS);
+  const [departmentNameOptions, setDepartmentNameOptions] = useState<string[]>(
+    [],
+  );
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("all");
   const [position, setPosition] = useState("all");
@@ -245,11 +246,7 @@ const Employees = () => {
         ];
       });
       setPositionOptionsByDepartment(positionMap);
-      setDepartmentNameOptions(
-        departmentRows.length > 0
-          ? departmentRows.map((row) => row.name)
-          : DEPARTMENTS,
-      );
+      setDepartmentNameOptions(departmentRows.map((row) => row.name));
       if (checklistTemplates.length > 0) {
         setRequiredDocCategories(
           Array.from(new Set(checklistTemplates.map((row) => row.category))),
@@ -510,11 +507,15 @@ const Employees = () => {
     }
   };
 
-  const fields = buildEmployeeFields(
-    employees,
-    editing?.id,
-    positionOptionsByDepartment,
-    departmentNameOptions,
+  const org = useOrgStructure();
+  const fields = withOrgFields(
+    buildEmployeeFields(
+      employees,
+      editing?.id,
+      positionOptionsByDepartment,
+      departmentNameOptions,
+    ),
+    org,
   );
 
   return (
@@ -1088,6 +1089,12 @@ const Employees = () => {
             : "Chỉ cần thông tin cơ bản để tạo hồ sơ. Bạn có thể bổ sung hợp đồng, lương, bảo hiểm sau."
         }
         fields={fields}
+        onFieldChange={(name, value, current) => {
+          // Chọn phòng ban → gợi ý người quản lý trực tiếp = trưởng phòng trên sơ đồ.
+          if (name !== "department" || current.manager_id) return;
+          const manager = org.managerOf(value);
+          if (manager?.employeeId) return { manager_id: manager.employeeId };
+        }}
         initial={
           editing ?? {
             status: "active",

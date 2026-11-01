@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileText, Loader2, Pencil, Plus, Printer, Search, Trash2 } from "lucide-react";
+import {
+  FileText,
+  Loader2,
+  Pencil,
+  Plus,
+  Printer,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { FieldDialog, type FieldDef } from "@/components/employee/field-dialog";
@@ -35,7 +43,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
-import { DEPARTMENTS, JOB_LEVELS } from "@/lib/employee-records";
+import { JOB_LEVELS } from "@/lib/employee-records";
 import { printHtml } from "@/lib/employee-documents";
 import { currency } from "@/lib/format";
 import {
@@ -51,8 +59,16 @@ import {
 import { listDepartments } from "@/lib/settings";
 import { getErrorMessage } from "@/lib/utils";
 
-const EMPLOYMENT_TYPES = ["Toàn thời gian", "Bán thời gian", "Thực tập", "Thời vụ", "Remote"];
-const statusOptions = Object.entries(JD_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const EMPLOYMENT_TYPES = [
+  "Toàn thời gian",
+  "Bán thời gian",
+  "Thực tập",
+  "Thời vụ",
+  "Remote",
+];
+const statusOptions = Object.entries(JD_STATUS_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
 
 const statusTone = (status: string) =>
   status === "open" ? "success" : status === "draft" ? "muted" : "outline";
@@ -121,7 +137,9 @@ const JobDescriptions = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<JobDescription | null>(null);
   const [detail, setDetail] = useState<JobDescription | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<JobDescription | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<JobDescription | null>(
+    null,
+  );
 
   const load = useCallback(async () => {
     if (!companyId) return;
@@ -134,7 +152,9 @@ const JobDescriptions = () => {
       setRows(jobs);
       setDepartments(deptRows.map((row) => row.name));
     } catch (error) {
-      toast.error("Không tải được mô tả công việc", { description: getErrorMessage(error) });
+      toast.error("Không tải được mô tả công việc", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setLoading(false);
     }
@@ -146,15 +166,29 @@ const JobDescriptions = () => {
 
   const fields: FieldDef[] = useMemo(
     () => [
-      { name: "title", label: "Tên vị trí", required: true, span: 2, placeholder: "Chuyên viên phát triển phần mềm" },
+      {
+        name: "title",
+        label: "Tên vị trí",
+        required: true,
+        span: 2,
+        placeholder: "Chuyên viên phát triển phần mềm",
+      },
       { name: "code", label: "Mã JD", placeholder: "JD-2026-014" },
       {
         name: "department",
         label: "Phòng ban",
         type: "select",
-        options: toOptionsSafe(departments.length ? departments : DEPARTMENTS),
+        options: toOptionsSafe(departments),
+        hint: departments.length
+          ? undefined
+          : "Sơ đồ tổ chức trống — vào Cài đặt › Cơ cấu tổ chức để thiết lập.",
       },
-      { name: "level", label: "Cấp bậc", type: "select", options: toOptionsSafe(JOB_LEVELS) },
+      {
+        name: "level",
+        label: "Cấp bậc",
+        type: "select",
+        options: toOptionsSafe(JOB_LEVELS),
+      },
       {
         name: "employment_type",
         label: "Hình thức làm việc",
@@ -162,11 +196,31 @@ const JobDescriptions = () => {
         options: toOptionsSafe(EMPLOYMENT_TYPES),
       },
       { name: "location", label: "Địa điểm", placeholder: "Hà Nội" },
-      { name: "status", label: "Trạng thái", type: "select", options: statusOptions },
-      { name: "salary_min", label: "Lương tối thiểu", type: "currency", placeholder: "15000000" },
-      { name: "salary_max", label: "Lương tối đa", type: "currency", placeholder: "25000000" },
+      {
+        name: "status",
+        label: "Trạng thái",
+        type: "select",
+        options: statusOptions,
+      },
+      {
+        name: "salary_min",
+        label: "Lương tối thiểu",
+        type: "currency",
+        placeholder: "15000000",
+      },
+      {
+        name: "salary_max",
+        label: "Lương tối đa",
+        type: "currency",
+        placeholder: "25000000",
+      },
       { name: "summary", label: "Mục tiêu công việc", type: "textarea" },
-      { name: "responsibilities", label: "Trách nhiệm chính", type: "textarea", placeholder: "Mỗi dòng một nhiệm vụ" },
+      {
+        name: "responsibilities",
+        label: "Trách nhiệm chính",
+        type: "textarea",
+        placeholder: "Mỗi dòng một nhiệm vụ",
+      },
       { name: "requirements", label: "Yêu cầu ứng viên", type: "textarea" },
       { name: "benefits", label: "Quyền lợi", type: "textarea" },
     ],
@@ -181,12 +235,15 @@ const JobDescriptions = () => {
         row.title.toLowerCase().includes(keyword) ||
         (row.code ?? "").toLowerCase().includes(keyword) ||
         (row.department ?? "").toLowerCase().includes(keyword);
-      const matchesStatus = statusFilter === "all" || row.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || row.status === statusFilter;
       return matchesKeyword && matchesStatus;
     });
   }, [rows, query, statusFilter]);
 
-  const handleSubmit = async (values: Record<string, string | number | null>) => {
+  const handleSubmit = async (
+    values: Record<string, string | number | null>,
+  ) => {
     if (!companyId) throw new Error("Chưa chọn công ty.");
     const min = Number(values.salary_min ?? 0);
     const max = Number(values.salary_max ?? 0);
@@ -222,7 +279,9 @@ const JobDescriptions = () => {
       setPendingDelete(null);
       await load();
     } catch (error) {
-      toast.error("Không xoá được mô tả công việc", { description: getErrorMessage(error) });
+      toast.error("Không xoá được mô tả công việc", {
+        description: getErrorMessage(error),
+      });
     }
   };
 
@@ -248,15 +307,25 @@ const JobDescriptions = () => {
     >
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tổng vị trí</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{rows.length}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Tổng vị trí
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
+            {rows.length}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đang áp dụng</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-success">{openIn}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Đang áp dụng
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-success">
+            {openIn}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Bản nháp</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Bản nháp
+          </p>
           <p className="mt-1 font-display text-[22px] font-semibold text-muted-foreground">
             {rows.filter((row) => row.status === "draft").length}
           </p>
@@ -275,7 +344,10 @@ const JobDescriptions = () => {
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-full text-[12.5px] sm:w-[190px]" aria-label="Lọc trạng thái">
+          <SelectTrigger
+            className="h-9 w-full text-[12.5px] sm:w-[190px]"
+            aria-label="Lọc trạng thái"
+          >
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -291,13 +363,16 @@ const JobDescriptions = () => {
 
       {loading ? (
         <Card className="flex items-center justify-center gap-2 p-16 text-[12.5px] text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Đang tải danh sách vị trí…
+          <Loader2 className="h-4 w-4 animate-spin" /> Đang tải danh sách vị
+          trí…
         </Card>
       ) : filtered.length === 0 ? (
         <Card className="p-12 text-center">
           <FileText className="mx-auto h-6 w-6 text-muted-foreground/70" />
           <p className="mt-2 text-[13px] font-semibold text-foreground">
-            {rows.length === 0 ? "Chưa có mô tả công việc" : "Không có vị trí phù hợp"}
+            {rows.length === 0
+              ? "Chưa có mô tả công việc"
+              : "Không có vị trí phù hợp"}
           </p>
           <p className="mt-1 text-[12px] text-muted-foreground">
             {rows.length === 0
@@ -311,17 +386,32 @@ const JobDescriptions = () => {
             <table className="w-full min-w-[880px] border-collapse text-[11.5px]">
               <thead>
                 <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.05em] text-muted-foreground">
-                  <th className="px-4 py-2.5 text-left font-semibold">Vị trí</th>
-                  <th className="px-3 py-2.5 text-left font-semibold">Phòng ban / cấp bậc</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Khoảng lương</th>
-                  <th className="px-3 py-2.5 text-left font-semibold">Hình thức</th>
-                  <th className="px-3 py-2.5 text-center font-semibold">Trạng thái</th>
-                  <th className="w-[110px] px-3 py-2.5 text-right font-semibold">Thao tác</th>
+                  <th className="px-4 py-2.5 text-left font-semibold">
+                    Vị trí
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-semibold">
+                    Phòng ban / cấp bậc
+                  </th>
+                  <th className="px-3 py-2.5 text-right font-semibold">
+                    Khoảng lương
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-semibold">
+                    Hình thức
+                  </th>
+                  <th className="px-3 py-2.5 text-center font-semibold">
+                    Trạng thái
+                  </th>
+                  <th className="w-[110px] px-3 py-2.5 text-right font-semibold">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((row) => (
-                  <tr key={row.id} className="border-t border-border/50 hover:bg-muted/20">
+                  <tr
+                    key={row.id}
+                    className="border-t border-border/50 hover:bg-muted/20"
+                  >
                     <td className="px-4 py-2.5">
                       <button
                         type="button"
@@ -332,7 +422,8 @@ const JobDescriptions = () => {
                           {row.title}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {row.code ?? "Chưa có mã"} · Tạo {formatDay(row.created_at)}
+                          {row.code ?? "Chưa có mã"} · Tạo{" "}
+                          {formatDay(row.created_at)}
                         </p>
                       </button>
                     </td>
@@ -340,13 +431,17 @@ const JobDescriptions = () => {
                       {row.department ?? "—"}
                       {row.level ? ` · ${row.level}` : ""}
                     </td>
-                    <td className="px-3 py-2.5 text-right text-[12px] text-foreground">{salaryLabel(row)}</td>
+                    <td className="px-3 py-2.5 text-right text-[12px] text-foreground">
+                      {salaryLabel(row)}
+                    </td>
                     <td className="px-3 py-2.5 text-[12px] text-muted-foreground">
                       {row.employment_type ?? "—"}
                       {row.location ? ` · ${row.location}` : ""}
                     </td>
                     <td className="px-3 py-2.5 text-center">
-                      <Badge variant={statusTone(row.status)}>{JD_STATUS_LABELS[row.status] ?? row.status}</Badge>
+                      <Badge variant={statusTone(row.status)}>
+                        {JD_STATUS_LABELS[row.status] ?? row.status}
+                      </Badge>
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center justify-end gap-0.5">
@@ -354,7 +449,9 @@ const JobDescriptions = () => {
                           variant="ghost"
                           size="icon-sm"
                           aria-label={`In mô tả ${row.title}`}
-                          onClick={() => printJob(row, activeCompany?.name ?? "Công ty")}
+                          onClick={() =>
+                            printJob(row, activeCompany?.name ?? "Công ty")
+                          }
                         >
                           <Printer className="h-3.5 w-3.5" />
                         </Button>
@@ -411,15 +508,22 @@ const JobDescriptions = () => {
             <DialogTitle>{detail?.title}</DialogTitle>
             <DialogDescription>
               {detail?.department ?? "Chưa xếp phòng ban"}
-              {detail?.level ? ` · ${detail.level}` : ""} · {detail ? salaryLabel(detail) : ""}
+              {detail?.level ? ` · ${detail.level}` : ""} ·{" "}
+              {detail ? salaryLabel(detail) : ""}
             </DialogDescription>
           </DialogHeader>
           {detail && (
             <div className="space-y-4 py-1">
               <div className="flex flex-wrap gap-1.5">
-                <Badge variant={statusTone(detail.status)}>{JD_STATUS_LABELS[detail.status] ?? detail.status}</Badge>
-                {detail.employment_type && <Badge variant="outline">{detail.employment_type}</Badge>}
-                {detail.location && <Badge variant="outline">{detail.location}</Badge>}
+                <Badge variant={statusTone(detail.status)}>
+                  {JD_STATUS_LABELS[detail.status] ?? detail.status}
+                </Badge>
+                {detail.employment_type && (
+                  <Badge variant="outline">{detail.employment_type}</Badge>
+                )}
+                {detail.location && (
+                  <Badge variant="outline">{detail.location}</Badge>
+                )}
               </div>
               {[
                 ["Mục tiêu công việc", detail.summary],
@@ -429,22 +533,32 @@ const JobDescriptions = () => {
               ].map(([label, content]) =>
                 content ? (
                   <div key={label as string}>
-                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-primary">{label}</p>
-                    <p className="mt-1 whitespace-pre-line text-[12.5px] leading-6 text-foreground">{content}</p>
+                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-primary">
+                      {label}
+                    </p>
+                    <p className="mt-1 whitespace-pre-line text-[12.5px] leading-6 text-foreground">
+                      {content}
+                    </p>
                   </div>
                 ) : null,
               )}
             </div>
           )}
           <DialogFooter className="flex-wrap gap-2">
-            <Button variant="outline" className="h-9" onClick={() => setDetail(null)}>
+            <Button
+              variant="outline"
+              className="h-9"
+              onClick={() => setDetail(null)}
+            >
               Đóng
             </Button>
             {detail && (
               <Button
                 variant="outline"
                 className="h-9 gap-1.5"
-                onClick={() => printJob(detail, activeCompany?.name ?? "Công ty")}
+                onClick={() =>
+                  printJob(detail, activeCompany?.name ?? "Công ty")
+                }
               >
                 <Printer className="h-3.5 w-3.5" /> In mô tả
               </Button>
@@ -465,12 +579,16 @@ const JobDescriptions = () => {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá mô tả công việc?</AlertDialogTitle>
             <AlertDialogDescription>
-              “{pendingDelete?.title}” sẽ bị xoá. Các chiến dịch đang dùng mô tả này có thể bị ảnh hưởng.
+              “{pendingDelete?.title}” sẽ bị xoá. Các chiến dịch đang dùng mô tả
+              này có thể bị ảnh hưởng.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,4 +1,9 @@
-import { createEmployee, listEmployees, type EmployeeRecord } from "@/lib/employee-records";
+import { listDepartmentPositions, listDepartments } from "@/lib/settings";
+import {
+  createEmployee,
+  listEmployees,
+  type EmployeeRecord,
+} from "@/lib/employee-records";
 
 export interface EmployeeImportRow {
   code: string;
@@ -19,26 +24,28 @@ export interface EmployeeImportRow {
   notes: string | null;
 }
 
-export const IMPORT_COLUMNS: { key: keyof EmployeeImportRow; label: string }[] = [
-  { key: "code", label: "Mã nhân viên" },
-  { key: "full_name", label: "Họ và tên" },
-  { key: "gender", label: "Giới tính" },
-  { key: "date_of_birth", label: "Ngày sinh" },
-  { key: "phone", label: "Số điện thoại" },
-  { key: "work_email", label: "Email công việc" },
-  { key: "department", label: "Phòng ban" },
-  { key: "position", label: "Chức danh" },
-  { key: "concurrent_positions", label: "Vị trí kiêm nhiệm" },
-  { key: "hire_date", label: "Ngày vào làm" },
-  { key: "work_location", label: "Địa điểm làm việc" },
-  { key: "national_id", label: "Số CCCD" },
-  { key: "bank_name", label: "Ngân hàng" },
-  { key: "bank_account", label: "Số tài khoản" },
-  { key: "tax_code", label: "Mã số thuế" },
-  { key: "notes", label: "Ghi chú" },
-];
+export const IMPORT_COLUMNS: { key: keyof EmployeeImportRow; label: string }[] =
+  [
+    { key: "code", label: "Mã nhân viên" },
+    { key: "full_name", label: "Họ và tên" },
+    { key: "gender", label: "Giới tính" },
+    { key: "date_of_birth", label: "Ngày sinh" },
+    { key: "phone", label: "Số điện thoại" },
+    { key: "work_email", label: "Email công việc" },
+    { key: "department", label: "Phòng ban" },
+    { key: "position", label: "Chức danh" },
+    { key: "concurrent_positions", label: "Vị trí kiêm nhiệm" },
+    { key: "hire_date", label: "Ngày vào làm" },
+    { key: "work_location", label: "Địa điểm làm việc" },
+    { key: "national_id", label: "Số CCCD" },
+    { key: "bank_name", label: "Ngân hàng" },
+    { key: "bank_account", label: "Số tài khoản" },
+    { key: "tax_code", label: "Mã số thuế" },
+    { key: "notes", label: "Ghi chú" },
+  ];
 
-const escapeCsv = (value: string) => (/[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
+const escapeCsv = (value: string) =>
+  /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 
 export const downloadEmployeeTemplate = () => {
   const headers = IMPORT_COLUMNS.map((column) => column.label);
@@ -139,10 +146,16 @@ const normalizeGender = (value: string): string | null => {
   return null;
 };
 
-export const parseEmployeeFile = (text: string): { rows: EmployeeImportRow[]; error: string | null } => {
+export const parseEmployeeFile = (
+  text: string,
+): { rows: EmployeeImportRow[]; error: string | null } => {
   const table = parseCsv(text);
   if (table.length < 2) {
-    return { rows: [], error: "Tệp không có dữ liệu (cần dòng tiêu đề và ít nhất 1 dòng nhân sự)." };
+    return {
+      rows: [],
+      error:
+        "Tệp không có dữ liệu (cần dòng tiêu đề và ít nhất 1 dòng nhân sự).",
+    };
   }
 
   const header = table[0].map((cell) => cell.trim().replace(/^\ufeff/, ""));
@@ -188,11 +201,18 @@ export const parseEmployeeFile = (text: string): { rows: EmployeeImportRow[]; er
 export interface ImportResult {
   created: number;
   errors: { line: number; message: string }[];
+  /** Dòng vẫn được tạo nhưng phòng ban/chức danh không khớp sơ đồ tổ chức. */
+  warnings: { line: number; message: string }[];
 }
 
-export const importEmployees = async (companyId: string, rows: EmployeeImportRow[]): Promise<ImportResult> => {
+export const importEmployees = async (
+  companyId: string,
+  rows: EmployeeImportRow[],
+): Promise<ImportResult> => {
   const existing: EmployeeRecord[] = await listEmployees(companyId);
-  const codes = new Set(existing.map((employee) => employee.code.toLowerCase()));
+  const codes = new Set(
+    existing.map((employee) => employee.code.toLowerCase()),
+  );
   const emails = new Set(
     existing
       .map((employee) => (employee.work_email ?? "").trim().toLowerCase())
@@ -200,7 +220,13 @@ export const importEmployees = async (companyId: string, rows: EmployeeImportRow
   );
 
   const errors: ImportResult["errors"] = [];
+  const warnings: ImportResult["warnings"] = [];
   let created = 0;
+  const [departments, positions] = await Promise.all([
+    listDepartments(companyId).catch(() => []),
+    listDepartmentPositions(companyId).catch(() => []),
+  ]);
+  const norm = (v: string | null) => (v ?? "").trim().toLowerCase();
 
   for (let index = 0; index < rows.length; index += 1) {
     const row = rows[index];
@@ -211,12 +237,42 @@ export const importEmployees = async (companyId: string, rows: EmployeeImportRow
       continue;
     }
     if (codes.has(row.code.toLowerCase())) {
-      errors.push({ line, message: `Mã ${row.code} đã tồn tại trong công ty.` });
+      errors.push({
+        line,
+        message: `Mã ${row.code} đã tồn tại trong công ty.`,
+      });
       continue;
     }
     if (row.work_email && emails.has(row.work_email.toLowerCase())) {
       errors.push({ line, message: `Email ${row.work_email} đã được dùng.` });
       continue;
+    }
+
+    // Khớp tên với sơ đồ tổ chức (không phân biệt hoa thường) → lưu đúng tên chuẩn.
+    let department = row.department;
+    let position = row.position;
+    const dep = department
+      ? departments.find((d) => norm(d.name) === norm(department))
+      : undefined;
+    if (department && !dep)
+      warnings.push({
+        line,
+        message: `Phòng ban "${department}" không có trên sơ đồ tổ chức.`,
+      });
+    if (dep) department = dep.name;
+    if (position) {
+      const pos =
+        positions.find(
+          (p) =>
+            norm(p.title) === norm(position) &&
+            (!dep || p.department_id === dep.id),
+        ) ?? null;
+      if (pos) position = pos.title;
+      else
+        warnings.push({
+          line,
+          message: `Chức danh "${position}" không có trong ${dep ? `phòng ${dep.name}` : "sơ đồ tổ chức"}.`,
+        });
     }
 
     try {
@@ -228,8 +284,8 @@ export const importEmployees = async (companyId: string, rows: EmployeeImportRow
         date_of_birth: row.date_of_birth,
         phone: row.phone,
         work_email: row.work_email,
-        department: row.department,
-        position: row.position,
+        department,
+        position,
         concurrent_positions: row.concurrent_positions,
         hire_date: row.hire_date,
         work_location: row.work_location,
@@ -246,10 +302,11 @@ export const importEmployees = async (companyId: string, rows: EmployeeImportRow
       if (row.work_email) emails.add(row.work_email.toLowerCase());
       created += 1;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không tạo được hồ sơ.";
+      const message =
+        error instanceof Error ? error.message : "Không tạo được hồ sơ.";
       errors.push({ line, message });
     }
   }
 
-  return { created, errors };
+  return { created, errors, warnings };
 };

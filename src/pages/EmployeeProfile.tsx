@@ -129,6 +129,7 @@ import {
   type OnboardingRecord,
 } from "@/lib/recruitment";
 import { buildEmployeeFields } from "@/lib/employee-fields";
+import { useOrgStructure, withOrgFields } from "@/lib/use-org-structure";
 import {
   EMPLOYEE_STATUS_META,
   EMPLOYMENT_TYPE_LABELS,
@@ -391,6 +392,7 @@ const EmployeeProfile = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { activeCompany, can, role, canManageModule } = useCompany();
+  const org = useOrgStructure();
   const canInvite = role === "owner" || role === "admin" || role === "hr";
   const canManage = canManageModule("employees");
   const canManagePermissions =
@@ -2000,7 +2002,16 @@ const EmployeeProfile = () => {
         onOpenChange={setEditOpen}
         title="Chỉnh sửa hồ sơ nhân viên"
         description="Cập nhật thông tin cá nhân, công việc và thanh toán."
-        fields={buildEmployeeFields(colleagues, employee.id)}
+        fields={withOrgFields(
+          buildEmployeeFields(colleagues, employee.id),
+          org,
+        )}
+        onFieldChange={(name, value, current) => {
+          // Chọn phòng ban → gợi ý người quản lý trực tiếp = trưởng phòng trên sơ đồ.
+          if (name !== "department" || current.manager_id) return;
+          const manager = org.managerOf(value);
+          if (manager?.employeeId) return { manager_id: manager.employeeId };
+        }}
         initial={employee}
         submitLabel="Lưu thay đổi"
         onSubmit={handleSave}

@@ -1,3 +1,4 @@
+import { useOrgStructure, withOrgFields } from "@/lib/use-org-structure";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -349,6 +350,7 @@ const CandidateProfile = () => {
     user?.id,
   ]);
 
+  const org = useOrgStructure();
   const editFields = useMemo(
     () =>
       buildCandidateFields(campaigns).filter(
@@ -1962,7 +1964,7 @@ const CandidateProfile = () => {
         }}
         title={editingOffer ? "Sửa offer" : "Tạo offer"}
         description="Offer đồng ý sẽ tự tạo hồ sơ hội nhập và cập nhật trạng thái ứng viên."
-        fields={offerFields}
+        fields={withOrgFields(offerFields, org)}
         initial={
           editingOffer ?? {
             position: candidate.position_applied ?? "",

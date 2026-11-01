@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, Download, FileSpreadsheet, Loader2, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  FileSpreadsheet,
+  Loader2,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +33,12 @@ interface ImportEmployeesDialogProps {
   onImported: () => void | Promise<void>;
 }
 
-export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImported }: ImportEmployeesDialogProps) => {
+export const ImportEmployeesDialog = ({
+  open,
+  onOpenChange,
+  companyId,
+  onImported,
+}: ImportEmployeesDialogProps) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [rows, setRows] = useState<EmployeeImportRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +63,9 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
     setError(null);
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
-      setError("Chỉ hỗ trợ tệp CSV. Hãy tải file mẫu, điền dữ liệu rồi lưu dưới dạng CSV (UTF-8).");
+      setError(
+        "Chỉ hỗ trợ tệp CSV. Hãy tải file mẫu, điền dữ liệu rồi lưu dưới dạng CSV (UTF-8).",
+      );
       setRows([]);
       setFileName(file.name);
       return;
@@ -73,14 +87,23 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
       setResult(outcome);
       if (outcome.created > 0) {
         toast.success(`Đã import ${outcome.created} nhân sự`, {
-          description: outcome.errors.length > 0 ? `${outcome.errors.length} dòng bị bỏ qua.` : undefined,
+          description:
+            outcome.errors.length > 0
+              ? `${outcome.errors.length} dòng bị bỏ qua.`
+              : undefined,
         });
         await onImported();
       } else {
-        toast.error("Không import được dòng nào", { description: "Xem chi tiết lỗi trong hộp thoại." });
+        toast.error("Không import được dòng nào", {
+          description: "Xem chi tiết lỗi trong hộp thoại.",
+        });
       }
     } catch (importError) {
-      setError(importError instanceof Error ? importError.message : "Không import được dữ liệu.");
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : "Không import được dữ liệu.",
+      );
     } finally {
       setImporting(false);
     }
@@ -95,8 +118,8 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
             Import danh sách nhân sự
           </DialogTitle>
           <DialogDescription>
-            Tải file mẫu, điền dữ liệu (mỗi dòng một nhân sự) rồi tải lên. Hồ sơ tạo mới sẽ tự có bản ghi tiếp nhận
-            trong quá trình công tác.
+            Tải file mẫu, điền dữ liệu (mỗi dòng một nhân sự) rồi tải lên. Hồ sơ
+            tạo mới sẽ tự có bản ghi tiếp nhận trong quá trình công tác.
           </DialogDescription>
         </DialogHeader>
 
@@ -108,7 +131,9 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
               className="h-9 gap-1.5 text-[12px]"
               onClick={() => {
                 downloadEmployeeTemplate();
-                toast.success("Đã tải file mẫu", { description: "Mở bằng Excel, điền dữ liệu và lưu dạng CSV." });
+                toast.success("Đã tải file mẫu", {
+                  description: "Mở bằng Excel, điền dữ liệu và lưu dạng CSV.",
+                });
               }}
             >
               <Download className="h-3.5 w-3.5" /> Tải file mẫu (CSV)
@@ -129,7 +154,11 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
               </span>
             </label>
 
-            {fileName && <span className="text-[11.5px] text-muted-foreground">{fileName}</span>}
+            {fileName && (
+              <span className="text-[11.5px] text-muted-foreground">
+                {fileName}
+              </span>
+            )}
           </div>
 
           {error && (
@@ -146,13 +175,22 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
               </div>
               <ul className="divide-y divide-border/60">
                 {rows.slice(0, 5).map((row, index) => (
-                  <li key={`${row.code}-${index}`} className="flex items-center gap-2 px-3 py-2 text-[11.5px]">
-                    <span className="w-5 shrink-0 text-muted-foreground">{index + 1}</span>
+                  <li
+                    key={`${row.code}-${index}`}
+                    className="flex items-center gap-2 px-3 py-2 text-[11.5px]"
+                  >
+                    <span className="w-5 shrink-0 text-muted-foreground">
+                      {index + 1}
+                    </span>
                     <span className="w-[92px] shrink-0 truncate font-mono text-[10.5px] text-muted-foreground">
                       {row.code || "—"}
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-foreground">{row.full_name || "—"}</span>
-                    <span className="shrink-0 text-muted-foreground">{row.department ?? "—"}</span>
+                    <span className="min-w-0 flex-1 truncate text-foreground">
+                      {row.full_name || "—"}
+                    </span>
+                    <span className="shrink-0 text-muted-foreground">
+                      {row.department ?? "—"}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -168,7 +206,8 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
                     : "border border-destructive/25 bg-destructive-subtle text-destructive"
                 }`}
               >
-                <CheckCircle2 className="h-4 w-4" /> Đã tạo {result.created} hồ sơ nhân sự
+                <CheckCircle2 className="h-4 w-4" /> Đã tạo {result.created} hồ
+                sơ nhân sự
               </p>
               {result.errors.length > 0 && (
                 <div className="rounded-md border border-warning/30 bg-warning-subtle px-3 py-2">
@@ -181,7 +220,27 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
                         Dòng {item.line}: {item.message}
                       </li>
                     ))}
-                    {result.errors.length > 8 && <li>… và {result.errors.length - 8} dòng khác</li>}
+                    {result.errors.length > 8 && (
+                      <li>… và {result.errors.length - 8} dòng khác</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+              {result.warnings.length > 0 && (
+                <div className="rounded-md border border-border bg-muted/50 px-3 py-2">
+                  <p className="text-[11.5px] font-semibold text-foreground">
+                    {result.warnings.length} dòng không khớp sơ đồ tổ chức (vẫn
+                    tạo, cần rà lại)
+                  </p>
+                  <ul className="mt-1 space-y-1 text-[11px] leading-5 text-muted-foreground">
+                    {result.warnings.slice(0, 10).map((item) => (
+                      <li key={`w-${item.line}-${item.message}`}>
+                        Dòng {item.line}: {item.message}
+                      </li>
+                    ))}
+                    {result.warnings.length > 10 && (
+                      <li>… và {result.warnings.length - 10} dòng khác</li>
+                    )}
                   </ul>
                 </div>
               )}
@@ -189,9 +248,10 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
           )}
 
           <p className="rounded-md border border-dashed border-border bg-muted/40 px-3 py-2 text-[11px] leading-5 text-muted-foreground">
-            Cột bắt buộc: <strong>Mã nhân viên</strong>, <strong>Họ và tên</strong>. Ngày nhận dạng{" "}
-            <code>YYYY-MM-DD</code> hoặc <code>DD/MM/YYYY</code>. Hệ thống tự bỏ qua dòng trùng mã, trùng email hoặc
-            trùng số điện thoại.
+            Cột bắt buộc: <strong>Mã nhân viên</strong>,{" "}
+            <strong>Họ và tên</strong>. Ngày nhận dạng <code>YYYY-MM-DD</code>{" "}
+            hoặc <code>DD/MM/YYYY</code>. Hệ thống tự bỏ qua dòng trùng mã,
+            trùng email hoặc trùng số điện thoại.
           </p>
         </div>
 
@@ -204,7 +264,11 @@ export const ImportEmployeesDialog = ({ open, onOpenChange, companyId, onImporte
             onClick={() => void handleImport()}
             disabled={importing || rows.length === 0 || !!result}
           >
-            {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {importing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
             {importing ? "Đang import…" : `Import ${rows.length || ""} nhân sự`}
           </Button>
         </DialogFooter>

@@ -23,7 +23,12 @@ import {
   sendInviteEmail,
 } from "@/lib/employee-invites";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
-import { listDepartments } from "@/lib/settings";
+import { useOrgStructure } from "@/lib/use-org-structure";
+import {
+  DepartmentSelect,
+  OrgEmptyHint,
+  PositionSelect,
+} from "@/components/org/org-selects";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -60,7 +65,7 @@ export const InviteEmployeeDialog = ({
   const [department, setDepartment] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [role, setRole] = useState<Role>("employee");
-  const [departments, setDepartments] = useState<string[]>([]);
+  const org = useOrgStructure();
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<Created[]>([]);
   const [skipped, setSkipped] = useState<string[]>([]);
@@ -73,11 +78,7 @@ export const InviteEmployeeDialog = ({
     setEmail(single?.work_email ?? single?.personal_email ?? "");
     setDepartment(single?.department ?? "");
     setJobTitle(single?.position ?? "");
-    if (companyId)
-      void listDepartments(companyId)
-        .then((rows) => setDepartments(rows.map((r) => r.name)))
-        .catch(() => setDepartments([]));
-  }, [open, single, companyId]);
+  }, [open, single]);
 
   const targets = useMemo(
     () => employees.filter((e) => !e.user_id),
@@ -226,25 +227,26 @@ export const InviteEmployeeDialog = ({
                     </p>
                   )}
                 </div>
+                <OrgEmptyHint org={org} />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1">
                     <Label>Phòng ban</Label>
-                    <Input
-                      list="invite-departments"
+                    <DepartmentSelect
+                      org={org}
                       value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
+                      onChange={(v) => {
+                        setDepartment(v);
+                        if (v !== department) setJobTitle("");
+                      }}
                     />
-                    <datalist id="invite-departments">
-                      {departments.map((d) => (
-                        <option key={d} value={d} />
-                      ))}
-                    </datalist>
                   </div>
                   <div className="space-y-1">
                     <Label>Vị trí / chức danh</Label>
-                    <Input
+                    <PositionSelect
+                      org={org}
+                      department={department}
                       value={jobTitle}
-                      onChange={(e) => setJobTitle(e.target.value)}
+                      onChange={setJobTitle}
                     />
                   </div>
                 </div>

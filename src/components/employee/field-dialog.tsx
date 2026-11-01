@@ -36,6 +36,12 @@ interface FieldDialogProps {
   initial?: object | null;
   submitLabel?: string;
   onSubmit: (values: Record<string, string | number | null>) => Promise<void>;
+  /** Gợi ý giá trị khác khi một field đổi (vd: chọn phòng ban → tự điền quản lý). */
+  onFieldChange?: (
+    name: string,
+    value: string,
+    values: FieldValues,
+  ) => Partial<FieldValues> | void;
 }
 
 const pad = (value: number) => String(value).padStart(2, "0");
@@ -55,7 +61,10 @@ const toInputValue = (value: unknown, type?: string) => {
   return String(value);
 };
 
-const buildValues = (fields: FieldDef[], initial?: object | null): FieldValues => {
+const buildValues = (
+  fields: FieldDef[],
+  initial?: object | null,
+): FieldValues => {
   const source = (initial ?? {}) as Record<string, unknown>;
   const next: FieldValues = {};
   for (const field of fields) {
@@ -73,10 +82,12 @@ export const FieldDialog = ({
   initial,
   submitLabel = "Lưu",
   onSubmit,
+  onFieldChange,
 }: FieldDialogProps) => {
   const [values, setValues] = useState<FieldValues>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [customFields, setCustomFields] = useState<Record<string, boolean>>({});
   const wasOpen = useRef(false);
 
   // Reset only when the dialog opens (not on every render), otherwise typing
@@ -84,6 +95,7 @@ export const FieldDialog = ({
   useEffect(() => {
     if (open && !wasOpen.current) {
       setValues(buildValues(fields, initial));
+      setCustomFields({});
       setError(null);
     }
     wasOpen.current = open;
@@ -107,11 +119,15 @@ export const FieldDialog = ({
       fields.forEach((field) => {
         if (field.dependsOn !== name || !field.optionsByValue) return;
         const options = field.optionsByValue[value] ?? field.options ?? [];
-        if (next[field.name] && !options.some((option) => option.value === next[field.name])) {
+        if (
+          next[field.name] &&
+          !options.some((option) => option.value === next[field.name])
+        ) {
           next[field.name] = "";
         }
       });
-      return next;
+      const patch = onFieldChange?.(name, value, next);
+      return patch ? { ...next, ...(patch as FieldValues) } : next;
     });
   };
 
@@ -125,7 +141,11 @@ export const FieldDialog = ({
         setError(`Vui lòng nhập ${field.label.toLowerCase()}.`);
         return;
       }
-      if ((field.type === "number" || field.type === "currency") && raw && Number.isNaN(Number(raw))) {
+      if (
+        (field.type === "number" || field.type === "currency") &&
+        raw &&
+        Number.isNaN(Number(raw))
+      ) {
         setError(`${field.label} phải là số.`);
         return;
       }
@@ -142,7 +162,9 @@ export const FieldDialog = ({
         payload[field.name] = /^\d{4}-\d{2}$/.test(raw) ? `${raw}-01` : raw;
       } else if (field.type === "datetime") {
         const parsed = new Date(raw);
-        payload[field.name] = Number.isNaN(parsed.getTime()) ? raw : parsed.toISOString();
+        payload[field.name] = Number.isNaN(parsed.getTime())
+          ? raw
+          : parsed.toISOString();
       } else {
         payload[field.name] = raw;
       }
@@ -165,7 +187,9 @@ export const FieldDialog = ({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            {description && <DialogDescription>{description}</DialogDescription>}
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
           </DialogHeader>
 
           <div className="space-y-4 py-3">
@@ -186,44 +210,117 @@ export const FieldDialog = ({
                 <div className="grid gap-3 sm:grid-cols-2">
                   {section.fields.map((field) => {
                     const id = `field-${field.name}`;
-                    const span = field.span === 2 || field.type === "textarea" ? "sm:col-span-2" : "";
+                    const span =
+                      field.span === 2 || field.type === "textarea"
+                        ? "sm:col-span-2"
+                        : "";
                     return (
                       <div key={field.name} className={`space-y-1.5 ${span}`}>
                         <Label htmlFor={id} className="text-[12px]">
                           {field.label}
-                          {field.required && <span className="ml-0.5 text-destructive">*</span>}
+                          {field.required && (
+                            <span className="ml-0.5 text-destructive">*</span>
+                          )}
                         </Label>
 
                         {field.type === "select" ? (
-                          <Select
-                            value={values[field.name] || "none"}
-                            onValueChange={(value) => setField(field.name, value === "none" ? "" : value)}
-                          >
-                            <SelectTrigger id={id} className="h-10">
-                              <SelectValue placeholder={field.placeholder ?? "Chọn"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Chưa chọn</SelectItem>
-                              {(
-                                field.dependsOn && field.optionsByValue
-                                  ? field.optionsByValue[values[field.dependsOn] ?? ""] ??
-                                    field.options ??
-                                    []
-                                  : field.options ?? []
-                              ).map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          (() => {
+                            const opts =
+                              (field.dependsOn && field.optionsByValue
+                                ? (field.optionsByValue[
+                                    values[field.dependsOn] ?? ""
+                                  ] ?? field.options)
+                                : field.options) ?? [];
+                            const current = values[field.name] ?? "";
+                            const isLegacy =
+                              !!current &&
+                              !opts.some((option) => option.value === current);
+                            if (customFields[field.name]) {
+                              return (
+                                <div className="flex gap-2">
+                                  <Input
+                                    id={id}
+                                    autoFocus
+                                    value={current}
+                                    placeholder="Nhập giá trị khác"
+                                    onChange={(event) =>
+                                      setField(field.name, event.target.value)
+                                    }
+                                    className="h-10"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="h-10"
+                                    onClick={() =>
+                                      setCustomFields((prev) => ({
+                                        ...prev,
+                                        [field.name]: false,
+                                      }))
+                                    }
+                                  >
+                                    Danh sách
+                                  </Button>
+                                </div>
+                              );
+                            }
+                            return (
+                              <Select
+                                value={current || "none"}
+                                onValueChange={(value) => {
+                                  if (value === "__custom__") {
+                                    setCustomFields((prev) => ({
+                                      ...prev,
+                                      [field.name]: true,
+                                    }));
+                                    return;
+                                  }
+                                  setField(
+                                    field.name,
+                                    value === "none" ? "" : value,
+                                  );
+                                }}
+                              >
+                                <SelectTrigger id={id} className="h-10">
+                                  <SelectValue
+                                    placeholder={field.placeholder ?? "Chọn"}
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">
+                                    Chưa chọn
+                                  </SelectItem>
+                                  {isLegacy && (
+                                    <SelectItem value={current}>
+                                      {current} (không có trên sơ đồ)
+                                    </SelectItem>
+                                  )}
+                                  {opts.map((option) => (
+                                    <SelectItem
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                  {field.allowCustom && (
+                                    <SelectItem value="__custom__">
+                                      Khác (nhập tay)…
+                                    </SelectItem>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            );
+                          })()
                         ) : field.type === "textarea" ? (
                           <Textarea
                             id={id}
                             rows={3}
                             value={values[field.name] ?? ""}
                             placeholder={field.placeholder}
-                            onChange={(event) => setField(field.name, event.target.value)}
+                            onChange={(event) =>
+                              setField(field.name, event.target.value)
+                            }
                             className="text-[13px]"
                           />
                         ) : (
@@ -234,21 +331,32 @@ export const FieldDialog = ({
                                 ? "date"
                                 : field.type === "month"
                                   ? "month"
-                                : field.type === "datetime"
-                                  ? "datetime-local"
-                                  : field.type === "email"
-                                    ? "email"
-                                    : "text"
+                                  : field.type === "datetime"
+                                    ? "datetime-local"
+                                    : field.type === "email"
+                                      ? "email"
+                                      : "text"
                             }
-                            inputMode={field.type === "number" || field.type === "currency" ? "numeric" : undefined}
+                            inputMode={
+                              field.type === "number" ||
+                              field.type === "currency"
+                                ? "numeric"
+                                : undefined
+                            }
                             value={values[field.name] ?? ""}
                             placeholder={field.placeholder}
-                            onChange={(event) => setField(field.name, event.target.value)}
+                            onChange={(event) =>
+                              setField(field.name, event.target.value)
+                            }
                             className="h-10 text-[13px]"
                           />
                         )}
 
-                        {field.hint && <p className="text-[10.5px] leading-4 text-muted-foreground">{field.hint}</p>}
+                        {field.hint && (
+                          <p className="text-[10.5px] leading-4 text-muted-foreground">
+                            {field.hint}
+                          </p>
+                        )}
                       </div>
                     );
                   })}
@@ -264,7 +372,11 @@ export const FieldDialog = ({
           </div>
 
           <DialogFooter className="gap-2">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+            >
               Huỷ
             </Button>
             <Button type="submit" disabled={saving} className="gap-2">

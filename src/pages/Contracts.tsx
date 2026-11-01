@@ -1,9 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileDown, FileSignature, FileSpreadsheet, Loader2, MoreHorizontal, Paperclip, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import {
+  FileDown,
+  FileSignature,
+  FileSpreadsheet,
+  Loader2,
+  MoreHorizontal,
+  Paperclip,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { FieldDialog, type FieldDef } from "@/components/employee/field-dialog";
+import { orgFieldDefs, useOrgStructure } from "@/lib/use-org-structure";
 import {
   Dialog,
   DialogContent,
@@ -61,8 +73,9 @@ const formatDay = (value: string | null) =>
   value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—";
 
 const formatMoney = (value: number | null) =>
-  value === null || value === undefined ? "—" : `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
-
+  value === null || value === undefined
+    ? "—"
+    : `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
 
 const Contracts = () => {
   const { activeCompany, can, canManageModule } = useCompany();
@@ -78,8 +91,12 @@ const Contracts = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CompanyContract | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<CompanyContract | null>(null);
-  const [detailContract, setDetailContract] = useState<CompanyContract | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<CompanyContract | null>(
+    null,
+  );
+  const [detailContract, setDetailContract] = useState<CompanyContract | null>(
+    null,
+  );
   const [fileBusy, setFileBusy] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const { selected, toggle, selectAll, clear, prune } = useSelection();
@@ -96,7 +113,9 @@ const Contracts = () => {
       setEmployees(employeeRows);
       prune(contractRows.map((contract) => contract.id));
     } catch (error) {
-      toast.error("Không tải được hợp đồng", { description: getErrorMessage(error) });
+      toast.error("Không tải được hợp đồng", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setLoading(false);
     }
@@ -118,40 +137,63 @@ const Contracts = () => {
     [employees],
   );
 
+  const org = useOrgStructure();
   const fields = useMemo<FieldDef[]>(
     () => [
-      { name: "employee_id", label: "Nhân sự", type: "select", required: true, options: employeeOptions, span: 2 },
+      {
+        name: "employee_id",
+        label: "Nhân sự",
+        type: "select",
+        required: true,
+        options: employeeOptions,
+        span: 2,
+      },
       { name: "contract_no", label: "Số hợp đồng", placeholder: "HĐ-2026-001" },
       {
         name: "contract_type",
         label: "Loại hợp đồng",
         type: "select",
         required: true,
-        options: Object.entries(CONTRACT_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+        options: Object.entries(CONTRACT_TYPE_LABELS).map(([value, label]) => ({
+          value,
+          label,
+        })),
       },
       {
         name: "status",
         label: "Trạng thái",
         type: "select",
-        options: Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+        options: Object.entries(CONTRACT_STATUS_LABELS).map(
+          ([value, label]) => ({ value, label }),
+        ),
       },
       { name: "start_date", label: "Ngày bắt đầu", type: "date" },
-      { name: "end_date", label: "Ngày kết thúc", type: "date", hint: "Bỏ trống nếu không xác định thời hạn." },
-      { name: "position", label: "Chức danh", placeholder: "Chuyên viên nhân sự" },
-      { name: "department", label: "Phòng ban", placeholder: "Phòng Nhân sự" },
+      {
+        name: "end_date",
+        label: "Ngày kết thúc",
+        type: "date",
+        hint: "Bỏ trống nếu không xác định thời hạn.",
+      },
+      ...orgFieldDefs(org),
       { name: "base_salary", label: "Lương cơ bản", type: "number" },
       { name: "allowance", label: "Phụ cấp", type: "number" },
-      { name: "insurance_salary", label: "Lương đóng bảo hiểm", type: "number" },
+      {
+        name: "insurance_salary",
+        label: "Lương đóng bảo hiểm",
+        type: "number",
+      },
       { name: "note", label: "Ghi chú", type: "textarea" },
     ],
-    [employeeOptions],
+    [employeeOptions, org],
   );
 
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase();
     return contracts.filter((contract) => {
-      if (statusFilter !== "all" && contract.status !== statusFilter) return false;
-      if (typeFilter !== "all" && contract.contract_type !== typeFilter) return false;
+      if (statusFilter !== "all" && contract.status !== statusFilter)
+        return false;
+      if (typeFilter !== "all" && contract.contract_type !== typeFilter)
+        return false;
       if (!keyword) return true;
       return `${contract.employee_name ?? ""} ${contract.employee_code ?? ""} ${contract.contract_no ?? ""} ${
         contract.department ?? contract.employee_department ?? ""
@@ -168,13 +210,24 @@ const Contracts = () => {
       return days !== null && days >= 0 && days <= 30;
     });
     const ended = contracts.filter((contract) => contract.status !== "active");
-    return { total: contracts.length, active: active.length, expiring: expiring.length, ended: ended.length };
+    return {
+      total: contracts.length,
+      active: active.length,
+      expiring: expiring.length,
+      ended: ended.length,
+    };
   }, [contracts]);
 
-  const handleSubmit = async (values: Record<string, string | number | null>) => {
+  const handleSubmit = async (
+    values: Record<string, string | number | null>,
+  ) => {
     if (!companyId) throw new Error("Chưa chọn công ty.");
     if (!values.employee_id) throw new Error("Vui lòng chọn nhân sự.");
-    if (values.start_date && values.end_date && String(values.end_date) < String(values.start_date)) {
+    if (
+      values.start_date &&
+      values.end_date &&
+      String(values.end_date) < String(values.start_date)
+    ) {
       throw new Error("Ngày kết thúc phải sau ngày bắt đầu.");
     }
 
@@ -187,9 +240,13 @@ const Contracts = () => {
       end_date: values.end_date,
       position: values.position,
       department: values.department,
-      base_salary: values.base_salary === null ? null : Number(values.base_salary),
+      base_salary:
+        values.base_salary === null ? null : Number(values.base_salary),
       allowance: values.allowance === null ? null : Number(values.allowance),
-      insurance_salary: values.insurance_salary === null ? null : Number(values.insurance_salary),
+      insurance_salary:
+        values.insurance_salary === null
+          ? null
+          : Number(values.insurance_salary),
       note: values.note,
     };
 
@@ -197,11 +254,18 @@ const Contracts = () => {
       if (editing) {
         await updateContract(editing.id, payload);
         await syncSalaryFromContract(editing.id);
-        toast.success("Đã cập nhật hợp đồng", { description: "Bản ghi lương đã được đồng bộ." });
+        toast.success("Đã cập nhật hợp đồng", {
+          description: "Bản ghi lương đã được đồng bộ.",
+        });
       } else {
-        const contractId = await createContract({ ...payload, company_id: companyId });
+        const contractId = await createContract({
+          ...payload,
+          company_id: companyId,
+        });
         await syncSalaryFromContract(contractId);
-        toast.success("Đã tạo hợp đồng", { description: "Đã tạo bản ghi lương tương ứng." });
+        toast.success("Đã tạo hợp đồng", {
+          description: "Đã tạo bản ghi lương tương ứng.",
+        });
       }
       setFormOpen(false);
       setEditing(null);
@@ -224,12 +288,17 @@ const Contracts = () => {
         contract_file_path: path,
         contract_file_name: file.name,
       });
-      setDetailContract({ ...detailContract, contract_file_path: path, contract_file_name: file.name });
+      setDetailContract({
+        ...detailContract,
+        contract_file_path: path,
+        contract_file_name: file.name,
+      });
       toast.success("Đã tải hợp đồng lên", { description: file.name });
       await load();
     } catch (uploadError) {
       toast.error("Không tải được hợp đồng", {
-        description: uploadError instanceof Error ? uploadError.message : undefined,
+        description:
+          uploadError instanceof Error ? uploadError.message : undefined,
       });
     } finally {
       setFileBusy(false);
@@ -254,7 +323,9 @@ const Contracts = () => {
       setBulkOpen(false);
       await load();
     } catch (error) {
-      toast.error("Không xoá được hợp đồng", { description: getErrorMessage(error) });
+      toast.error("Không xoá được hợp đồng", {
+        description: getErrorMessage(error),
+      });
     }
   };
 
@@ -266,7 +337,9 @@ const Contracts = () => {
       setPendingDelete(null);
       await load();
     } catch (error) {
-      toast.error("Không xoá được hợp đồng", { description: getErrorMessage(error) });
+      toast.error("Không xoá được hợp đồng", {
+        description: getErrorMessage(error),
+      });
     }
   };
 
@@ -309,7 +382,9 @@ const Contracts = () => {
       if (days !== null && days >= 0 && days <= 30) return "warning" as const;
       return "success" as const;
     }
-    return contract.status === "expired" ? "warning" as const : "muted" as const;
+    return contract.status === "expired"
+      ? ("warning" as const)
+      : ("muted" as const);
   };
 
   return (
@@ -323,7 +398,14 @@ const Contracts = () => {
             <Button
               variant="outline"
               className="h-9 gap-1.5 text-[12.5px]"
-              onClick={() => exportExcel("danh-sach-hop-dong", exportHeaders, exportRows(), "Danh sách hợp đồng")}
+              onClick={() =>
+                exportExcel(
+                  "danh-sach-hop-dong",
+                  exportHeaders,
+                  exportRows(),
+                  "Danh sách hợp đồng",
+                )
+              }
             >
               <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
             </Button>
@@ -358,20 +440,36 @@ const Contracts = () => {
 
       <div className="grid gap-3 sm:grid-cols-4">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Tổng hợp đồng</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{stats.total}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Tổng hợp đồng
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
+            {stats.total}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đang hiệu lực</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-success">{stats.active}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Đang hiệu lực
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-success">
+            {stats.active}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Sắp hết hạn 30 ngày</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-warning">{stats.expiring}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Sắp hết hạn 30 ngày
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-warning">
+            {stats.expiring}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Hết hạn / chấm dứt</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{stats.ended}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Hết hạn / chấm dứt
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
+            {stats.ended}
+          </p>
         </Card>
       </div>
 
@@ -412,7 +510,9 @@ const Contracts = () => {
             ))}
           </select>
         </div>
-        <span className="text-[11.5px] text-muted-foreground">{filtered.length} hợp đồng</span>
+        <span className="text-[11.5px] text-muted-foreground">
+          {filtered.length} hợp đồng
+        </span>
       </Card>
 
       {canManage && (
@@ -432,9 +532,13 @@ const Contracts = () => {
         <Card className="p-12 text-center">
           <FileSignature className="mx-auto h-6 w-6 text-muted-foreground/70" />
           <p className="mt-2 text-[13px] font-semibold text-foreground">
-            {contracts.length === 0 ? "Chưa có hợp đồng nào" : "Không có hợp đồng phù hợp bộ lọc"}
+            {contracts.length === 0
+              ? "Chưa có hợp đồng nào"
+              : "Không có hợp đồng phù hợp bộ lọc"}
           </p>
-          <p className="mt-1 text-[12px] text-muted-foreground">Thêm hợp đồng mới hoặc điều chỉnh bộ lọc.</p>
+          <p className="mt-1 text-[12px] text-muted-foreground">
+            Thêm hợp đồng mới hoặc điều chỉnh bộ lọc.
+          </p>
           {canManage && contracts.length === 0 && (
             <Button
               className="mt-3 h-9 gap-1.5 text-[12.5px]"
@@ -459,17 +563,36 @@ const Contracts = () => {
                         type="checkbox"
                         aria-label="Chọn tất cả hợp đồng"
                         className="h-3.5 w-3.5 accent-primary"
-                        checked={filtered.length > 0 && filtered.every((contract) => selected.includes(contract.id))}
-                        onChange={() => selectAll(filtered.map((contract) => contract.id))}
+                        checked={
+                          filtered.length > 0 &&
+                          filtered.every((contract) =>
+                            selected.includes(contract.id),
+                          )
+                        }
+                        onChange={() =>
+                          selectAll(filtered.map((contract) => contract.id))
+                        }
                       />
                     </th>
                   )}
-                  <th className="px-4 py-2.5 text-left font-semibold">Nhân sự</th>
-                  <th className="px-3 py-2.5 text-left font-semibold">Hợp đồng</th>
-                  <th className="px-3 py-2.5 text-left font-semibold">Thời hạn</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Lương cơ bản</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Phụ cấp</th>
-                  <th className="px-3 py-2.5 text-center font-semibold">Trạng thái</th>
+                  <th className="px-4 py-2.5 text-left font-semibold">
+                    Nhân sự
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-semibold">
+                    Hợp đồng
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-semibold">
+                    Thời hạn
+                  </th>
+                  <th className="px-3 py-2.5 text-right font-semibold">
+                    Lương cơ bản
+                  </th>
+                  <th className="px-3 py-2.5 text-right font-semibold">
+                    Phụ cấp
+                  </th>
+                  <th className="px-3 py-2.5 text-center font-semibold">
+                    Trạng thái
+                  </th>
                   <th className="w-[48px] px-2 py-2.5" />
                 </tr>
               </thead>
@@ -477,7 +600,10 @@ const Contracts = () => {
                 {filtered.map((contract) => {
                   const days = contractDaysLeft(contract);
                   return (
-                    <tr key={contract.id} className="border-t border-border/50 hover:bg-muted/20">
+                    <tr
+                      key={contract.id}
+                      className="border-t border-border/50 hover:bg-muted/20"
+                    >
                       {canManage && (
                         <td className="px-2 py-2.5 text-center">
                           <input
@@ -499,26 +625,43 @@ const Contracts = () => {
                         </button>
                         <p className="text-[10px] text-muted-foreground">
                           {contract.employee_code ?? "—"}
-                          {contract.employee_department ? ` · ${contract.employee_department}` : ""}
+                          {contract.employee_department
+                            ? ` · ${contract.employee_department}`
+                            : ""}
                         </p>
                       </td>
                       <td className="px-3 py-2.5">
-                        <p className="font-mono text-[11.5px] text-foreground">{contract.contract_no ?? "—"}</p>
+                        <p className="font-mono text-[11.5px] text-foreground">
+                          {contract.contract_no ?? "—"}
+                        </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {CONTRACT_TYPE_LABELS[contract.contract_type] ?? contract.contract_type}
+                          {CONTRACT_TYPE_LABELS[contract.contract_type] ??
+                            contract.contract_type}
                           {contract.position ? ` · ${contract.position}` : ""}
                         </p>
                       </td>
                       <td className="px-3 py-2.5">
                         <p className="text-[11.5px] text-foreground">
-                          {formatDay(contract.start_date)} → {contract.end_date ? formatDay(contract.end_date) : "Không thời hạn"}
+                          {formatDay(contract.start_date)} →{" "}
+                          {contract.end_date
+                            ? formatDay(contract.end_date)
+                            : "Không thời hạn"}
                         </p>
-                        {contract.status === "active" && days !== null && days >= 0 && days <= 30 && (
-                          <p className="text-[10px] font-medium text-warning">Còn {days} ngày</p>
-                        )}
-                        {contract.status === "active" && days !== null && days < 0 && (
-                          <p className="text-[10px] font-medium text-destructive">Đã quá hạn {-days} ngày</p>
-                        )}
+                        {contract.status === "active" &&
+                          days !== null &&
+                          days >= 0 &&
+                          days <= 30 && (
+                            <p className="text-[10px] font-medium text-warning">
+                              Còn {days} ngày
+                            </p>
+                          )}
+                        {contract.status === "active" &&
+                          days !== null &&
+                          days < 0 && (
+                            <p className="text-[10px] font-medium text-destructive">
+                              Đã quá hạn {-days} ngày
+                            </p>
+                          )}
                       </td>
                       <td className="px-3 py-2.5 text-right text-[11.5px] text-foreground">
                         {formatMoney(contract.base_salary)}
@@ -528,18 +671,26 @@ const Contracts = () => {
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         <Badge variant={statusTone(contract)}>
-                          {CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}
+                          {CONTRACT_STATUS_LABELS[contract.status] ??
+                            contract.status}
                         </Badge>
                       </td>
                       <td className="px-2 py-2.5 text-right">
                         {canManage && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm" aria-label="Thao tác hợp đồng">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Thao tác hợp đồng"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-[190px]">
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-[190px]"
+                            >
                               <DropdownMenuItem
                                 className="gap-2 text-[12.5px]"
                                 onSelect={() => {
@@ -568,19 +719,24 @@ const Contracts = () => {
         </Card>
       )}
 
-      <Dialog open={!!detailContract} onOpenChange={(open) => !open && setDetailContract(null)}>
+      <Dialog
+        open={!!detailContract}
+        onOpenChange={(open) => !open && setDetailContract(null)}
+      >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center gap-2">
               Hợp đồng {detailContract?.contract_no ?? ""}
               {detailContract && (
                 <Badge variant={statusTone(detailContract)}>
-                  {CONTRACT_STATUS_LABELS[detailContract.status] ?? detailContract.status}
+                  {CONTRACT_STATUS_LABELS[detailContract.status] ??
+                    detailContract.status}
                 </Badge>
               )}
             </DialogTitle>
             <DialogDescription>
-              {detailContract?.employee_name ?? "Nhân sự"} · {detailContract?.employee_code ?? "—"}
+              {detailContract?.employee_name ?? "Nhân sự"} ·{" "}
+              {detailContract?.employee_code ?? "—"}
             </DialogDescription>
           </DialogHeader>
 
@@ -588,22 +744,43 @@ const Contracts = () => {
             <div className="space-y-4 py-1">
               <div className="grid gap-2.5 sm:grid-cols-2">
                 {[
-                  ["Loại hợp đồng", CONTRACT_TYPE_LABELS[detailContract.contract_type] ?? detailContract.contract_type],
-                  ["Phòng ban", detailContract.department ?? detailContract.employee_department ?? "—"],
+                  [
+                    "Loại hợp đồng",
+                    CONTRACT_TYPE_LABELS[detailContract.contract_type] ??
+                      detailContract.contract_type,
+                  ],
+                  [
+                    "Phòng ban",
+                    detailContract.department ??
+                      detailContract.employee_department ??
+                      "—",
+                  ],
                   ["Chức danh", detailContract.position ?? "—"],
                   [
                     "Thời hạn",
                     `${formatDay(detailContract.start_date)} → ${
-                      detailContract.end_date ? formatDay(detailContract.end_date) : "Không thời hạn"
+                      detailContract.end_date
+                        ? formatDay(detailContract.end_date)
+                        : "Không thời hạn"
                     }`,
                   ],
                   ["Lương cơ bản", formatMoney(detailContract.base_salary)],
                   ["Phụ cấp", formatMoney(detailContract.allowance)],
-                  ["Lương đóng bảo hiểm", formatMoney(detailContract.insurance_salary)],
+                  [
+                    "Lương đóng bảo hiểm",
+                    formatMoney(detailContract.insurance_salary),
+                  ],
                 ].map(([label, value]) => (
-                  <div key={String(label)} className="rounded-lg border border-border bg-muted/20 px-3 py-2">
-                    <p className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">{label}</p>
-                    <p className="mt-0.5 text-[12.5px] font-medium text-foreground">{value}</p>
+                  <div
+                    key={String(label)}
+                    className="rounded-lg border border-border bg-muted/20 px-3 py-2"
+                  >
+                    <p className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">
+                      {label}
+                    </p>
+                    <p className="mt-0.5 text-[12.5px] font-medium text-foreground">
+                      {value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -626,17 +803,25 @@ const Contracts = () => {
                       className="inline-flex min-w-0 items-center gap-1.5 text-[11.5px] font-medium text-primary hover:underline"
                     >
                       <Paperclip className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">{detailContract.contract_file_name ?? "Tệp hợp đồng"}</span>
+                      <span className="truncate">
+                        {detailContract.contract_file_name ?? "Tệp hợp đồng"}
+                      </span>
                     </button>
                     {canManage && (
                       <label className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-md border border-border px-2.5 text-[11px] text-muted-foreground hover:border-primary/40 hover:text-foreground">
-                        {fileBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Paperclip className="h-3 w-3" />}
+                        {fileBusy ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Paperclip className="h-3 w-3" />
+                        )}
                         Thay tệp
                         <input
                           type="file"
                           className="hidden"
                           onChange={(event) => {
-                            void handleUploadContractFile(event.target.files?.[0]);
+                            void handleUploadContractFile(
+                              event.target.files?.[0],
+                            );
                             event.target.value = "";
                           }}
                         />
@@ -645,16 +830,24 @@ const Contracts = () => {
                   </div>
                 ) : (
                   <div className="mt-1.5 flex items-center justify-between gap-2">
-                    <p className="text-[11.5px] text-muted-foreground">Chưa có tệp hợp đồng.</p>
+                    <p className="text-[11.5px] text-muted-foreground">
+                      Chưa có tệp hợp đồng.
+                    </p>
                     {canManage && (
                       <label className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-md border border-border px-2.5 text-[11px] text-muted-foreground hover:border-primary/40 hover:text-foreground">
-                        {fileBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                        {fileBusy ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Plus className="h-3 w-3" />
+                        )}
                         Tải hợp đồng
                         <input
                           type="file"
                           className="hidden"
                           onChange={(event) => {
-                            void handleUploadContractFile(event.target.files?.[0]);
+                            void handleUploadContractFile(
+                              event.target.files?.[0],
+                            );
                             event.target.value = "";
                           }}
                         />
@@ -662,7 +855,9 @@ const Contracts = () => {
                     )}
                   </div>
                 )}
-                <p className="mt-1 text-[10px] text-muted-foreground">PDF/DOC/DOCX/ảnh, tối đa 15MB.</p>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  PDF/DOC/DOCX/ảnh, tối đa 15MB.
+                </p>
               </div>
 
               <Link
@@ -675,7 +870,11 @@ const Contracts = () => {
           )}
 
           <DialogFooter>
-            <Button variant="outline" className="h-9" onClick={() => setDetailContract(null)}>
+            <Button
+              variant="outline"
+              className="h-9"
+              onClick={() => setDetailContract(null)}
+            >
               Đóng
             </Button>
             {canManage && detailContract && (
@@ -704,9 +903,23 @@ const Contracts = () => {
         title={editing ? "Sửa hợp đồng" : "Thêm hợp đồng"}
         description="Hợp đồng được lưu trong hồ sơ nhân sự và dùng cho cảnh báo hết hạn."
         fields={fields}
+        onFieldChange={(name, value, current) => {
+          // Chọn nhân sự → tự lấy phòng ban / chức danh từ hồ sơ (nếu ô còn trống).
+          if (name !== "employee_id") return;
+          const person = employees.find((e) => e.id === value);
+          if (!person) return;
+          return {
+            department: current.department || person.department || "",
+            position: current.position || person.position || "",
+          };
+        }}
         initial={
           editing
-            ? { ...editing, contract_type: editing.contract_type, status: editing.status }
+            ? {
+                ...editing,
+                contract_type: editing.contract_type,
+                status: editing.status,
+              }
             : {
                 contract_type: "fixed_term",
                 status: "active",
@@ -721,7 +934,9 @@ const Contracts = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá {selected.length} hợp đồng?</AlertDialogTitle>
-            <AlertDialogDescription>Các hợp đồng đã chọn sẽ bị xoá khỏi hệ thống.</AlertDialogDescription>
+            <AlertDialogDescription>
+              Các hợp đồng đã chọn sẽ bị xoá khỏi hệ thống.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Huỷ</AlertDialogCancel>
@@ -735,12 +950,16 @@ const Contracts = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá hợp đồng?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hợp đồng {pendingDelete?.contract_no ?? ""} của {pendingDelete?.employee_name ?? "nhân sự"} sẽ bị xoá khỏi hồ sơ.
+              Hợp đồng {pendingDelete?.contract_no ?? ""} của{" "}
+              {pendingDelete?.employee_name ?? "nhân sự"} sẽ bị xoá khỏi hồ sơ.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

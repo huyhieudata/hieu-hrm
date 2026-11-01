@@ -1,3 +1,4 @@
+import { useOrgStructure } from "@/lib/use-org-structure";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -41,10 +42,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCompany } from "@/lib/company-provider";
-import { DEPARTMENTS, formatMonth } from "@/lib/employee-records";
-import { buildInsuranceHistoryHtml, downloadHtml, printHtml } from "@/lib/employee-documents";
+import { formatMonth } from "@/lib/employee-records";
+import {
+  buildInsuranceHistoryHtml,
+  downloadHtml,
+  printHtml,
+} from "@/lib/employee-documents";
 import { exportExcel, exportPdf } from "@/lib/export-utils";
 import { currency } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,6 +92,7 @@ const statusTone = (status: string) =>
   status === "active" ? "success" : status === "paused" ? "warning" : "muted";
 
 const Insurance = () => {
+  const org = useOrgStructure();
   const { activeCompany, can, canManageModule } = useCompany();
   const companyId = activeCompany?.id ?? null;
   const canManage = canManageModule("insurance");
@@ -91,7 +103,9 @@ const Insurance = () => {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("all");
-  const [status, setStatus] = useState<"all" | "active" | "paused" | "closed">("all");
+  const [status, setStatus] = useState<"all" | "active" | "paused" | "closed">(
+    "all",
+  );
   const [detail, setDetail] = useState<{
     employee: NonNullable<InsuranceRow["employee"]>;
     records: InsuranceRow[];
@@ -111,7 +125,11 @@ const Insurance = () => {
         .order("start_date", { ascending: false });
 
       if (error) throw error;
-      setRows(((data ?? []) as unknown as InsuranceRow[]).filter((row) => row.employee));
+      setRows(
+        ((data ?? []) as unknown as InsuranceRow[]).filter(
+          (row) => row.employee,
+        ),
+      );
     } catch (error) {
       toast.error("Không tải được dữ liệu bảo hiểm", {
         description: error instanceof Error ? error.message : undefined,
@@ -136,9 +154,15 @@ const Insurance = () => {
 
     return Array.from(map.values()).map((list) => {
       const sorted = [...list].sort(
-        (a, b) => new Date(b.start_date ?? 0).getTime() - new Date(a.start_date ?? 0).getTime(),
+        (a, b) =>
+          new Date(b.start_date ?? 0).getTime() -
+          new Date(a.start_date ?? 0).getTime(),
       );
-      return { employee: sorted[0].employee as NonNullable<InsuranceRow["employee"]>, latest: sorted[0], records: sorted };
+      return {
+        employee: sorted[0].employee as NonNullable<InsuranceRow["employee"]>,
+        latest: sorted[0],
+        records: sorted,
+      };
     });
   }, [rows]);
 
@@ -151,7 +175,8 @@ const Insurance = () => {
         `${person.full_name} ${person.code} ${group.latest.insurance_number ?? ""} ${person.position ?? ""}`
           .toLowerCase()
           .includes(keyword);
-      const matchesDepartment = department === "all" || person.department === department;
+      const matchesDepartment =
+        department === "all" || person.department === department;
       const matchesStatus = status === "all" || group.latest.status === status;
       return matchesQuery && matchesDepartment && matchesStatus;
     });
@@ -163,7 +188,10 @@ const Insurance = () => {
       active: active.length,
       paused: groups.filter((group) => group.latest.status === "paused").length,
       closed: groups.filter((group) => group.latest.status === "closed").length,
-      fund: active.reduce((sum, group) => sum + Number(group.latest.salary_base ?? 0), 0),
+      fund: active.reduce(
+        (sum, group) => sum + Number(group.latest.salary_base ?? 0),
+        0,
+      ),
     };
   }, [groups]);
 
@@ -204,7 +232,10 @@ const Insurance = () => {
         .filter((group) => selected.includes(group.employee.id))
         .flatMap((group) => group.records.map((record) => record.id));
       if (ids.length > 0) {
-        const { error } = await supabase.from("employee_insurance_records").delete().in("id", ids);
+        const { error } = await supabase
+          .from("employee_insurance_records")
+          .delete()
+          .in("id", ids);
         if (error) throw error;
       }
       toast.success(`Đã xoá bảo hiểm của ${selected.length} nhân sự`);
@@ -244,7 +275,12 @@ const Insurance = () => {
               variant="outline"
               className="h-9 gap-1.5 text-[12.5px]"
               onClick={() =>
-                exportPdf("Danh sách tham gia BHXH", activeCompany?.name ?? "Công ty", exportHeaders, exportRows())
+                exportPdf(
+                  "Danh sách tham gia BHXH",
+                  activeCompany?.name ?? "Công ty",
+                  exportHeaders,
+                  exportRows(),
+                )
               }
             >
               <FileDown className="h-3.5 w-3.5" /> PDF
@@ -255,9 +291,24 @@ const Insurance = () => {
 
       <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Đang đóng BHXH", value: stats.active, icon: ShieldCheck, tone: "success" },
-          { label: "Ngừng đóng", value: stats.paused, icon: ShieldOff, tone: "warning" },
-          { label: "Đã chốt sổ", value: stats.closed, icon: HeartPulse, tone: "muted" },
+          {
+            label: "Đang đóng BHXH",
+            value: stats.active,
+            icon: ShieldCheck,
+            tone: "success",
+          },
+          {
+            label: "Ngừng đóng",
+            value: stats.paused,
+            icon: ShieldOff,
+            tone: "warning",
+          },
+          {
+            label: "Đã chốt sổ",
+            value: stats.closed,
+            icon: HeartPulse,
+            tone: "muted",
+          },
           {
             label: "Quỹ lương đóng BHXH",
             value: currency(stats.fund, true),
@@ -274,7 +325,8 @@ const Insurance = () => {
                   item.tone === "success" && "bg-success-subtle text-success",
                   item.tone === "warning" && "bg-warning-subtle text-warning",
                   item.tone === "muted" && "bg-muted text-muted-foreground",
-                  item.tone === "primary" && "bg-primary-subtle text-primary-subtle-foreground",
+                  item.tone === "primary" &&
+                    "bg-primary-subtle text-primary-subtle-foreground",
                 )}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
@@ -334,7 +386,7 @@ const Insurance = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả phòng ban</SelectItem>
-                {DEPARTMENTS.map((name) => (
+                {org.departmentOptions.map(({ value: name }) => (
                   <SelectItem key={name} value={name}>
                     {name}
                   </SelectItem>
@@ -355,22 +407,24 @@ const Insurance = () => {
         </div>
 
         {canManage && (
-        <SelectionBar
-          count={selected.length}
-          label="nhân sự"
-          onClear={clear}
-          onDelete={() => setBulkOpen(true)}
-        />
-      )}
+          <SelectionBar
+            count={selected.length}
+            label="nhân sự"
+            onClear={clear}
+            onDelete={() => setBulkOpen(true)}
+          />
+        )}
 
-      {loading ? (
+        {loading ? (
           <div className="flex items-center justify-center gap-2 px-5 py-12 text-[12.5px] text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Đang tải dữ liệu BHXH…
           </div>
         ) : filtered.length === 0 ? (
           <div className="px-5 py-14 text-center">
             <HeartPulse className="mx-auto h-6 w-6 text-muted-foreground/70" />
-            <p className="mt-2.5 text-[13.5px] font-semibold text-foreground">Không có nhân sự phù hợp</p>
+            <p className="mt-2.5 text-[13.5px] font-semibold text-foreground">
+              Không có nhân sự phù hợp
+            </p>
             <p className="mt-1 text-[12px] text-muted-foreground">
               {rows.length === 0
                 ? "Chưa có dữ liệu đóng BHXH. Thêm trong hồ sơ nhân viên → tab Bảo hiểm."
@@ -402,7 +456,12 @@ const Insurance = () => {
                     <div className="min-w-0">
                       <button
                         type="button"
-                        onClick={() => setDetail({ employee: group.employee, records: group.records })}
+                        onClick={() =>
+                          setDetail({
+                            employee: group.employee,
+                            records: group.records,
+                          })
+                        }
                         className="flex items-center gap-1 truncate text-[13px] font-semibold text-foreground hover:text-primary"
                       >
                         {group.employee.full_name}
@@ -410,13 +469,19 @@ const Insurance = () => {
                       </button>
                       <p className="truncate text-[11.5px] text-muted-foreground">
                         {group.employee.code}
-                        {group.employee.position ? ` · ${group.employee.position}` : ""}
-                        {group.employee.department ? ` · ${group.employee.department}` : ""}
+                        {group.employee.position
+                          ? ` · ${group.employee.position}`
+                          : ""}
+                        {group.employee.department
+                          ? ` · ${group.employee.department}`
+                          : ""}
                       </p>
                       <p className="text-[11px] text-muted-foreground/90 lg:hidden">
                         Từ {formatMonth(latest.start_date)} ·{" "}
-                        {latest.salary_base ? currency(Number(latest.salary_base), true) : "—"} ·{" "}
-                        {STATUS_LABELS[latest.status] ?? latest.status}
+                        {latest.salary_base
+                          ? currency(Number(latest.salary_base), true)
+                          : "—"}{" "}
+                        · {STATUS_LABELS[latest.status] ?? latest.status}
                       </p>
                     </div>
                   </div>
@@ -428,10 +493,13 @@ const Insurance = () => {
                     {formatMonth(latest.start_date)}
                   </span>
                   <span className="hidden w-[130px] shrink-0 text-[12px] font-medium text-foreground lg:block">
-                    {latest.salary_base ? currency(Number(latest.salary_base)) : "—"}
+                    {latest.salary_base
+                      ? currency(Number(latest.salary_base))
+                      : "—"}
                   </span>
                   <span className="hidden w-[100px] shrink-0 text-[11.5px] text-muted-foreground lg:block">
-                    {latest.employee_rate ?? "—"}% / {latest.employer_rate ?? "—"}%
+                    {latest.employee_rate ?? "—"}% /{" "}
+                    {latest.employer_rate ?? "—"}%
                   </span>
                   <span className="hidden w-[120px] shrink-0 lg:block">
                     <Badge variant={statusTone(latest.status)}>
@@ -440,7 +508,12 @@ const Insurance = () => {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setDetail({ employee: group.employee, records: group.records })}
+                    onClick={() =>
+                      setDetail({
+                        employee: group.employee,
+                        records: group.records,
+                      })
+                    }
                     className="hidden w-[110px] shrink-0 text-left text-[11.5px] text-primary hover:underline lg:block"
                   >
                     {group.records.length} giai đoạn
@@ -461,7 +534,9 @@ const Insurance = () => {
             <Users className="h-3.5 w-3.5" />
             {filtered.length} / {groups.length} nhân sự theo bộ lọc
           </span>
-          <span>Bấm tên nhân sự để xem toàn bộ giai đoạn đóng và in/PDF bảng kê.</span>
+          <span>
+            Bấm tên nhân sự để xem toàn bộ giai đoạn đóng và in/PDF bảng kê.
+          </span>
         </div>
       </Card>
 
@@ -475,8 +550,9 @@ const Insurance = () => {
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              {[detail?.employee.position, detail?.employee.department].filter(Boolean).join(" · ") ||
-                "Quá trình đóng bảo hiểm xã hội"}
+              {[detail?.employee.position, detail?.employee.department]
+                .filter(Boolean)
+                .join(" · ") || "Quá trình đóng bảo hiểm xã hội"}
             </DialogDescription>
           </DialogHeader>
 
@@ -528,12 +604,24 @@ const Insurance = () => {
               <table className="w-full text-[11.5px]">
                 <thead className="bg-muted/50 text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
-                    <th className="px-2.5 py-2 text-left font-semibold">Số sổ</th>
-                    <th className="px-2.5 py-2 text-left font-semibold">Từ tháng</th>
-                    <th className="px-2.5 py-2 text-left font-semibold">Đến tháng</th>
-                    <th className="px-2.5 py-2 text-left font-semibold">Mức đóng</th>
-                    <th className="px-2.5 py-2 text-left font-semibold">NLĐ / DN</th>
-                    <th className="px-2.5 py-2 text-left font-semibold">Trạng thái</th>
+                    <th className="px-2.5 py-2 text-left font-semibold">
+                      Số sổ
+                    </th>
+                    <th className="px-2.5 py-2 text-left font-semibold">
+                      Từ tháng
+                    </th>
+                    <th className="px-2.5 py-2 text-left font-semibold">
+                      Đến tháng
+                    </th>
+                    <th className="px-2.5 py-2 text-left font-semibold">
+                      Mức đóng
+                    </th>
+                    <th className="px-2.5 py-2 text-left font-semibold">
+                      NLĐ / DN
+                    </th>
+                    <th className="px-2.5 py-2 text-left font-semibold">
+                      Trạng thái
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
@@ -542,15 +630,20 @@ const Insurance = () => {
                       <td className="px-2.5 py-2 font-mono text-[10.5px] text-muted-foreground">
                         {record.insurance_number ?? "—"}
                       </td>
-                      <td className="px-2.5 py-2 text-muted-foreground">{formatMonth(record.start_date)}</td>
+                      <td className="px-2.5 py-2 text-muted-foreground">
+                        {formatMonth(record.start_date)}
+                      </td>
                       <td className="px-2.5 py-2 text-muted-foreground">
                         {record.end_date ? formatMonth(record.end_date) : "nay"}
                       </td>
                       <td className="px-2.5 py-2 font-medium text-foreground">
-                        {record.salary_base ? currency(Number(record.salary_base)) : "—"}
+                        {record.salary_base
+                          ? currency(Number(record.salary_base))
+                          : "—"}
                       </td>
                       <td className="px-2.5 py-2 text-muted-foreground">
-                        {record.employee_rate ?? "—"}% / {record.employer_rate ?? "—"}%
+                        {record.employee_rate ?? "—"}% /{" "}
+                        {record.employer_rate ?? "—"}%
                       </td>
                       <td className="px-2.5 py-2">
                         <Badge variant={statusTone(record.status)}>
@@ -564,14 +657,20 @@ const Insurance = () => {
             </div>
 
             <p className="text-[10.5px] leading-5 text-muted-foreground">
-              Bảng kê gồm mọi giai đoạn đóng BHXH của nhân sự. Hiện chỉ giai đoạn gần nhất được hiển thị ở danh sách
-              chính.
+              Bảng kê gồm mọi giai đoạn đóng BHXH của nhân sự. Hiện chỉ giai
+              đoạn gần nhất được hiển thị ở danh sách chính.
             </p>
           </div>
 
           <DialogFooter className="gap-2 sm:justify-between">
-            <Button asChild variant="outline" className="h-9 gap-1.5 text-[12px]">
-              <Link to={detail ? `/employees/${detail.employee.id}` : "/employees"}>
+            <Button
+              asChild
+              variant="outline"
+              className="h-9 gap-1.5 text-[12px]"
+            >
+              <Link
+                to={detail ? `/employees/${detail.employee.id}` : "/employees"}
+              >
                 <History className="h-3.5 w-3.5" /> Mở hồ sơ nhân viên
               </Link>
             </Button>
@@ -584,9 +683,12 @@ const Insurance = () => {
       <AlertDialog open={bulkOpen} onOpenChange={setBulkOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xoá bảo hiểm của {selected.length} nhân sự?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Xoá bảo hiểm của {selected.length} nhân sự?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Toàn bộ giai đoạn bảo hiểm của các nhân sự đã chọn sẽ bị xoá khỏi hệ thống.
+              Toàn bộ giai đoạn bảo hiểm của các nhân sự đã chọn sẽ bị xoá khỏi
+              hệ thống.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

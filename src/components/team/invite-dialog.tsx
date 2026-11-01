@@ -1,3 +1,9 @@
+import { useOrgStructure } from "@/lib/use-org-structure";
+import {
+  DepartmentSelect,
+  OrgEmptyHint,
+  PositionSelect,
+} from "@/components/org/org-selects";
 import { useState, type FormEvent } from "react";
 import { Copy, Link2, Loader2, Send } from "lucide-react";
 
@@ -21,7 +27,12 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { copyInviteLink, inviteLink } from "@/lib/invite-link";
-import { ASSIGNABLE_ROLES, ROLE_DESCRIPTIONS, ROLE_LABELS, type Role } from "@/lib/roles";
+import {
+  ASSIGNABLE_ROLES,
+  ROLE_DESCRIPTIONS,
+  ROLE_LABELS,
+  type Role,
+} from "@/lib/roles";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -46,6 +57,7 @@ export const InviteDialog = ({
   const [role, setRole] = useState<Role>("employee");
   const [jobTitle, setJobTitle] = useState("");
   const [department, setDepartment] = useState("");
+  const org = useOrgStructure();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdToken, setCreatedToken] = useState<string | null>(null);
@@ -70,7 +82,9 @@ export const InviteDialog = ({
 
     const trimmedEmail = email.trim();
     if (trimmedEmail && !EMAIL_PATTERN.test(trimmedEmail)) {
-      setError("Email không hợp lệ. Để trống nếu bạn muốn mời bằng liên kết công khai.");
+      setError(
+        "Email không hợp lệ. Để trống nếu bạn muốn mời bằng liên kết công khai.",
+      );
       return;
     }
 
@@ -94,7 +108,10 @@ export const InviteDialog = ({
       setCreatedToken(data.token);
       onCreated();
     } catch (insertError) {
-      const message = insertError instanceof Error ? insertError.message : "Không tạo được lời mời.";
+      const message =
+        insertError instanceof Error
+          ? insertError.message
+          : "Không tạo được lời mời.";
       setError(
         message.includes("row-level security")
           ? "Bạn không có quyền mời thành viên trong công ty này."
@@ -116,8 +133,8 @@ export const InviteDialog = ({
                 Liên kết mời đã sẵn sàng
               </DialogTitle>
               <DialogDescription>
-                Gửi liên kết này cho người bạn muốn mời. Liên kết dùng được một lần và hết hạn sau 14
-                ngày.
+                Gửi liên kết này cho người bạn muốn mời. Liên kết dùng được một
+                lần và hết hạn sau 14 ngày.
               </DialogDescription>
             </DialogHeader>
 
@@ -128,7 +145,10 @@ export const InviteDialog = ({
                 </p>
               </div>
               <div className="rounded-md border border-dashed border-border bg-card p-3 text-[11.5px] leading-5 text-muted-foreground">
-                Vai trò khi tham gia: <span className="font-semibold text-foreground">{ROLE_LABELS[role]}</span>
+                Vai trò khi tham gia:{" "}
+                <span className="font-semibold text-foreground">
+                  {ROLE_LABELS[role]}
+                </span>
                 <br />
                 {ROLE_DESCRIPTIONS[role]}
               </div>
@@ -138,7 +158,10 @@ export const InviteDialog = ({
               <Button variant="ghost" onClick={reset}>
                 Tạo lời mời khác
               </Button>
-              <Button className="gap-2" onClick={() => void copyInviteLink(createdToken)}>
+              <Button
+                className="gap-2"
+                onClick={() => void copyInviteLink(createdToken)}
+              >
                 <Copy className="h-4 w-4" />
                 Sao chép liên kết
               </Button>
@@ -149,8 +172,8 @@ export const InviteDialog = ({
             <DialogHeader>
               <DialogTitle>Mời thành viên</DialogTitle>
               <DialogDescription>
-                Lời mời được gửi qua liên kết bảo mật. Bạn có thể gửi trước, sau đó gán thêm thông tin
-                khi họ tham gia.
+                Lời mời được gửi qua liên kết bảo mật. Bạn có thể gửi trước, sau
+                đó gán thêm thông tin khi họ tham gia.
               </DialogDescription>
             </DialogHeader>
 
@@ -168,13 +191,17 @@ export const InviteDialog = ({
                   className="h-10"
                 />
                 <p className="text-[11px] leading-4 text-muted-foreground">
-                  Nếu nhập email, chỉ tài khoản đăng nhập bằng email này mới dùng được liên kết.
+                  Nếu nhập email, chỉ tài khoản đăng nhập bằng email này mới
+                  dùng được liên kết.
                 </p>
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-[12.5px]">Vai trò</Label>
-                <Select value={role} onValueChange={(value) => setRole(value as Role)}>
+                <Select
+                  value={role}
+                  onValueChange={(value) => setRole(value as Role)}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
@@ -186,7 +213,9 @@ export const InviteDialog = ({
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-[11px] leading-4 text-muted-foreground">{ROLE_DESCRIPTIONS[role]}</p>
+                <p className="text-[11px] leading-4 text-muted-foreground">
+                  {ROLE_DESCRIPTIONS[role]}
+                </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -194,27 +223,30 @@ export const InviteDialog = ({
                   <Label htmlFor="invite-title" className="text-[12.5px]">
                     Chức danh
                   </Label>
-                  <Input
+                  <PositionSelect
                     id="invite-title"
+                    org={org}
+                    department={department}
                     value={jobTitle}
-                    onChange={(event) => setJobTitle(event.target.value)}
-                    placeholder="Chuyên viên nhân sự"
-                    className="h-10"
+                    onChange={setJobTitle}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="invite-department" className="text-[12.5px]">
                     Phòng ban
                   </Label>
-                  <Input
+                  <DepartmentSelect
                     id="invite-department"
+                    org={org}
                     value={department}
-                    onChange={(event) => setDepartment(event.target.value)}
-                    placeholder="Nhân sự"
-                    className="h-10"
+                    onChange={(v) => {
+                      setDepartment(v);
+                      setJobTitle("");
+                    }}
                   />
                 </div>
               </div>
+              <OrgEmptyHint org={org} />
 
               {error && (
                 <p className="rounded-md border border-destructive/25 bg-destructive-subtle px-3 py-2 text-[11.5px] leading-5 text-destructive">
@@ -224,11 +256,19 @@ export const InviteDialog = ({
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => handleOpenChange(false)}
+              >
                 Huỷ
               </Button>
               <Button type="submit" className="gap-2" disabled={submitting}>
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
                 {submitting ? "Đang tạo…" : "Tạo liên kết mời"}
               </Button>
             </DialogFooter>

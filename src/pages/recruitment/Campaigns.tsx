@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Briefcase, CalendarClock, Loader2, Megaphone, Pencil, Plus, Search, Trash2, Users } from "lucide-react";
+import {
+  Briefcase,
+  CalendarClock,
+  Loader2,
+  Megaphone,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { FieldDialog, type FieldDef } from "@/components/employee/field-dialog";
@@ -28,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
-import { DEPARTMENTS } from "@/lib/employee-records";
 import {
   CAMPAIGN_PRIORITY_LABELS,
   CAMPAIGN_STATUS_LABELS,
@@ -48,7 +57,13 @@ import { cn, getErrorMessage } from "@/lib/utils";
 const priorityTone = (value: string) =>
   value === "high" ? "destructive" : value === "low" ? "muted" : "info";
 const campaignTone = (value: string) =>
-  value === "open" ? "success" : value === "on_hold" ? "warning" : value === "closed" ? "muted" : "outline";
+  value === "open"
+    ? "success"
+    : value === "on_hold"
+      ? "warning"
+      : value === "closed"
+        ? "muted"
+        : "outline";
 
 const Campaigns = () => {
   const { activeCompany, can, canManageModule } = useCompany();
@@ -71,18 +86,21 @@ const Campaigns = () => {
     if (!companyId) return;
     setLoading(true);
     try {
-      const [campaignRows, jobRows, candidateRows, deptRows] = await Promise.all([
-        listRows<Campaign>("recruitment_campaigns", companyId, "created_at"),
-        listRows<JobDescription>("job_descriptions", companyId, "created_at"),
-        listRows<Candidate>("candidates", companyId, "applied_at"),
-        listDepartments(companyId),
-      ]);
+      const [campaignRows, jobRows, candidateRows, deptRows] =
+        await Promise.all([
+          listRows<Campaign>("recruitment_campaigns", companyId, "created_at"),
+          listRows<JobDescription>("job_descriptions", companyId, "created_at"),
+          listRows<Candidate>("candidates", companyId, "applied_at"),
+          listDepartments(companyId),
+        ]);
       setRows(campaignRows);
       setJobs(jobRows);
       setCandidates(candidateRows);
       setDepartments(deptRows.map((row) => row.name));
     } catch (error) {
-      toast.error("Không tải được chiến dịch tuyển dụng", { description: getErrorMessage(error) });
+      toast.error("Không tải được chiến dịch tuyển dụng", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setLoading(false);
     }
@@ -92,13 +110,20 @@ const Campaigns = () => {
     void load();
   }, [load]);
 
-  const jobById = useMemo(() => new Map(jobs.map((job) => [job.id, job])), [jobs]);
+  const jobById = useMemo(
+    () => new Map(jobs.map((job) => [job.id, job])),
+    [jobs],
+  );
 
   const statsFor = useCallback(
     (campaignId: string) => {
-      const list = candidates.filter((candidate) => candidate.campaign_id === campaignId);
+      const list = candidates.filter(
+        (candidate) => candidate.campaign_id === campaignId,
+      );
       const hired = list.filter(
-        (candidate) => candidate.status === "offer_accepted" || candidate.status === "started",
+        (candidate) =>
+          candidate.status === "offer_accepted" ||
+          candidate.status === "started",
       ).length;
       return { total: list.length, hired };
     },
@@ -107,7 +132,13 @@ const Campaigns = () => {
 
   const fields: FieldDef[] = useMemo(
     () => [
-      { name: "title", label: "Tên chiến dịch", required: true, span: 2, placeholder: "Tuyển 3 Backend Engineer Q4/2026" },
+      {
+        name: "title",
+        label: "Tên chiến dịch",
+        required: true,
+        span: 2,
+        placeholder: "Tuyển 3 Backend Engineer Q4/2026",
+      },
       {
         name: "job_description_id",
         label: "Mô tả công việc",
@@ -119,24 +150,40 @@ const Campaigns = () => {
         name: "department",
         label: "Phòng ban",
         type: "select",
-        options: toOptionsSafe(departments.length ? departments : DEPARTMENTS),
+        options: toOptionsSafe(departments),
+        hint: departments.length
+          ? undefined
+          : "Sơ đồ tổ chức trống — vào Cài đặt › Cơ cấu tổ chức để thiết lập.",
       },
-      { name: "headcount", label: "Số lượng cần tuyển", type: "number", placeholder: "3" },
+      {
+        name: "headcount",
+        label: "Số lượng cần tuyển",
+        type: "number",
+        placeholder: "3",
+      },
       {
         name: "priority",
         label: "Mức ưu tiên",
         type: "select",
-        options: Object.entries(CAMPAIGN_PRIORITY_LABELS).map(([value, label]) => ({ value, label })),
+        options: Object.entries(CAMPAIGN_PRIORITY_LABELS).map(
+          ([value, label]) => ({ value, label }),
+        ),
       },
       {
         name: "status",
         label: "Trạng thái",
         type: "select",
-        options: Object.entries(CAMPAIGN_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+        options: Object.entries(CAMPAIGN_STATUS_LABELS).map(
+          ([value, label]) => ({ value, label }),
+        ),
       },
       { name: "start_date", label: "Ngày bắt đầu", type: "date" },
       { name: "end_date", label: "Ngày kết thúc", type: "date" },
-      { name: "hiring_manager", label: "Người phụ trách", placeholder: "Trần Quốc Bảo" },
+      {
+        name: "hiring_manager",
+        label: "Người phụ trách",
+        placeholder: "Trần Quốc Bảo",
+      },
       {
         name: "sla_days",
         label: "SLA tuyển dụng (ngày)",
@@ -157,17 +204,21 @@ const Campaigns = () => {
         row.title.toLowerCase().includes(keyword) ||
         (row.code ?? "").toLowerCase().includes(keyword) ||
         (row.department ?? "").toLowerCase().includes(keyword);
-      const matchesStatus = statusFilter === "all" || row.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || row.status === statusFilter;
       return matchesKeyword && matchesStatus;
     });
   }, [rows, query, statusFilter]);
 
-  const handleSubmit = async (values: Record<string, string | number | null>) => {
+  const handleSubmit = async (
+    values: Record<string, string | number | null>,
+  ) => {
     if (!companyId) throw new Error("Chưa chọn công ty.");
     const headcount = Math.floor(Number(values.headcount ?? 1) || 1);
     const slaDays = Math.floor(Number(values.sla_days ?? 30) || 30);
     if (headcount < 1) throw new Error("Số lượng cần tuyển phải lớn hơn 0.");
-    if (slaDays < 1 || slaDays > 365) throw new Error("SLA tuyển dụng phải trong khoảng 1 – 365 ngày.");
+    if (slaDays < 1 || slaDays > 365)
+      throw new Error("SLA tuyển dụng phải trong khoảng 1 – 365 ngày.");
     const payload = {
       ...values,
       status: values.status ?? "open",
@@ -209,7 +260,10 @@ const Campaigns = () => {
   };
 
   const openRows = rows.filter((row) => row.status === "open");
-  const totalHeadcount = openRows.reduce((sum, row) => sum + Number(row.headcount ?? 0), 0);
+  const totalHeadcount = openRows.reduce(
+    (sum, row) => sum + Number(row.headcount ?? 0),
+    0,
+  );
 
   return (
     <RecruitmentShell
@@ -231,16 +285,28 @@ const Campaigns = () => {
     >
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Đang tuyển</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-success">{openRows.length}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Đang tuyển
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-success">
+            {openRows.length}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Chỉ tiêu</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{totalHeadcount}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Chỉ tiêu
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
+            {totalHeadcount}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Ứng viên</p>
-          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">{candidates.length}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Ứng viên
+          </p>
+          <p className="mt-1 font-display text-[22px] font-semibold text-foreground">
+            {candidates.length}
+          </p>
         </Card>
       </div>
 
@@ -256,7 +322,10 @@ const Campaigns = () => {
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-full text-[12.5px] sm:w-[190px]" aria-label="Lọc trạng thái chiến dịch">
+          <SelectTrigger
+            className="h-9 w-full text-[12.5px] sm:w-[190px]"
+            aria-label="Lọc trạng thái chiến dịch"
+          >
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -278,7 +347,9 @@ const Campaigns = () => {
         <Card className="p-12 text-center">
           <Megaphone className="mx-auto h-6 w-6 text-muted-foreground/70" />
           <p className="mt-2 text-[13px] font-semibold text-foreground">
-            {rows.length === 0 ? "Chưa có chiến dịch tuyển dụng" : "Không có chiến dịch phù hợp"}
+            {rows.length === 0
+              ? "Chưa có chiến dịch tuyển dụng"
+              : "Không có chiến dịch phù hợp"}
           </p>
           <p className="mt-1 text-[12px] text-muted-foreground">
             {rows.length === 0
@@ -301,14 +372,21 @@ const Campaigns = () => {
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((row) => {
             const stats = statsFor(row.id);
-            const job = row.job_description_id ? jobById.get(row.job_description_id) : null;
+            const job = row.job_description_id
+              ? jobById.get(row.job_description_id)
+              : null;
             const countdown = campaignCountdown(row);
-            const percent = row.headcount > 0 ? Math.min(Math.round((stats.hired / row.headcount) * 100), 100) : 0;
+            const percent =
+              row.headcount > 0
+                ? Math.min(Math.round((stats.hired / row.headcount) * 100), 100)
+                : 0;
             return (
               <Card key={row.id} className="flex flex-col gap-3 p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-foreground">{row.title}</p>
+                    <p className="truncate text-[13px] font-semibold text-foreground">
+                      {row.title}
+                    </p>
                     <p className="mt-0.5 text-[10.5px] text-muted-foreground">
                       {row.code ?? "Chưa có mã"}
                       {row.department ? ` · ${row.department}` : ""}
@@ -321,7 +399,8 @@ const Campaigns = () => {
 
                 <div className="flex flex-wrap items-center gap-1.5">
                   <Badge variant={priorityTone(row.priority)}>
-                    Ưu tiên {CAMPAIGN_PRIORITY_LABELS[row.priority] ?? row.priority}
+                    Ưu tiên{" "}
+                    {CAMPAIGN_PRIORITY_LABELS[row.priority] ?? row.priority}
                   </Badge>
                   <Badge variant={countdown.tone}>{countdown.label}</Badge>
                   {job && (
@@ -341,7 +420,10 @@ const Campaigns = () => {
                     </span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${percent}%` }}
+                    />
                   </div>
                 </div>
 
@@ -404,18 +486,24 @@ const Campaigns = () => {
         onSubmit={handleSubmit}
       />
 
-      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá chiến dịch?</AlertDialogTitle>
             <AlertDialogDescription>
-              “{pendingDelete?.title}” sẽ bị xoá. Ứng viên đã gắn với chiến dịch có thể mất liên kết.
+              “{pendingDelete?.title}” sẽ bị xoá. Ứng viên đã gắn với chiến dịch
+              có thể mất liên kết.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Huỷ</AlertDialogCancel>
             <AlertDialogAction
-              className={cn("bg-destructive text-destructive-foreground hover:bg-destructive/90")}
+              className={cn(
+                "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+              )}
               onClick={() => void remove()}
             >
               Xoá chiến dịch
