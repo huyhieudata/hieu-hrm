@@ -20,6 +20,7 @@ import {
   UserMinus,
   UserPlus,
   Users,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,6 +43,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SelectionBar } from "@/components/common/selection-bar";
+import { InviteEmployeeDialog } from "@/components/employee/invite-employee-dialog";
 import { useSelection } from "@/lib/use-selection";
 import {
   DropdownMenu,
@@ -76,8 +78,15 @@ import {
   type EmployeeStatus,
 } from "@/lib/employee-records";
 import { exportExcel, exportPdf } from "@/lib/export-utils";
-import { buildEmployeeWarnings, REQUIRED_DOCUMENT_CATEGORIES } from "@/lib/employee-warnings";
-import { listDepartmentPositions, listDepartments, listDocumentChecklist } from "@/lib/settings";
+import {
+  buildEmployeeWarnings,
+  REQUIRED_DOCUMENT_CATEGORIES,
+} from "@/lib/employee-warnings";
+import {
+  listDepartmentPositions,
+  listDepartments,
+  listDocumentChecklist,
+} from "@/lib/settings";
 import { isManagerial } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
@@ -94,10 +103,14 @@ const statusFilters: { id: "all" | EmployeeStatus; label: string }[] = [
 
 const friendlyError = (error: unknown) => {
   const message = error instanceof Error ? error.message : "Đã xảy ra lỗi.";
-  if (message.includes("Email đã tồn tại")) return "Email này đã được dùng cho nhân sự khác trong workspace.";
-  if (message.includes("Số điện thoại đã tồn tại")) return "Số điện thoại này đã được dùng cho nhân sự khác trong workspace.";
-  if (message.includes("duplicate key")) return "Mã nhân viên này đã tồn tại trong công ty.";
-  if (message.includes("row-level security")) return "Bạn không có quyền thực hiện thao tác này.";
+  if (message.includes("Email đã tồn tại"))
+    return "Email này đã được dùng cho nhân sự khác trong workspace.";
+  if (message.includes("Số điện thoại đã tồn tại"))
+    return "Số điện thoại này đã được dùng cho nhân sự khác trong workspace.";
+  if (message.includes("duplicate key"))
+    return "Mã nhân viên này đã tồn tại trong công ty.";
+  if (message.includes("row-level security"))
+    return "Bạn không có quyền thực hiện thao tác này.";
   return message;
 };
 
@@ -112,20 +125,35 @@ const Employees = () => {
 
   const [employees, setEmployees] = useState<EmployeeRecord[]>([]);
   const [contractsByEmployee, setContractsByEmployee] = useState<
-    Record<string, { status: string; end_date: string | null; contract_type: string; start_date: string | null }[]>
+    Record<
+      string,
+      {
+        status: string;
+        end_date: string | null;
+        contract_type: string;
+        start_date: string | null;
+      }[]
+    >
   >({});
-  const [documentCategoriesByEmployee, setDocumentCategoriesByEmployee] = useState<Record<string, string[]>>({});
-  const [requiredDocCategories, setRequiredDocCategories] = useState<string[]>(REQUIRED_DOCUMENT_CATEGORIES);
+  const [documentCategoriesByEmployee, setDocumentCategoriesByEmployee] =
+    useState<Record<string, string[]>>({});
+  const [requiredDocCategories, setRequiredDocCategories] = useState<string[]>(
+    REQUIRED_DOCUMENT_CATEGORIES,
+  );
   const [onboardingByEmployee, setOnboardingByEmployee] = useState<
-    Record<string, { status: string; checklist: { completed: boolean }[] | null }>
+    Record<
+      string,
+      { status: string; checklist: { completed: boolean }[] | null }
+    >
   >({});
   const [loading, setLoading] = useState(true);
   const [bulkOpen, setBulkOpen] = useState(false);
   const { selected, toggle, selectAll, clear, prune } = useSelection();
-  const [positionOptionsByDepartment, setPositionOptionsByDepartment] = useState<
-    Record<string, { value: string; label: string }[]>
-  >({});
-  const [departmentNameOptions, setDepartmentNameOptions] = useState<string[]>(DEPARTMENTS);
+  const [bulkInviteOpen, setBulkInviteOpen] = useState(false);
+  const [positionOptionsByDepartment, setPositionOptionsByDepartment] =
+    useState<Record<string, { value: string; label: string }[]>>({});
+  const [departmentNameOptions, setDepartmentNameOptions] =
+    useState<string[]>(DEPARTMENTS);
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("all");
   const [position, setPosition] = useState("all");
@@ -151,26 +179,50 @@ const Employees = () => {
     if (!companyId) return;
     setLoading(true);
     try {
-      const [people, contracts, checklistTemplates, documentResult, onboardingResult, departmentRows, positionRows] =
-        await Promise.all([
+      const [
+        people,
+        contracts,
+        checklistTemplates,
+        documentResult,
+        onboardingResult,
+        departmentRows,
+        positionRows,
+      ] = await Promise.all([
         listEmployees(companyId),
         canManage
           ? listCompanyContractSummaries(companyId).catch(() => [])
           : Promise.resolve(
-              [] as { employee_id: string; status: string; end_date: string | null; contract_type: string; start_date: string | null }[],
+              [] as {
+                employee_id: string;
+                status: string;
+                end_date: string | null;
+                contract_type: string;
+                start_date: string | null;
+              }[],
             ),
         canManage
           ? listDocumentChecklist(companyId).catch(() => [])
           : Promise.resolve([] as { category: string }[]),
         canManage
-          ? supabase.from("employee_documents").select("employee_id, category").eq("company_id", companyId)
-          : Promise.resolve({ data: [] as { employee_id: string; category: string }[] }),
+          ? supabase
+              .from("employee_documents")
+              .select("employee_id, category")
+              .eq("company_id", companyId)
+          : Promise.resolve({
+              data: [] as { employee_id: string; category: string }[],
+            }),
         canManage
           ? supabase
               .from("onboarding_records")
               .select("employee_id, status, checklist")
               .eq("company_id", companyId)
-          : Promise.resolve({ data: [] as { employee_id: string | null; status: string; checklist: unknown }[] }),
+          : Promise.resolve({
+              data: [] as {
+                employee_id: string | null;
+                status: string;
+                checklist: unknown;
+              }[],
+            }),
         listDepartments(companyId).catch(() => []),
         listDepartmentPositions(companyId).catch(() => []),
       ]);
@@ -178,9 +230,12 @@ const Employees = () => {
       prune(people.map((person) => person.id));
 
       const departmentNameById = new Map<string, string>(
-        departmentRows.map((department) => [department.id, department.name] as [string, string]),
+        departmentRows.map(
+          (department) => [department.id, department.name] as [string, string],
+        ),
       );
-      const positionMap: Record<string, { value: string; label: string }[]> = {};
+      const positionMap: Record<string, { value: string; label: string }[]> =
+        {};
       positionRows.forEach((position) => {
         const departmentName = departmentNameById.get(position.department_id);
         if (!departmentName) return;
@@ -196,14 +251,21 @@ const Employees = () => {
           : DEPARTMENTS,
       );
       if (checklistTemplates.length > 0) {
-        setRequiredDocCategories(Array.from(new Set(checklistTemplates.map((row) => row.category))));
+        setRequiredDocCategories(
+          Array.from(new Set(checklistTemplates.map((row) => row.category))),
+        );
       } else {
         setRequiredDocCategories(REQUIRED_DOCUMENT_CATEGORIES);
       }
 
       const grouped: Record<
         string,
-        { status: string; end_date: string | null; contract_type: string; start_date: string | null }[]
+        {
+          status: string;
+          end_date: string | null;
+          contract_type: string;
+          start_date: string | null;
+        }[]
       > = {};
       contracts.forEach((contract) => {
         const list = grouped[contract.employee_id] ?? [];
@@ -218,12 +280,23 @@ const Employees = () => {
       setContractsByEmployee(grouped);
 
       const categories: Record<string, string[]> = {};
-      ((documentResult.data ?? []) as { employee_id: string; category: string }[]).forEach((document) => {
-        categories[document.employee_id] = [...(categories[document.employee_id] ?? []), document.category];
+      (
+        (documentResult.data ?? []) as {
+          employee_id: string;
+          category: string;
+        }[]
+      ).forEach((document) => {
+        categories[document.employee_id] = [
+          ...(categories[document.employee_id] ?? []),
+          document.category,
+        ];
       });
       setDocumentCategoriesByEmployee(categories);
 
-      const onboardingMap: Record<string, { status: string; checklist: { completed: boolean }[] | null }> = {};
+      const onboardingMap: Record<
+        string,
+        { status: string; checklist: { completed: boolean }[] | null }
+      > = {};
       (
         (onboardingResult.data ?? []) as {
           employee_id: string | null;
@@ -232,12 +305,17 @@ const Employees = () => {
         }[]
       ).forEach((record) => {
         if (record.employee_id && !onboardingMap[record.employee_id]) {
-          onboardingMap[record.employee_id] = { status: record.status, checklist: record.checklist };
+          onboardingMap[record.employee_id] = {
+            status: record.status,
+            checklist: record.checklist,
+          };
         }
       });
       setOnboardingByEmployee(onboardingMap);
     } catch (loadError) {
-      toast.error("Không tải được danh sách nhân viên", { description: friendlyError(loadError) });
+      toast.error("Không tải được danh sách nhân viên", {
+        description: friendlyError(loadError),
+      });
     } finally {
       setLoading(false);
     }
@@ -288,35 +366,51 @@ const Employees = () => {
 
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    return employees.filter((person) => {
-      const matchesQuery =
-        !keyword ||
-        `${person.full_name} ${person.code} ${person.work_email ?? ""} ${person.personal_email ?? ""} ${person.position ?? ""} ${person.department ?? ""}`
-          .toLowerCase()
-          .includes(keyword);
-      const matchesDepartment = department === "all" || person.department === department;
-      const matchesPosition = position === "all" || person.position === position;
-      const matchesStatus = status === "all" || person.status === status;
-      return matchesQuery && matchesDepartment && matchesPosition && matchesStatus;
-    }).sort((a, b) => {
-      if (sort === "name-desc") return b.full_name.localeCompare(a.full_name, "vi");
-      if (sort === "newest") return (b.hire_date ?? "").localeCompare(a.hire_date ?? "");
-      if (sort === "department") return (a.department ?? "").localeCompare(b.department ?? "", "vi");
-      return a.full_name.localeCompare(b.full_name, "vi");
-    });
+    return employees
+      .filter((person) => {
+        const matchesQuery =
+          !keyword ||
+          `${person.full_name} ${person.code} ${person.work_email ?? ""} ${person.personal_email ?? ""} ${person.position ?? ""} ${person.department ?? ""}`
+            .toLowerCase()
+            .includes(keyword);
+        const matchesDepartment =
+          department === "all" || person.department === department;
+        const matchesPosition =
+          position === "all" || person.position === position;
+        const matchesStatus = status === "all" || person.status === status;
+        return (
+          matchesQuery && matchesDepartment && matchesPosition && matchesStatus
+        );
+      })
+      .sort((a, b) => {
+        if (sort === "name-desc")
+          return b.full_name.localeCompare(a.full_name, "vi");
+        if (sort === "newest")
+          return (b.hire_date ?? "").localeCompare(a.hire_date ?? "");
+        if (sort === "department")
+          return (a.department ?? "").localeCompare(b.department ?? "", "vi");
+        return a.full_name.localeCompare(b.full_name, "vi");
+      });
   }, [department, employees, position, query, sort, status]);
 
   const positionOptions = useMemo(
     () =>
       Array.from(
-        new Set(employees.map((person) => person.position).filter((title): title is string => !!title)),
+        new Set(
+          employees
+            .map((person) => person.position)
+            .filter((title): title is string => !!title),
+        ),
       ).sort((a, b) => a.localeCompare(b, "vi")),
     [employees],
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const rows = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const rows = filtered.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   const warningsByEmployee = useMemo(() => {
     if (!canManage) return {} as Record<string, number>;
@@ -347,14 +441,18 @@ const Employees = () => {
       total: employees.length,
       active: employees.filter((person) => person.status === "active").length,
       paused: employees.filter(
-        (person) => person.status === "maternity" || person.status === "long_leave",
+        (person) =>
+          person.status === "maternity" || person.status === "long_leave",
       ).length,
-      resigned: employees.filter((person) => person.status === "resigned").length,
+      resigned: employees.filter((person) => person.status === "resigned")
+        .length,
     }),
     [employees],
   );
 
-  const handleSubmit = async (values: Record<string, string | number | null>) => {
+  const handleSubmit = async (
+    values: Record<string, string | number | null>,
+  ) => {
     try {
       if (editing) {
         await updateEmployee(editing.id, values);
@@ -367,10 +465,13 @@ const Employees = () => {
           created_by: user?.id ?? null,
         });
         toast.success("Đã thêm nhân viên mới", {
-          description: "Tiếp tục bổ sung quá trình công tác, lương và bảo hiểm trong hồ sơ 360°.",
+          description:
+            "Tiếp tục bổ sung quá trình công tác, lương và bảo hiểm trong hồ sơ 360°.",
         });
         setFormOpen(false);
-        navigate(`/employees/${createdId}`);
+        navigate(
+          `/employees/${createdId}${role === "owner" || role === "admin" || role === "hr" ? "?moi=1" : ""}`,
+        );
         return;
       }
       setFormOpen(false);
@@ -389,7 +490,9 @@ const Employees = () => {
       setBulkOpen(false);
       await load();
     } catch (error) {
-      toast.error("Không xoá được hồ sơ", { description: friendlyError(error) });
+      toast.error("Không xoá được hồ sơ", {
+        description: friendlyError(error),
+      });
     }
   };
 
@@ -401,7 +504,9 @@ const Employees = () => {
       setRemoval(null);
       await load();
     } catch (deleteError) {
-      toast.error("Không xoá được hồ sơ", { description: friendlyError(deleteError) });
+      toast.error("Không xoá được hồ sơ", {
+        description: friendlyError(deleteError),
+      });
     }
   };
 
@@ -430,7 +535,16 @@ const Employees = () => {
               onClick={() =>
                 exportExcel(
                   "danh-sach-nhan-vien",
-                  ["Mã NV", "Họ tên", "Phòng ban", "Vị trí", "Trạng thái", "Email", "Điện thoại", "Ngày vào làm"],
+                  [
+                    "Mã NV",
+                    "Họ tên",
+                    "Phòng ban",
+                    "Vị trí",
+                    "Trạng thái",
+                    "Email",
+                    "Điện thoại",
+                    "Ngày vào làm",
+                  ],
                   filtered.map((person) => [
                     person.code,
                     person.full_name,
@@ -454,7 +568,16 @@ const Employees = () => {
                 exportPdf(
                   "Danh sách nhân viên",
                   activeCompany?.name ?? "Công ty",
-                  ["Mã NV", "Họ tên", "Phòng ban", "Vị trí", "Trạng thái", "Email", "Điện thoại", "Ngày vào làm"],
+                  [
+                    "Mã NV",
+                    "Họ tên",
+                    "Phòng ban",
+                    "Vị trí",
+                    "Trạng thái",
+                    "Email",
+                    "Điện thoại",
+                    "Ngày vào làm",
+                  ],
                   filtered.map((person) => [
                     person.code,
                     person.full_name,
@@ -480,13 +603,13 @@ const Employees = () => {
                   <Upload className="h-3.5 w-3.5" />
                   Import dữ liệu
                 </Button>
-              <Button
-                className="h-9 gap-1.5 text-[12.5px]"
-                onClick={() => {
-                  setEditing(null);
-                  setFormOpen(true);
-                }}
-              >
+                <Button
+                  className="h-9 gap-1.5 text-[12.5px]"
+                  onClick={() => {
+                    setEditing(null);
+                    setFormOpen(true);
+                  }}
+                >
                   <Plus className="h-4 w-4" />
                   Thêm nhân viên
                 </Button>
@@ -498,10 +621,25 @@ const Employees = () => {
 
       <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Tổng nhân sự", value: stats.total, icon: Users, tone: "primary" },
-          { label: "Đang làm việc", value: stats.active, icon: UserCheck, tone: "success" },
+          {
+            label: "Tổng nhân sự",
+            value: stats.total,
+            icon: Users,
+            tone: "primary",
+          },
+          {
+            label: "Đang làm việc",
+            value: stats.active,
+            icon: UserCheck,
+            tone: "success",
+          },
           { label: "Đang nghỉ", value: stats.paused, icon: Moon, tone: "info" },
-          { label: "Đã nghỉ việc", value: stats.resigned, icon: UserMinus, tone: "muted" },
+          {
+            label: "Đã nghỉ việc",
+            value: stats.resigned,
+            icon: UserMinus,
+            tone: "muted",
+          },
         ].map((item) => {
           const Icon = item.icon;
           return (
@@ -509,7 +647,8 @@ const Employees = () => {
               <span
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-[11px]",
-                  item.tone === "primary" && "bg-primary-subtle text-primary-subtle-foreground",
+                  item.tone === "primary" &&
+                    "bg-primary-subtle text-primary-subtle-foreground",
                   item.tone === "success" && "bg-success-subtle text-success",
                   item.tone === "info" && "bg-info-subtle text-info",
                   item.tone === "muted" && "bg-muted text-muted-foreground",
@@ -530,6 +669,20 @@ const Employees = () => {
         })}
       </div>
 
+      {(role === "owner" || role === "admin" || role === "hr") &&
+        selected.length > 0 && (
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5 text-[11.5px]"
+              onClick={() => setBulkInviteOpen(true)}
+            >
+              <Send className="h-3.5 w-3.5" /> Gửi lời mời {selected.length}{" "}
+              người
+            </Button>
+          </div>
+        )}
       {canDelete && (
         <SelectionBar
           count={selected.length}
@@ -648,13 +801,19 @@ const Employees = () => {
                 <input
                   type="checkbox"
                   className="h-3.5 w-3.5 accent-primary"
-                  checked={rows.length > 0 && rows.every((person) => selected.includes(person.id))}
+                  checked={
+                    rows.length > 0 &&
+                    rows.every((person) => selected.includes(person.id))
+                  }
                   onChange={() => selectAll(rows.map((person) => person.id))}
                 />
                 Chọn trang
               </label>
             )}
-            {(query || department !== "all" || position !== "all" || status !== "all") && (
+            {(query ||
+              department !== "all" ||
+              position !== "all" ||
+              status !== "all") && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -684,7 +843,10 @@ const Employees = () => {
         {loading ? (
           <div className="divide-y divide-border/60">
             {Array.from({ length: 6 }, (_, index) => (
-              <div key={index} className="flex animate-pulse items-center gap-3 px-5 py-3">
+              <div
+                key={index}
+                className="flex animate-pulse items-center gap-3 px-5 py-3"
+              >
                 <div className="h-9 w-9 rounded-full bg-muted" />
                 <div className="flex-1 space-y-1.5">
                   <div className="h-3 w-40 rounded bg-muted" />
@@ -698,7 +860,9 @@ const Employees = () => {
           <div className="px-5 py-14 text-center">
             <Users className="mx-auto h-6 w-6 text-muted-foreground/70" />
             <p className="mt-2.5 text-[13.5px] font-semibold text-foreground">
-              {employees.length === 0 ? "Chưa có hồ sơ nhân viên nào" : "Không tìm thấy nhân viên phù hợp"}
+              {employees.length === 0
+                ? "Chưa có hồ sơ nhân viên nào"
+                : "Không tìm thấy nhân viên phù hợp"}
             </p>
             <p className="mx-auto mt-1 max-w-sm text-[12px] leading-5 text-muted-foreground">
               {employees.length === 0
@@ -721,14 +885,19 @@ const Employees = () => {
           <ul className="divide-y divide-border/60">
             {rows.map((person) => {
               const meta = EMPLOYEE_STATUS_META[person.status];
-              const health = canManage ? contractHealth(contractsByEmployee[person.id] ?? []) : null;
+              const health = canManage
+                ? contractHealth(contractsByEmployee[person.id] ?? [])
+                : null;
               const latestContract = canManage
-                ? [...(contractsByEmployee[person.id] ?? [])].sort((a, b) =>
+                ? ([...(contractsByEmployee[person.id] ?? [])].sort((a, b) =>
                     (b.start_date ?? "").localeCompare(a.start_date ?? ""),
-                  )[0] ?? null
+                  )[0] ?? null)
                 : null;
               return (
-                <li key={person.id} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/25">
+                <li
+                  key={person.id}
+                  className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/25"
+                >
                   {canDelete && (
                     <input
                       type="checkbox"
@@ -769,26 +938,31 @@ const Employees = () => {
                         ) : null}
                       </p>
                       <p className="truncate text-[11px] text-muted-foreground/90 lg:hidden">
-                        {person.department ?? "Chưa xếp phòng ban"} · {meta.label}
+                        {person.department ?? "Chưa xếp phòng ban"} ·{" "}
+                        {meta.label}
                       </p>
-                      {health && person.status !== "resigned" && health.state !== "ok" && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate(`/employees/${person.id}?tab=work&section=contracts`)
-                          }
-                          title={health.label}
-                          className={cn(
-                            "mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors",
-                            health.tone === "destructive"
-                              ? "bg-destructive-subtle text-destructive hover:bg-destructive/15"
-                              : "bg-warning-subtle text-warning hover:bg-warning/15",
-                          )}
-                        >
-                          <AlertTriangle className="h-2.5 w-2.5" />
-                          {health.shortLabel}
-                        </button>
-                      )}
+                      {health &&
+                        person.status !== "resigned" &&
+                        health.state !== "ok" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              navigate(
+                                `/employees/${person.id}?tab=work&section=contracts`,
+                              )
+                            }
+                            title={health.label}
+                            className={cn(
+                              "mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors",
+                              health.tone === "destructive"
+                                ? "bg-destructive-subtle text-destructive hover:bg-destructive/15"
+                                : "bg-warning-subtle text-warning hover:bg-warning/15",
+                            )}
+                          >
+                            <AlertTriangle className="h-2.5 w-2.5" />
+                            {health.shortLabel}
+                          </button>
+                        )}
                     </div>
                   </div>
 
@@ -807,14 +981,22 @@ const Employees = () => {
                   <div className="w-9 shrink-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-sm" aria-label={`Thao tác ${person.full_name}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Thao tác ${person.full_name}`}
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-[200px]">
-                        <DropdownMenuItem className="gap-2 text-[12.5px]" asChild>
+                        <DropdownMenuItem
+                          className="gap-2 text-[12.5px]"
+                          asChild
+                        >
                           <Link to={`/employees/${person.id}`}>
-                            <ArrowUpRight className="h-3.5 w-3.5" /> Mở hồ sơ 360°
+                            <ArrowUpRight className="h-3.5 w-3.5" /> Mở hồ sơ
+                            360°
                           </Link>
                         </DropdownMenuItem>
                         {canManage && (
@@ -826,7 +1008,8 @@ const Employees = () => {
                                 setFormOpen(true);
                               }}
                             >
-                              <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa thông tin
+                              <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa thông
+                              tin
                             </DropdownMenuItem>
                             {canDelete && (
                               <>
@@ -853,7 +1036,8 @@ const Employees = () => {
         {filtered.length > pageSize && (
           <div className="flex items-center justify-between border-t border-border/60 px-5 py-3 text-[11.5px] text-muted-foreground">
             <span>
-              {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filtered.length)} trong{" "}
+              {(currentPage - 1) * pageSize + 1}–
+              {Math.min(currentPage * pageSize, filtered.length)} trong{" "}
               {filtered.length} nhân viên
             </span>
             <div className="flex items-center gap-1.5">
@@ -874,7 +1058,9 @@ const Employees = () => {
                 size="icon-sm"
                 aria-label="Trang sau"
                 disabled={currentPage === totalPages}
-                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </Button>
@@ -917,10 +1103,13 @@ const Employees = () => {
       <AlertDialog open={bulkOpen} onOpenChange={setBulkOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xoá {selected.length} hồ sơ nhân viên?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Xoá {selected.length} hồ sơ nhân viên?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Toàn bộ dữ liệu liên quan (hợp đồng, lương, bảo hiểm, tài sản, tài liệu…) của các nhân sự đã chọn sẽ bị
-              xoá. Hành động không thể hoàn tác.
+              Toàn bộ dữ liệu liên quan (hợp đồng, lương, bảo hiểm, tài sản, tài
+              liệu…) của các nhân sự đã chọn sẽ bị xoá. Hành động không thể hoàn
+              tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -935,13 +1124,17 @@ const Employees = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!removal} onOpenChange={(open) => !open && setRemoval(null)}>
+      <AlertDialog
+        open={!!removal}
+        onOpenChange={(open) => !open && setRemoval(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá hồ sơ nhân viên?</AlertDialogTitle>
             <AlertDialogDescription>
-              Toàn bộ dữ liệu của {removal?.full_name} — quá trình công tác, lương, bảo hiểm, khen thưởng,
-              kỷ luật, đào tạo và tài liệu — sẽ bị xoá vĩnh viễn.
+              Toàn bộ dữ liệu của {removal?.full_name} — quá trình công tác,
+              lương, bảo hiểm, khen thưởng, kỷ luật, đào tạo và tài liệu — sẽ bị
+              xoá vĩnh viễn.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -955,6 +1148,12 @@ const Employees = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <InviteEmployeeDialog
+        open={bulkInviteOpen}
+        onOpenChange={setBulkInviteOpen}
+        employees={employees.filter((e) => selected.includes(e.id))}
+        onDone={clear}
+      />
     </AppShell>
   );
 };

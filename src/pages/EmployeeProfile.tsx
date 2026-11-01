@@ -1,5 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   AlertTriangle,
   MessageSquare,
@@ -53,6 +65,8 @@ import NotesTab from "@/components/employee/notes-tab";
 import { BankInfoCard } from "@/components/employee/bank-info-card";
 import { OnboardingTab } from "@/components/employee/onboarding-tab";
 import { ResignationDialog } from "@/components/employee/resignation-dialog";
+import { InviteEmployeeDialog } from "@/components/employee/invite-employee-dialog";
+import { InviteStatusBar } from "@/components/employee/invite-status-card";
 import { DisciplineTab } from "@/components/employee/discipline-tab";
 import { DocumentsTab } from "@/components/employee/documents-tab";
 import { EmployeeEvaluationsTab } from "@/components/employee/evaluations-tab";
@@ -93,8 +107,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
-import { buildEmployeeWarnings, REQUIRED_DOCUMENT_CATEGORIES } from "@/lib/employee-warnings";
-import { listDepartments, listDocumentChecklist, type DepartmentRecord } from "@/lib/settings";
+import {
+  buildEmployeeWarnings,
+  REQUIRED_DOCUMENT_CATEGORIES,
+} from "@/lib/employee-warnings";
+import {
+  listDepartments,
+  listDocumentChecklist,
+  type DepartmentRecord,
+} from "@/lib/settings";
 import {
   buildAssetHandoverHtml,
   buildDebtConfirmationHtml,
@@ -102,7 +123,11 @@ import {
   downloadHtml,
   printHtml,
 } from "@/lib/employee-documents";
-import { listRows, onboardingProgress, type OnboardingRecord } from "@/lib/recruitment";
+import {
+  listRows,
+  onboardingProgress,
+  type OnboardingRecord,
+} from "@/lib/recruitment";
 import { buildEmployeeFields } from "@/lib/employee-fields";
 import {
   EMPLOYEE_STATUS_META,
@@ -167,7 +192,8 @@ const tenure = (from: string | null, to: string | null) => {
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "—";
   const months = Math.max(
     0,
-    (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()),
+    (end.getFullYear() - start.getFullYear()) * 12 +
+      (end.getMonth() - start.getMonth()),
   );
   if (months < 12) return `${months} tháng`;
   const years = Math.floor(months / 12);
@@ -175,10 +201,20 @@ const tenure = (from: string | null, to: string | null) => {
   return rest ? `${years} năm ${rest} tháng` : `${years} năm`;
 };
 
-const InfoRow = ({ label, value }: { label: string; value: string | null | undefined }) => (
+const InfoRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) => (
   <div className="min-w-0">
-    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
-    <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">{value?.trim() || "—"}</p>
+    <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+      {label}
+    </p>
+    <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">
+      {value?.trim() || "—"}
+    </p>
   </div>
 );
 
@@ -205,11 +241,21 @@ const EditableInfoRow = ({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const raw = employee[field] as string | number | null | undefined;
-  const shown = display ? display(raw) : kind === "date" ? formatDate(raw as string | null) : raw;
+  const shown = display
+    ? display(raw)
+    : kind === "date"
+      ? formatDate(raw as string | null)
+      : raw;
 
   const start = () => {
     if (!canEdit) return;
-    setDraft(raw == null ? "" : kind === "date" ? String(raw).slice(0, 10) : String(raw));
+    setDraft(
+      raw == null
+        ? ""
+        : kind === "date"
+          ? String(raw).slice(0, 10)
+          : String(raw),
+    );
     setEditing(true);
   };
 
@@ -217,7 +263,8 @@ const EditableInfoRow = ({
     if (busy) return;
     setBusy(true);
     try {
-      const next = value.trim() === "" ? null : kind === "number" ? Number(value) : value;
+      const next =
+        value.trim() === "" ? null : kind === "number" ? Number(value) : value;
       await updateEmployee(employee.id, { [field]: next });
       toast.success("Đã cập nhật thông tin");
       setEditing(false);
@@ -234,7 +281,9 @@ const EditableInfoRow = ({
   if (editing) {
     return (
       <div className="min-w-0">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          {label}
+        </p>
         {kind === "select" ? (
           <select
             autoFocus
@@ -262,7 +311,8 @@ const EditableInfoRow = ({
             onChange={(event) => setDraft(event.target.value)}
             onBlur={() => void save(draft)}
             onKeyDown={(event) => {
-              if (event.key === "Enter") (event.target as HTMLInputElement).blur();
+              if (event.key === "Enter")
+                (event.target as HTMLInputElement).blur();
               if (event.key === "Escape") setEditing(false);
             }}
             className="mt-1 h-8 w-full rounded-md border border-primary bg-card px-2 text-[12.5px] text-foreground outline-none focus:shadow-focus"
@@ -274,12 +324,19 @@ const EditableInfoRow = ({
 
   return (
     <div
-      className={cn("min-w-0 rounded-md", canEdit && "-mx-1 cursor-text px-1 py-0.5 hover:bg-muted/50")}
+      className={cn(
+        "min-w-0 rounded-md",
+        canEdit && "-mx-1 cursor-text px-1 py-0.5 hover:bg-muted/50",
+      )}
       onDoubleClick={start}
       title={canEdit ? "Nháy đúp để sửa" : undefined}
     >
-      <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
-      <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">{shown ?? "—"}</p>
+      <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-0.5 break-words text-[12.5px] font-medium text-foreground">
+        {shown ?? "—"}
+      </p>
     </div>
   );
 };
@@ -304,8 +361,12 @@ const SectionCard = ({
           <Icon className="h-[17px] w-[17px]" strokeWidth={1.9} />
         </span>
         <div className="min-w-0">
-          <h3 className="text-[13.5px] font-semibold text-foreground">{title}</h3>
-          {description && <p className="text-[11.5px] text-muted-foreground">{description}</p>}
+          <h3 className="text-[13.5px] font-semibold text-foreground">
+            {title}
+          </h3>
+          {description && (
+            <p className="text-[11.5px] text-muted-foreground">{description}</p>
+          )}
         </div>
       </div>
       {onEdit && (
@@ -330,11 +391,15 @@ const EmployeeProfile = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { activeCompany, can, role, canManageModule } = useCompany();
+  const canInvite = role === "owner" || role === "admin" || role === "hr";
   const canManage = canManageModule("employees");
-  const canManagePermissions = role === "owner" || role === "admin" || role === "hr";
+  const canManagePermissions =
+    role === "owner" || role === "admin" || role === "hr";
   const canDelete = isManagerial(role);
 
   const [employee, setEmployee] = useState<EmployeeRecord | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteReload, setInviteReload] = useState(0);
   const [colleagues, setColleagues] = useState<EmployeeRecord[]>([]);
   const [departments, setDepartments] = useState<DepartmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -345,7 +410,9 @@ const EmployeeProfile = () => {
   const [resignOpen, setResignOpen] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
-  const [requiredDocCategories, setRequiredDocCategories] = useState<string[]>(REQUIRED_DOCUMENT_CATEGORIES);
+  const [requiredDocCategories, setRequiredDocCategories] = useState<string[]>(
+    REQUIRED_DOCUMENT_CATEGORIES,
+  );
   const [summary, setSummary] = useState<{
     contract: ContractRecord | null;
     salary: SalaryRecord | null;
@@ -374,7 +441,9 @@ const EmployeeProfile = () => {
     void listDocumentChecklist(activeCompany.id)
       .then((rows) => {
         if (active && rows.length > 0) {
-          setRequiredDocCategories(Array.from(new Set(rows.map((row) => row.category))));
+          setRequiredDocCategories(
+            Array.from(new Set(rows.map((row) => row.category))),
+          );
         }
       })
       .catch(() => undefined);
@@ -387,13 +456,14 @@ const EmployeeProfile = () => {
     ? buildEmployeeWarnings({
         employee,
         contracts: summary.contracts,
-        documentCategories: summary.documents.map((document) => document.category),
+        documentCategories: summary.documents.map(
+          (document) => document.category,
+        ),
         onboarding: summary.onboarding[0] ?? null,
         canSensitive,
         requiredCategories: requiredDocCategories,
       })
     : [];
-
 
   const load = useCallback(async () => {
     if (!id || !activeCompany) return;
@@ -446,33 +516,53 @@ const EmployeeProfile = () => {
           documents,
           onboardingRows,
         ] = await Promise.all([
-            fetchRecords<ContractRecord>("employee_contracts", id, "start_date").catch(() => []),
-            canSensitive
-              ? fetchRecords<SalaryRecord>("employee_salary_records", id, "effective_date").catch(() => [])
-              : Promise.resolve([] as SalaryRecord[]),
-            canSensitive
-              ? fetchRecords<InsuranceRecord>("employee_insurance_records", id, "start_date").catch(
-                  () => [],
-                )
-              : Promise.resolve([] as InsuranceRecord[]),
-            countRecords("employee_work_history", id).catch(() => 0),
-            countRecords("employee_rewards", id).catch(() => 0),
-            countRecords("employee_discipline_records", id).catch(() => 0),
-            countRecords("employee_training_records", id).catch(() => 0),
-            countRecords("employee_assets", id).catch(() => 0),
-            fetchRecords<DependentRecord>("employee_dependents", id, "created_at").catch(() => []),
-            canSensitive
-              ? fetchRecords<DebtRecord>("employee_debts", id, "due_date").catch(() => [] as DebtRecord[])
-              : Promise.resolve([] as DebtRecord[]),
-            canSensitive
-              ? fetchRecords<DocumentRecord>("employee_documents", id, "created_at").catch(
-                  () => [] as DocumentRecord[],
-                )
-              : Promise.resolve([] as DocumentRecord[]),
-            listRows<OnboardingRecord>("onboarding_records", activeCompany?.id ?? "", "created_at").catch(
-              () => [] as OnboardingRecord[],
-            ),
-          ]);
+          fetchRecords<ContractRecord>(
+            "employee_contracts",
+            id,
+            "start_date",
+          ).catch(() => []),
+          canSensitive
+            ? fetchRecords<SalaryRecord>(
+                "employee_salary_records",
+                id,
+                "effective_date",
+              ).catch(() => [])
+            : Promise.resolve([] as SalaryRecord[]),
+          canSensitive
+            ? fetchRecords<InsuranceRecord>(
+                "employee_insurance_records",
+                id,
+                "start_date",
+              ).catch(() => [])
+            : Promise.resolve([] as InsuranceRecord[]),
+          countRecords("employee_work_history", id).catch(() => 0),
+          countRecords("employee_rewards", id).catch(() => 0),
+          countRecords("employee_discipline_records", id).catch(() => 0),
+          countRecords("employee_training_records", id).catch(() => 0),
+          countRecords("employee_assets", id).catch(() => 0),
+          fetchRecords<DependentRecord>(
+            "employee_dependents",
+            id,
+            "created_at",
+          ).catch(() => []),
+          canSensitive
+            ? fetchRecords<DebtRecord>("employee_debts", id, "due_date").catch(
+                () => [] as DebtRecord[],
+              )
+            : Promise.resolve([] as DebtRecord[]),
+          canSensitive
+            ? fetchRecords<DocumentRecord>(
+                "employee_documents",
+                id,
+                "created_at",
+              ).catch(() => [] as DocumentRecord[])
+            : Promise.resolve([] as DocumentRecord[]),
+          listRows<OnboardingRecord>(
+            "onboarding_records",
+            activeCompany?.id ?? "",
+            "created_at",
+          ).catch(() => [] as OnboardingRecord[]),
+        ]);
 
         if (!active) return;
         setSummary({
@@ -490,7 +580,9 @@ const EmployeeProfile = () => {
             training,
             assets,
             documents: documents.length,
-            debts: debts.filter((debt) => debt.status === "open" && debtOutstanding(debt) > 0).length,
+            debts: debts.filter(
+              (debt) => debt.status === "open" && debtOutstanding(debt) > 0,
+            ).length,
           },
         });
       } catch (summaryError) {
@@ -506,17 +598,19 @@ const EmployeeProfile = () => {
 
   const manager = useMemo(() => {
     if (!employee) return null;
-    const department = departments.find((item) => item.name === employee.department) ?? null;
+    const department =
+      departments.find((item) => item.name === employee.department) ?? null;
     let managerId = employee.manager_id;
     if (department) {
-      const isDepartmentManager = department.manager_employee_id === employee.id;
+      const isDepartmentManager =
+        department.manager_employee_id === employee.id;
       const parent = department.parent_id
-        ? departments.find((item) => item.id === department.parent_id) ?? null
+        ? (departments.find((item) => item.id === department.parent_id) ?? null)
         : null;
       managerId =
         isDepartmentManager && parent?.manager_employee_id
           ? parent.manager_employee_id
-          : department.manager_employee_id ?? managerId;
+          : (department.manager_employee_id ?? managerId);
     }
     return colleagues.find((person) => person.id === managerId) ?? null;
   }, [colleagues, departments, employee]);
@@ -528,7 +622,8 @@ const EmployeeProfile = () => {
       { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
       {
         id: "warnings",
-        label: warnings.length > 0 ? `Cảnh báo (${warnings.length})` : "Cảnh báo",
+        label:
+          warnings.length > 0 ? `Cảnh báo (${warnings.length})` : "Cảnh báo",
         icon: AlertTriangle,
       },
       { id: "personal", label: "Thông tin cá nhân", icon: UserRound },
@@ -547,9 +642,12 @@ const EmployeeProfile = () => {
     list.push({ id: "training", label: "Đào tạo", icon: GraduationCap });
     list.push({ id: "evaluations", label: "Đánh giá", icon: ClipboardCheck });
     list.push({ id: "assets", label: "Tài sản", icon: Laptop });
-    if (canSensitive) list.push({ id: "permissions", label: "Phân quyền", icon: KeyRound });
-    if (canSensitive) list.push({ id: "debts", label: "Công nợ", icon: Banknote });
-    if (canSensitive) list.push({ id: "documents", label: "Tài liệu", icon: FolderOpen });
+    if (canSensitive)
+      list.push({ id: "permissions", label: "Phân quyền", icon: KeyRound });
+    if (canSensitive)
+      list.push({ id: "debts", label: "Công nợ", icon: Banknote });
+    if (canSensitive)
+      list.push({ id: "documents", label: "Tài liệu", icon: FolderOpen });
     list.push({ id: "history", label: "Lịch sử", icon: History });
     return list;
   }, [canSensitive, warnings.length]);
@@ -558,7 +656,11 @@ const EmployeeProfile = () => {
     const container = tabBarRef.current;
     if (!container) return;
     const active = container.querySelector<HTMLElement>('[data-active="true"]');
-    active?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    active?.scrollIntoView({
+      inline: "center",
+      block: "nearest",
+      behavior: "smooth",
+    });
   }, [tab]);
 
   const handleAvatarUpload = async (file: File | undefined) => {
@@ -575,7 +677,8 @@ const EmployeeProfile = () => {
       await load();
     } catch (uploadError) {
       toast.error("Không tải được ảnh hồ sơ", {
-        description: uploadError instanceof Error ? uploadError.message : undefined,
+        description:
+          uploadError instanceof Error ? uploadError.message : undefined,
       });
     } finally {
       setAvatarBusy(false);
@@ -593,7 +696,8 @@ const EmployeeProfile = () => {
       navigate("/employees");
     } catch (deleteError) {
       toast.error("Không xoá được hồ sơ", {
-        description: deleteError instanceof Error ? deleteError.message : undefined,
+        description:
+          deleteError instanceof Error ? deleteError.message : undefined,
       });
     } finally {
       setRemoving(false);
@@ -608,10 +712,23 @@ const EmployeeProfile = () => {
     }
     if (searchParams.get("section") === "contracts") {
       window.setTimeout(() => {
-        document.getElementById("contracts")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document
+          .getElementById("contracts")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 300);
     }
   }, [searchParams, tabs]);
+
+  // Vừa tạo hồ sơ (?moi=1): mở ngay popup gửi lời mời.
+  useEffect(() => {
+    if (
+      canInvite &&
+      employee &&
+      !employee.user_id &&
+      searchParams.get("moi") === "1"
+    )
+      setInviteOpen(true);
+  }, [canInvite, employee, searchParams]);
 
   const loadDocumentData = async () => {
     if (!employee || !activeCompany) return null;
@@ -629,19 +746,65 @@ const EmployeeProfile = () => {
       training,
       documents,
     ] = await Promise.all([
-        fetchRecords<ContractRecord>("employee_contracts", employee.id, "start_date").catch(() => []),
-        fetchRecords<SalaryRecord>("employee_salary_records", employee.id, "effective_date").catch(() => []),
-        fetchRecords<InsuranceRecord>("employee_insurance_records", employee.id, "start_date").catch(() => []),
-        fetchRecords<WorkHistoryRecord>("employee_work_history", employee.id, "start_date").catch(() => []),
-        listRows<OnboardingRecord>("onboarding_records", activeCompany.id, "created_at").catch(() => []),
-        fetchRecords<AssetRecord>("employee_assets", employee.id, "assigned_date").catch(() => []),
-        fetchRecords<DebtRecord>("employee_debts", employee.id, "due_date").catch(() => []),
-        fetchRecords<DependentRecord>("employee_dependents", employee.id, "created_at").catch(() => []),
-        fetchRecords<RewardRecord>("employee_rewards", employee.id, "reward_date").catch(() => []),
-        fetchRecords<DisciplineRecord>("employee_discipline_records", employee.id, "effective_date").catch(() => []),
-        fetchRecords<TrainingRecord>("employee_training_records", employee.id, "start_date").catch(() => []),
-        fetchRecords<DocumentRecord>("employee_documents", employee.id, "created_at").catch(() => []),
-      ]);
+      fetchRecords<ContractRecord>(
+        "employee_contracts",
+        employee.id,
+        "start_date",
+      ).catch(() => []),
+      fetchRecords<SalaryRecord>(
+        "employee_salary_records",
+        employee.id,
+        "effective_date",
+      ).catch(() => []),
+      fetchRecords<InsuranceRecord>(
+        "employee_insurance_records",
+        employee.id,
+        "start_date",
+      ).catch(() => []),
+      fetchRecords<WorkHistoryRecord>(
+        "employee_work_history",
+        employee.id,
+        "start_date",
+      ).catch(() => []),
+      listRows<OnboardingRecord>(
+        "onboarding_records",
+        activeCompany.id,
+        "created_at",
+      ).catch(() => []),
+      fetchRecords<AssetRecord>(
+        "employee_assets",
+        employee.id,
+        "assigned_date",
+      ).catch(() => []),
+      fetchRecords<DebtRecord>("employee_debts", employee.id, "due_date").catch(
+        () => [],
+      ),
+      fetchRecords<DependentRecord>(
+        "employee_dependents",
+        employee.id,
+        "created_at",
+      ).catch(() => []),
+      fetchRecords<RewardRecord>(
+        "employee_rewards",
+        employee.id,
+        "reward_date",
+      ).catch(() => []),
+      fetchRecords<DisciplineRecord>(
+        "employee_discipline_records",
+        employee.id,
+        "effective_date",
+      ).catch(() => []),
+      fetchRecords<TrainingRecord>(
+        "employee_training_records",
+        employee.id,
+        "start_date",
+      ).catch(() => []),
+      fetchRecords<DocumentRecord>(
+        "employee_documents",
+        employee.id,
+        "created_at",
+      ).catch(() => []),
+    ]);
 
     return {
       employee,
@@ -649,7 +812,9 @@ const EmployeeProfile = () => {
       salaries,
       insurance,
       workHistory,
-      onboarding: onboardingRows.filter((row) => row.employee_id === employee.id),
+      onboarding: onboardingRows.filter(
+        (row) => row.employee_id === employee.id,
+      ),
       assets,
       debts,
       dependents,
@@ -678,26 +843,48 @@ const EmployeeProfile = () => {
 
   const handlePrintAssets = async () => {
     if (!employee || !activeCompany) return;
-    const assets = await fetchRecords<AssetRecord>("employee_assets", employee.id, "assigned_date");
+    const assets = await fetchRecords<AssetRecord>(
+      "employee_assets",
+      employee.id,
+      "assigned_date",
+    );
     printHtml(buildAssetHandoverHtml(employee, assets, activeCompany.name));
   };
 
   const handleDownloadAssets = async () => {
     if (!employee || !activeCompany) return;
-    const assets = await fetchRecords<AssetRecord>("employee_assets", employee.id, "assigned_date");
-    downloadHtml(buildAssetHandoverHtml(employee, assets, activeCompany.name), `bien-ban-ban-giao-${employee.code.toLowerCase()}`);
+    const assets = await fetchRecords<AssetRecord>(
+      "employee_assets",
+      employee.id,
+      "assigned_date",
+    );
+    downloadHtml(
+      buildAssetHandoverHtml(employee, assets, activeCompany.name),
+      `bien-ban-ban-giao-${employee.code.toLowerCase()}`,
+    );
   };
 
   const handlePrintDebts = async () => {
     if (!employee || !activeCompany) return;
-    const debts = await fetchRecords<DebtRecord>("employee_debts", employee.id, "due_date");
+    const debts = await fetchRecords<DebtRecord>(
+      "employee_debts",
+      employee.id,
+      "due_date",
+    );
     printHtml(buildDebtConfirmationHtml(employee, debts, activeCompany.name));
   };
 
   const handleDownloadDebts = async () => {
     if (!employee || !activeCompany) return;
-    const debts = await fetchRecords<DebtRecord>("employee_debts", employee.id, "due_date");
-    downloadHtml(buildDebtConfirmationHtml(employee, debts, activeCompany.name), `bien-ban-cong-no-${employee.code.toLowerCase()}`);
+    const debts = await fetchRecords<DebtRecord>(
+      "employee_debts",
+      employee.id,
+      "due_date",
+    );
+    downloadHtml(
+      buildDebtConfirmationHtml(employee, debts, activeCompany.name),
+      `bien-ban-cong-no-${employee.code.toLowerCase()}`,
+    );
   };
 
   const handleSave = async (values: Record<string, string | number | null>) => {
@@ -708,8 +895,13 @@ const EmployeeProfile = () => {
       setEditOpen(false);
       await load();
     } catch (saveError) {
-      const message = saveError instanceof Error ? saveError.message : "Không lưu được.";
-      throw new Error(message.includes("duplicate key") ? "Mã nhân viên đã tồn tại." : message);
+      const message =
+        saveError instanceof Error ? saveError.message : "Không lưu được.";
+      throw new Error(
+        message.includes("duplicate key")
+          ? "Mã nhân viên đã tồn tại."
+          : message,
+      );
     }
   };
 
@@ -730,11 +922,16 @@ const EmployeeProfile = () => {
       <AppShell>
         <Card className="p-10 text-center">
           <Users className="mx-auto h-7 w-7 text-muted-foreground" />
-          <p className="mt-3 text-[14px] font-semibold text-foreground">Không tìm thấy hồ sơ nhân viên</p>
+          <p className="mt-3 text-[14px] font-semibold text-foreground">
+            Không tìm thấy hồ sơ nhân viên
+          </p>
           <p className="mt-1 text-[12.5px] text-muted-foreground">
             Hồ sơ có thể đã bị xoá hoặc bạn không có quyền truy cập.
           </p>
-          <Button className="mt-4 h-9 gap-1.5 text-[12.5px]" onClick={() => navigate("/employees")}>
+          <Button
+            className="mt-4 h-9 gap-1.5 text-[12.5px]"
+            onClick={() => navigate("/employees")}
+          >
             <ArrowLeft className="h-3.5 w-3.5" /> Về danh sách nhân viên
           </Button>
         </Card>
@@ -743,15 +940,22 @@ const EmployeeProfile = () => {
   }
 
   const meta = EMPLOYEE_STATUS_META[employee.status];
-  const activeInsurance = summary.insurance.filter((item) => item.status === "active");
+  const activeInsurance = summary.insurance.filter(
+    (item) => item.status === "active",
+  );
   return (
     <AppShell>
       <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground">
-        <Link to="/employees" className="inline-flex items-center gap-1 transition-colors hover:text-foreground">
+        <Link
+          to="/employees"
+          className="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+        >
           <ArrowLeft className="h-3 w-3" /> Hồ sơ nhân viên
         </Link>
         <ChevronRight className="h-3 w-3" />
-        <span className="font-medium text-foreground">{employee.full_name}</span>
+        <span className="font-medium text-foreground">
+          {employee.full_name}
+        </span>
       </div>
 
       <Card className="relative overflow-hidden p-0">
@@ -773,7 +977,11 @@ const EmployeeProfile = () => {
               />
               {canManage && (
                 <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 text-background opacity-0 transition-opacity group-hover:opacity-100">
-                  {avatarBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                  {avatarBusy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </span>
               )}
               {canManage && (
@@ -811,7 +1019,9 @@ const EmployeeProfile = () => {
                 )}
               </div>
               <p className="mt-1 text-[12.5px] text-muted-foreground">
-                {[employee.position, employee.department].filter(Boolean).join(" · ") || "Chưa cập nhật vị trí"}
+                {[employee.position, employee.department]
+                  .filter(Boolean)
+                  .join(" · ") || "Chưa cập nhật vị trí"}
               </p>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] text-muted-foreground">
@@ -831,12 +1041,16 @@ const EmployeeProfile = () => {
                   </span>
                 )}
                 <span className="inline-flex items-center gap-1.5">
-                  <CalendarDays className="h-3 w-3" /> Vào làm {formatDate(employee.hire_date)}
+                  <CalendarDays className="h-3 w-3" /> Vào làm{" "}
+                  {formatDate(employee.hire_date)}
                 </span>
                 {employee.status === "resigned" && (
                   <span className="inline-flex items-center gap-1.5 font-medium text-warning">
-                    <CalendarDays className="h-3 w-3" /> Nghỉ việc {formatDate(employee.resignation_date)}
-                    {employee.resignation_reason ? ` · ${employee.resignation_reason}` : ""}
+                    <CalendarDays className="h-3 w-3" /> Nghỉ việc{" "}
+                    {formatDate(employee.resignation_date)}
+                    {employee.resignation_reason
+                      ? ` · ${employee.resignation_reason}`
+                      : ""}
                   </span>
                 )}
                 {activeCompany && (
@@ -845,6 +1059,16 @@ const EmployeeProfile = () => {
                   </span>
                 )}
               </div>
+              {canInvite && activeCompany && (
+                <div className="mt-3">
+                  <InviteStatusBar
+                    companyId={activeCompany.id}
+                    employeeId={employee.id}
+                    reloadKey={inviteReload}
+                    onInvite={() => setInviteOpen(true)}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -859,12 +1083,18 @@ const EmployeeProfile = () => {
                   <UserMinus className="h-3.5 w-3.5" /> Nghỉ việc
                 </Button>
               )}
-              <Button className="h-9 gap-1.5 text-[12.5px]" onClick={() => setEditOpen(true)}>
+              <Button
+                className="h-9 gap-1.5 text-[12.5px]"
+                onClick={() => setEditOpen(true)}
+              >
                 <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa hồ sơ
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="h-9 gap-1.5 text-[12.5px]">
+                  <Button
+                    variant="outline"
+                    className="h-9 gap-1.5 text-[12.5px]"
+                  >
                     <MoreHorizontal className="h-4 w-4" /> Thao tác
                   </Button>
                 </DropdownMenuTrigger>
@@ -887,10 +1117,16 @@ const EmployeeProfile = () => {
                   >
                     <Link2 className="h-3.5 w-3.5" /> Gửi link hoàn thiện hồ sơ
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2 text-[12.5px]" onSelect={() => void handlePrintSummary()}>
+                  <DropdownMenuItem
+                    className="gap-2 text-[12.5px]"
+                    onSelect={() => void handlePrintSummary()}
+                  >
                     <Printer className="h-3.5 w-3.5" /> In trích yếu hồ sơ
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2 text-[12.5px]" onSelect={() => void handleDownloadSummary()}>
+                  <DropdownMenuItem
+                    className="gap-2 text-[12.5px]"
+                    onSelect={() => void handleDownloadSummary()}
+                  >
                     <Download className="h-3.5 w-3.5" /> Tải trích yếu hồ sơ
                   </DropdownMenuItem>
                   {canDelete && (
@@ -911,7 +1147,10 @@ const EmployeeProfile = () => {
         </div>
 
         <div className="sticky top-0 z-20 border-t border-border/60 bg-card/95 backdrop-blur">
-          <div ref={tabBarRef} className="scrollbar-slim flex gap-1 overflow-x-auto px-3 py-2">
+          <div
+            ref={tabBarRef}
+            className="scrollbar-slim flex gap-1 overflow-x-auto px-3 py-2"
+          >
             {tabs.map((item) => {
               const Icon = item.icon;
               const isActive = tab === item.id;
@@ -942,9 +1181,12 @@ const EmployeeProfile = () => {
           {warnings.length === 0 ? (
             <Card className="p-10 text-center">
               <CheckCircle2 className="mx-auto h-7 w-7 text-success" />
-              <p className="mt-2 text-[13.5px] font-semibold text-foreground">Hồ sơ không có cảnh báo</p>
+              <p className="mt-2 text-[13.5px] font-semibold text-foreground">
+                Hồ sơ không có cảnh báo
+              </p>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                Hợp đồng, thông tin thanh toán, giấy tờ và hội nhập đều đã đầy đủ.
+                Hợp đồng, thông tin thanh toán, giấy tờ và hội nhập đều đã đầy
+                đủ.
               </p>
             </Card>
           ) : (
@@ -957,20 +1199,26 @@ const EmployeeProfile = () => {
                   className={cn(
                     "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
                     index > 0 && "border-t border-border/60",
-                    warning.severity === "high" ? "hover:bg-destructive-subtle/60" : "hover:bg-warning-subtle/60",
+                    warning.severity === "high"
+                      ? "hover:bg-destructive-subtle/60"
+                      : "hover:bg-warning-subtle/60",
                   )}
                 >
                   <AlertTriangle
                     className={cn(
                       "mt-0.5 h-4 w-4 shrink-0",
-                      warning.severity === "high" ? "text-destructive" : "text-warning",
+                      warning.severity === "high"
+                        ? "text-destructive"
+                        : "text-warning",
                     )}
                   />
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
                         "block text-[12.5px] font-semibold",
-                        warning.severity === "high" ? "text-destructive" : "text-foreground",
+                        warning.severity === "high"
+                          ? "text-destructive"
+                          : "text-foreground",
                       )}
                     >
                       {warning.title}
@@ -986,8 +1234,8 @@ const EmployeeProfile = () => {
           )}
 
           <p className="text-[10.5px] leading-5 text-muted-foreground">
-            Cảnh báo được tính tự động từ hợp đồng, thông tin thanh toán, mức đầy đủ hồ sơ, checklist giấy tờ và tiến
-            độ hội nhập.
+            Cảnh báo được tính tự động từ hợp đồng, thông tin thanh toán, mức
+            đầy đủ hồ sơ, checklist giấy tờ và tiến độ hội nhập.
           </p>
         </div>
       )}
@@ -1003,7 +1251,8 @@ const EmployeeProfile = () => {
                 {tenure(employee.hire_date, employee.resignation_date)}
               </p>
               <p className="text-[11px] text-muted-foreground">
-                {EMPLOYMENT_TYPE_LABELS[employee.employment_type ?? ""] ?? "Chưa cập nhật hình thức"}
+                {EMPLOYMENT_TYPE_LABELS[employee.employment_type ?? ""] ??
+                  "Chưa cập nhật hình thức"}
               </p>
             </Card>
             <Card className="p-4">
@@ -1011,10 +1260,15 @@ const EmployeeProfile = () => {
                 Hợp đồng hiện tại
               </p>
               <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.02em] text-foreground">
-                {summary.contract ? CONTRACT_TYPE_LABELS[summary.contract.contract_type] ?? "—" : "Chưa có"}
+                {summary.contract
+                  ? (CONTRACT_TYPE_LABELS[summary.contract.contract_type] ??
+                    "—")
+                  : "Chưa có"}
               </p>
               <p className="text-[11px] text-muted-foreground">
-                {summary.contract ? formatDate(summary.contract.start_date) : "Thêm hợp đồng trong tab Công tác"}
+                {summary.contract
+                  ? formatDate(summary.contract.start_date)
+                  : "Thêm hợp đồng trong tab Công tác"}
               </p>
             </Card>
             <Card className="p-4">
@@ -1022,7 +1276,9 @@ const EmployeeProfile = () => {
                 Mức lương hiện tại
               </p>
               <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.02em] text-foreground">
-                {canSensitive && summary.salary ? currency(Number(summary.salary.base_salary), true) : "•••"}
+                {canSensitive && summary.salary
+                  ? currency(Number(summary.salary.base_salary), true)
+                  : "•••"}
               </p>
               <p className="text-[11px] text-muted-foreground">
                 {canSensitive && summary.salary
@@ -1039,7 +1295,13 @@ const EmployeeProfile = () => {
               </p>
               <p className="text-[11px] text-muted-foreground">
                 {canSensitive
-                  ? activeInsurance.map((item) => INSURANCE_TYPE_LABELS[item.insurance_type] ?? item.insurance_type).join(" · ") || "Chưa tham gia"
+                  ? activeInsurance
+                      .map(
+                        (item) =>
+                          INSURANCE_TYPE_LABELS[item.insurance_type] ??
+                          item.insurance_type,
+                      )
+                      .join(" · ") || "Chưa tham gia"
                   : "Thông tin nội bộ"}
               </p>
             </Card>
@@ -1059,40 +1321,80 @@ const EmployeeProfile = () => {
               <div className="flex items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary-subtle text-primary-subtle-foreground">
-                    <UserRound className="h-[17px] w-[17px]" strokeWidth={1.9} />
+                    <UserRound
+                      className="h-[17px] w-[17px]"
+                      strokeWidth={1.9}
+                    />
                   </span>
                   <div>
-                    <h3 className="text-[13.5px] font-semibold text-foreground">Thông tin nhanh</h3>
+                    <h3 className="text-[13.5px] font-semibold text-foreground">
+                      Thông tin nhanh
+                    </h3>
                     <p className="text-[11.5px] text-muted-foreground">
-                      Dữ liệu cốt lõi của hồ sơ{canManage ? " · bấm để chỉnh sửa" : ""}
+                      Dữ liệu cốt lõi của hồ sơ
+                      {canManage ? " · bấm để chỉnh sửa" : ""}
                     </p>
                   </div>
                 </div>
-                {canManage && <Pencil className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                {canManage && (
+                  <Pencil className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                )}
               </div>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <EditableInfoRow label="Email công việc" field="work_email" kind="email" employee={employee} canEdit={canManage} onSaved={load} />
+                <EditableInfoRow
+                  label="Email công việc"
+                  field="work_email"
+                  kind="email"
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
                 <InfoRow label="Số điện thoại" value={employee.phone} />
                 <InfoRow label="Phòng ban" value={employee.department} />
                 <InfoRow label="Chức danh" value={employee.position} />
-                <InfoRow label="Vị trí kiêm nhiệm" value={employee.concurrent_positions} />
-                <InfoRow label="Quản lý trực tiếp" value={manager?.full_name ?? "—"} />
-                <EditableInfoRow label="Địa điểm làm việc" field="work_location" employee={employee} canEdit={canManage} onSaved={load} />
-                <InfoRow label="Ngày vào làm" value={formatDate(employee.hire_date)} />
-                <InfoRow label="Ngày chính thức" value={formatDate(employee.official_date)} />
-                <EditableInfoRow label="Ngày sinh" field="date_of_birth" kind="date" employee={employee} canEdit={canManage} onSaved={load} />
+                <InfoRow
+                  label="Vị trí kiêm nhiệm"
+                  value={employee.concurrent_positions}
+                />
+                <InfoRow
+                  label="Quản lý trực tiếp"
+                  value={manager?.full_name ?? "—"}
+                />
                 <EditableInfoRow
-                label="Giới tính"
-                field="gender"
-                kind="select"
-                options={[
-                  { value: "male", label: "Nam" },
-                  { value: "female", label: "Nữ" },
-                ]}
-                employee={employee}
-                canEdit={canManage}
-                onSaved={load}
-              />
+                  label="Địa điểm làm việc"
+                  field="work_location"
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
+                <InfoRow
+                  label="Ngày vào làm"
+                  value={formatDate(employee.hire_date)}
+                />
+                <InfoRow
+                  label="Ngày chính thức"
+                  value={formatDate(employee.official_date)}
+                />
+                <EditableInfoRow
+                  label="Ngày sinh"
+                  field="date_of_birth"
+                  kind="date"
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
+                <EditableInfoRow
+                  label="Giới tính"
+                  field="gender"
+                  kind="select"
+                  options={[
+                    { value: "male", label: "Nam" },
+                    { value: "female", label: "Nữ" },
+                  ]}
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
               </div>
             </Card>
 
@@ -1102,17 +1404,41 @@ const EmployeeProfile = () => {
                   <BadgeCheck className="h-[17px] w-[17px]" strokeWidth={1.9} />
                 </span>
                 <div>
-                  <h3 className="text-[13.5px] font-semibold text-foreground">Độ đầy đủ hồ sơ</h3>
-                  <p className="text-[11.5px] text-muted-foreground">Số bản ghi đã ghi nhận</p>
+                  <h3 className="text-[13.5px] font-semibold text-foreground">
+                    Độ đầy đủ hồ sơ
+                  </h3>
+                  <p className="text-[11.5px] text-muted-foreground">
+                    Số bản ghi đã ghi nhận
+                  </p>
                 </div>
               </div>
               <ul className="mt-4 space-y-2.5">
                 {[
-                  { label: "Mốc công tác", value: summary.counts.work ?? 0, tab: "work" as TabId },
-                  { label: "Khen thưởng", value: summary.counts.rewards ?? 0, tab: "rewards" as TabId },
-                  { label: "Bản ghi kỷ luật", value: summary.counts.discipline ?? 0, tab: "rewards" as TabId },
-                  { label: "Khoá đào tạo", value: summary.counts.training ?? 0, tab: "training" as TabId },
-                  { label: "Tài sản bàn giao", value: summary.counts.assets ?? 0, tab: "assets" as TabId },
+                  {
+                    label: "Mốc công tác",
+                    value: summary.counts.work ?? 0,
+                    tab: "work" as TabId,
+                  },
+                  {
+                    label: "Khen thưởng",
+                    value: summary.counts.rewards ?? 0,
+                    tab: "rewards" as TabId,
+                  },
+                  {
+                    label: "Bản ghi kỷ luật",
+                    value: summary.counts.discipline ?? 0,
+                    tab: "rewards" as TabId,
+                  },
+                  {
+                    label: "Khoá đào tạo",
+                    value: summary.counts.training ?? 0,
+                    tab: "training" as TabId,
+                  },
+                  {
+                    label: "Tài sản bàn giao",
+                    value: summary.counts.assets ?? 0,
+                    tab: "assets" as TabId,
+                  },
                   ...(canSensitive
                     ? [
                         {
@@ -1123,7 +1449,13 @@ const EmployeeProfile = () => {
                       ]
                     : []),
                   ...(canSensitive
-                    ? [{ label: "Tài liệu đính kèm", value: summary.counts.documents ?? 0, tab: "documents" as TabId }]
+                    ? [
+                        {
+                          label: "Tài liệu đính kèm",
+                          value: summary.counts.documents ?? 0,
+                          tab: "documents" as TabId,
+                        },
+                      ]
                     : []),
                 ].map((row) => (
                   <li key={row.label}>
@@ -1132,8 +1464,12 @@ const EmployeeProfile = () => {
                       onClick={() => setTab(row.tab)}
                       className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted"
                     >
-                      <span className="text-[12px] text-muted-foreground">{row.label}</span>
-                      <span className="text-[12.5px] font-semibold text-foreground">{row.value}</span>
+                      <span className="text-[12px] text-muted-foreground">
+                        {row.label}
+                      </span>
+                      <span className="text-[12.5px] font-semibold text-foreground">
+                        {row.value}
+                      </span>
                     </button>
                   </li>
                 ))}
@@ -1143,7 +1479,9 @@ const EmployeeProfile = () => {
 
           {employee.notes && (
             <Card className="p-5">
-              <h3 className="text-[13.5px] font-semibold text-foreground">Ghi chú nội bộ</h3>
+              <h3 className="text-[13.5px] font-semibold text-foreground">
+                Ghi chú nội bộ
+              </h3>
               <p className="mt-2 whitespace-pre-line text-[12.5px] leading-6 text-muted-foreground">
                 {employee.notes}
               </p>
@@ -1156,11 +1494,33 @@ const EmployeeProfile = () => {
         <div className="grid gap-5 lg:grid-cols-2">
           <SectionCard
             title="Thông tin cá nhân"
-            onEdit={canManage ? () => setEditOpen(true) : undefined} description="Giấy tờ tuỳ thân và tình trạng hôn nhân" icon={IdCard}>
+            onEdit={canManage ? () => setEditOpen(true) : undefined}
+            description="Giấy tờ tuỳ thân và tình trạng hôn nhân"
+            icon={IdCard}
+          >
             <div className="grid gap-4 sm:grid-cols-2">
-              <EditableInfoRow label="Họ và tên" field="full_name" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Mã nhân viên" field="code" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Ngày sinh" field="date_of_birth" kind="date" employee={employee} canEdit={canManage} onSaved={load} />
+              <EditableInfoRow
+                label="Họ và tên"
+                field="full_name"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Mã nhân viên"
+                field="code"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Ngày sinh"
+                field="date_of_birth"
+                kind="date"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
               <EditableInfoRow
                 label="Giới tính"
                 field="gender"
@@ -1173,49 +1533,152 @@ const EmployeeProfile = () => {
                 canEdit={canManage}
                 onSaved={load}
               />
-              <EditableInfoRow label="Số CCCD / CMND" field="national_id" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Ngày cấp" field="national_id_issue_date" kind="date" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Nơi cấp" field="national_id_issue_place" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Quốc tịch" field="nationality" employee={employee} canEdit={canManage} onSaved={load} />
               <EditableInfoRow
-                label="Hôn nhân"
-                field="marital_status"
-                kind="select"
-                options={Object.entries(MARITAL_LABELS).map(([value, label]) => ({ value, label }))}
+                label="Số CCCD / CMND"
+                field="national_id"
                 employee={employee}
                 canEdit={canManage}
                 onSaved={load}
               />
-              <EditableInfoRow label="Người phụ thuộc" field="dependents_count" kind="number" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Số sổ BHXH" field="insurance_number" employee={employee} canEdit={canManage} onSaved={load} />
+              <EditableInfoRow
+                label="Ngày cấp"
+                field="national_id_issue_date"
+                kind="date"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Nơi cấp"
+                field="national_id_issue_place"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Quốc tịch"
+                field="nationality"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Hôn nhân"
+                field="marital_status"
+                kind="select"
+                options={Object.entries(MARITAL_LABELS).map(
+                  ([value, label]) => ({ value, label }),
+                )}
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Người phụ thuộc"
+                field="dependents_count"
+                kind="number"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Số sổ BHXH"
+                field="insurance_number"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
             </div>
           </SectionCard>
 
           <SectionCard
             title="Liên hệ"
-            onEdit={canManage ? () => setEditOpen(true) : undefined} description="Email, điện thoại và địa chỉ" icon={Mail}>
+            onEdit={canManage ? () => setEditOpen(true) : undefined}
+            description="Email, điện thoại và địa chỉ"
+            icon={Mail}
+          >
             <div className="grid gap-4 sm:grid-cols-2">
-              <EditableInfoRow label="Email công việc" field="work_email" kind="email" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Email cá nhân" field="personal_email" kind="email" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Điện thoại" field="phone" kind="tel" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Địa điểm làm việc" field="work_location" employee={employee} canEdit={canManage} onSaved={load} />
+              <EditableInfoRow
+                label="Email công việc"
+                field="work_email"
+                kind="email"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Email cá nhân"
+                field="personal_email"
+                kind="email"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Điện thoại"
+                field="phone"
+                kind="tel"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Địa điểm làm việc"
+                field="work_location"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
               <div className="sm:col-span-2">
-                <EditableInfoRow label="Địa chỉ hiện tại" field="current_address" employee={employee} canEdit={canManage} onSaved={load} />
+                <EditableInfoRow
+                  label="Địa chỉ hiện tại"
+                  field="current_address"
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
               </div>
               <div className="sm:col-span-2">
-                <EditableInfoRow label="Địa chỉ thường trú" field="permanent_address" employee={employee} canEdit={canManage} onSaved={load} />
+                <EditableInfoRow
+                  label="Địa chỉ thường trú"
+                  field="permanent_address"
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
               </div>
             </div>
           </SectionCard>
 
           <SectionCard
             title="Học vấn"
-            onEdit={canManage ? () => setEditOpen(true) : undefined} description="Trình độ và chuyên ngành" icon={GraduationCap}>
+            onEdit={canManage ? () => setEditOpen(true) : undefined}
+            description="Trình độ và chuyên ngành"
+            icon={GraduationCap}
+          >
             <div className="grid gap-4 sm:grid-cols-2">
-              <EditableInfoRow label="Trình độ" field="education_level" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Chuyên ngành" field="major" employee={employee} canEdit={canManage} onSaved={load} />
+              <EditableInfoRow
+                label="Trình độ"
+                field="education_level"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Chuyên ngành"
+                field="major"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
               <div className="sm:col-span-2">
-                <EditableInfoRow label="Trường" field="school" employee={employee} canEdit={canManage} onSaved={load} />
+                <EditableInfoRow
+                  label="Trường"
+                  field="school"
+                  employee={employee}
+                  canEdit={canManage}
+                  onSaved={load}
+                />
               </div>
             </div>
           </SectionCard>
@@ -1227,7 +1690,9 @@ const EmployeeProfile = () => {
           >
             {summary.dependents.length === 0 ? (
               <div className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center">
-                <p className="text-[12px] text-muted-foreground">Nhân sự chưa khai báo người phụ thuộc.</p>
+                <p className="text-[12px] text-muted-foreground">
+                  Nhân sự chưa khai báo người phụ thuộc.
+                </p>
                 {canManage && (
                   <Button
                     size="sm"
@@ -1243,16 +1708,32 @@ const EmployeeProfile = () => {
               <div className="space-y-2">
                 <ul className="divide-y divide-border/60 rounded-md border border-border">
                   {summary.dependents.map((dependent) => (
-                    <li key={dependent.id} className="flex items-center gap-2 px-3 py-2">
+                    <li
+                      key={dependent.id}
+                      className="flex items-center gap-2 px-3 py-2"
+                    >
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[12.5px] font-medium text-foreground">{dependent.full_name}</p>
+                        <p className="truncate text-[12.5px] font-medium text-foreground">
+                          {dependent.full_name}
+                        </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {DEPENDENT_RELATION_LABELS[dependent.relationship] ?? dependent.relationship}
-                          {dependent.date_of_birth ? ` · sinh ${formatDate(dependent.date_of_birth)}` : ""}
+                          {DEPENDENT_RELATION_LABELS[dependent.relationship] ??
+                            dependent.relationship}
+                          {dependent.date_of_birth
+                            ? ` · sinh ${formatDate(dependent.date_of_birth)}`
+                            : ""}
                         </p>
                       </div>
-                      <Badge variant={dependent.registered_for_deduction ? "success" : "muted"}>
-                        {dependent.registered_for_deduction ? "Giảm trừ" : "Không"}
+                      <Badge
+                        variant={
+                          dependent.registered_for_deduction
+                            ? "success"
+                            : "muted"
+                        }
+                      >
+                        {dependent.registered_for_deduction
+                          ? "Giảm trừ"
+                          : "Không"}
                       </Badge>
                     </li>
                   ))}
@@ -1271,22 +1752,52 @@ const EmployeeProfile = () => {
 
           <SectionCard
             title="Liên hệ khẩn cấp"
-            onEdit={canManage ? () => setEditOpen(true) : undefined} description="Người cần liên hệ khi có sự cố" icon={ShieldAlert}>
+            onEdit={canManage ? () => setEditOpen(true) : undefined}
+            description="Người cần liên hệ khi có sự cố"
+            icon={ShieldAlert}
+          >
             <div className="grid gap-4 sm:grid-cols-2">
-              <EditableInfoRow label="Họ tên" field="emergency_contact_name" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Quan hệ" field="emergency_contact_relation" employee={employee} canEdit={canManage} onSaved={load} />
-              <EditableInfoRow label="Điện thoại" field="emergency_contact_phone" kind="tel" employee={employee} canEdit={canManage} onSaved={load} />
+              <EditableInfoRow
+                label="Họ tên"
+                field="emergency_contact_name"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Quan hệ"
+                field="emergency_contact_relation"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
+              <EditableInfoRow
+                label="Điện thoại"
+                field="emergency_contact_phone"
+                kind="tel"
+                employee={employee}
+                canEdit={canManage}
+                onSaved={load}
+              />
             </div>
           </SectionCard>
         </div>
       )}
 
       {tab === "contacts" && activeCompany && (
-        <ContactsTab employeeId={employee.id} companyId={activeCompany.id} canManage={canManage} />
+        <ContactsTab
+          employeeId={employee.id}
+          companyId={activeCompany.id}
+          canManage={canManage}
+        />
       )}
 
       {tab === "notes" && activeCompany && (
-        <NotesTab employeeId={employee.id} companyId={activeCompany.id} canManage={canManage} />
+        <NotesTab
+          employeeId={employee.id}
+          companyId={activeCompany.id}
+          canManage={canManage}
+        />
       )}
 
       {tab === "work" && (
@@ -1296,12 +1807,19 @@ const EmployeeProfile = () => {
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
                 Nhân sự đã nghỉ việc từ {formatDate(employee.resignation_date)}
-                {employee.resignation_reason ? ` · Lý do: ${employee.resignation_reason}` : ""}. Hợp đồng đang
-                hiệu lực đã được chấm dứt tự động; mọi thay đổi trạng thái đều được ghi vào quá trình công tác.
+                {employee.resignation_reason
+                  ? ` · Lý do: ${employee.resignation_reason}`
+                  : ""}
+                . Hợp đồng đang hiệu lực đã được chấm dứt tự động; mọi thay đổi
+                trạng thái đều được ghi vào quá trình công tác.
               </span>
             </div>
           )}
-          <WorkHistoryTab employeeId={employee.id} canManage={canManage} onChanged={load} />
+          <WorkHistoryTab
+            employeeId={employee.id}
+            canManage={canManage}
+            onChanged={load}
+          />
           <div id="contracts" className="scroll-mt-24">
             <ContractsTab employeeId={employee.id} canManage={canManage} />
           </div>
@@ -1309,13 +1827,21 @@ const EmployeeProfile = () => {
       )}
 
       {tab === "onboarding" && canSensitive && activeCompany && (
-        <OnboardingTab employeeId={employee.id} companyId={activeCompany.id} canManage={canManage} />
+        <OnboardingTab
+          employeeId={employee.id}
+          companyId={activeCompany.id}
+          canManage={canManage}
+        />
       )}
 
       {tab === "salary" && canSensitive && (
         <div className="space-y-5">
           <SalaryTab employeeId={employee.id} canManage={canManage} />
-          <BankInfoCard employee={employee} canManage={canManage} onUpdated={load} />
+          <BankInfoCard
+            employee={employee}
+            canManage={canManage}
+            onUpdated={load}
+          />
         </div>
       )}
 
@@ -1323,7 +1849,9 @@ const EmployeeProfile = () => {
         <InsuranceTab employeeId={employee.id} canManage={canManage} />
       )}
 
-      {tab === "dependents" && <DependentsTab employeeId={employee.id} canManage={canManage} />}
+      {tab === "dependents" && (
+        <DependentsTab employeeId={employee.id} canManage={canManage} />
+      )}
 
       {tab === "permissions" && canSensitive && activeCompany && (
         <PermissionsTab
@@ -1334,7 +1862,11 @@ const EmployeeProfile = () => {
       )}
 
       {tab === "requests" && activeCompany && (
-        <RequestsTab employeeId={employee.id} companyId={activeCompany.id} canManage={canManage} />
+        <RequestsTab
+          employeeId={employee.id}
+          companyId={activeCompany.id}
+          canManage={canManage}
+        />
       )}
 
       {tab === "rewards" && (
@@ -1344,13 +1876,21 @@ const EmployeeProfile = () => {
         </div>
       )}
 
-      {tab === "training" && <TrainingTab employeeId={employee.id} canManage={canManage} />}
+      {tab === "training" && (
+        <TrainingTab employeeId={employee.id} canManage={canManage} />
+      )}
       {tab === "evaluations" && activeCompany && (
-        <EmployeeEvaluationsTab employeeId={employee.id} isSelf={employee.user_id === user?.id} />
+        <EmployeeEvaluationsTab
+          employeeId={employee.id}
+          isSelf={employee.user_id === user?.id}
+        />
       )}
 
       {tab === "evaluations" && activeCompany && (
-        <EmployeeEvaluationsTab employeeId={employee.id} isSelf={employee.user_id === user?.id} />
+        <EmployeeEvaluationsTab
+          employeeId={employee.id}
+          isSelf={employee.user_id === user?.id}
+        />
       )}
 
       {tab === "assets" && (
@@ -1360,10 +1900,20 @@ const EmployeeProfile = () => {
               In hoặc tải biên bản bàn giao toàn bộ tài sản của nhân sự.
             </p>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[11.5px]" onClick={() => void handlePrintAssets()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-[11.5px]"
+                onClick={() => void handlePrintAssets()}
+              >
                 <Printer className="h-3.5 w-3.5" /> In biên bản
               </Button>
-              <Button variant="ghost" size="icon-sm" aria-label="Tải biên bản bàn giao" onClick={() => void handleDownloadAssets()}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Tải biên bản bàn giao"
+                onClick={() => void handleDownloadAssets()}
+              >
                 <Download className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -1379,10 +1929,20 @@ const EmployeeProfile = () => {
               In hoặc tải biên bản xác nhận công nợ của nhân sự.
             </p>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[11.5px]" onClick={() => void handlePrintDebts()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-[11.5px]"
+                onClick={() => void handlePrintDebts()}
+              >
                 <Printer className="h-3.5 w-3.5" /> In biên bản
               </Button>
-              <Button variant="ghost" size="icon-sm" aria-label="Tải biên bản công nợ" onClick={() => void handleDownloadDebts()}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Tải biên bản công nợ"
+                onClick={() => void handleDownloadDebts()}
+              >
                 <Download className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -1391,10 +1951,16 @@ const EmployeeProfile = () => {
         </div>
       )}
 
-      {tab === "history" && <ActivityTimeline entityType="employee" entityId={employee.id} />}
+      {tab === "history" && (
+        <ActivityTimeline entityType="employee" entityId={employee.id} />
+      )}
 
       {tab === "documents" && canSensitive && activeCompany && (
-        <DocumentsTab employeeId={employee.id} companyId={activeCompany.id} canManage={canManage} />
+        <DocumentsTab
+          employeeId={employee.id}
+          companyId={activeCompany.id}
+          canManage={canManage}
+        />
       )}
 
       <ResignationDialog
@@ -1411,8 +1977,9 @@ const EmployeeProfile = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá hồ sơ nhân viên?</AlertDialogTitle>
             <AlertDialogDescription>
-              Toàn bộ dữ liệu của {employee.full_name} — quá trình công tác, hợp đồng, lương, bảo hiểm,
-              khen thưởng, kỷ luật, đào tạo và tài liệu — sẽ bị xoá vĩnh viễn.
+              Toàn bộ dữ liệu của {employee.full_name} — quá trình công tác, hợp
+              đồng, lương, bảo hiểm, khen thưởng, kỷ luật, đào tạo và tài liệu —
+              sẽ bị xoá vĩnh viễn.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1438,6 +2005,14 @@ const EmployeeProfile = () => {
         submitLabel="Lưu thay đổi"
         onSubmit={handleSave}
       />
+      {canInvite && (
+        <InviteEmployeeDialog
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          employees={[employee]}
+          onDone={() => setInviteReload((n) => n + 1)}
+        />
+      )}
     </AppShell>
   );
 };
