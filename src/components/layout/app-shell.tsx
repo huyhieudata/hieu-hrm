@@ -123,6 +123,7 @@ const mobileTitle = (pathname: string) => {
   if (pathname.startsWith("/toi/cham-cong")) return "Chấm công của tôi";
   if (pathname.startsWith("/toi/thiet-bi")) return "Thiết bị chấm công";
   if (pathname.startsWith("/toi/bang-cong")) return "Bảng công của tôi";
+  if (pathname.startsWith("/toi/danh-gia")) return "Đánh giá của tôi";
   if (pathname.startsWith("/toi/phieu-luong")) return "Phiếu lương";
   if (pathname.startsWith("/toi/tin-tuc")) return "Tin tức";
   if (pathname.startsWith("/toi/khao-sat")) return "Khảo sát";

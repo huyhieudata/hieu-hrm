@@ -12,7 +12,7 @@ import {
   Smartphone,
   UserRound,
   Users,
-  Wallet,
+  Wallet, ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,6 +36,7 @@ const EmployeeApps = () => {
       { label: "Tài khoản", to: "/toi", icon: UserRound, group: "mine" },
       { label: "Đơn từ", to: "/don-tu", icon: FileText, group: "mine" },
       { label: "Phiếu lương", to: "/toi/phieu-luong", icon: Wallet, group: "mine" },
+      { label: "Đánh giá của tôi", to: "/toi/danh-gia", icon: ClipboardCheck, group: "mine" },
     ];
     if (canDo("attendance", "view")) {
       mine.push(

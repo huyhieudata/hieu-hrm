@@ -1892,13 +1892,6 @@ const EmployeeProfile = () => {
         />
       )}
 
-      {tab === "evaluations" && activeCompany && (
-        <EmployeeEvaluationsTab
-          employeeId={employee.id}
-          isSelf={employee.user_id === user?.id}
-        />
-      )}
-
       {tab === "assets" && (
         <div className="space-y-4">
           <Card className="flex flex-wrap items-center justify-between gap-3 p-3.5">

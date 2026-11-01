@@ -516,6 +516,12 @@ export const EmployeeEvaluationsTab = ({
     () => selectableTemplates(templates, EMPLOYEE_EVALUATION_KINDS),
     [templates],
   );
+  // Nút xám vì: (1) không đọc được biểu mẫu (thiếu quyền Đánh giá › Xem), hoặc (2) chưa có biểu mẫu
+  // loại Thử việc/Định kỳ đang dùng (biểu mẫu Phỏng vấn không dùng cho nhân viên).
+  const noTemplateReason =
+    templates.length === 0 && !canDo("evaluations", "view")
+      ? "Vai trò của anh/chị chưa có quyền Đánh giá › Xem nên không thấy biểu mẫu. Nhờ Chủ sở hữu/Quản trị cấp ở Cài đặt › Thành viên & quyền."
+      : "Chưa có biểu mẫu loại Thử việc hoặc Định kỳ đang dùng (biểu mẫu Phỏng vấn không áp dụng). HR/Quản trị tạo ở Cài đặt › Biểu mẫu đánh giá.";
   const templateName = (id: string) => {
     const row = templates.find((t) => t.id === id);
     return row ? `${row.name} · v${row.version}` : "Biểu mẫu";
@@ -577,11 +583,7 @@ export const EmployeeEvaluationsTab = ({
             size="sm"
             className="gap-1"
             disabled={selectable.length === 0}
-            title={
-              selectable.length === 0
-                ? "Chưa có biểu mẫu thử việc/định kỳ đang dùng"
-                : undefined
-            }
+            title={selectable.length === 0 ? noTemplateReason : undefined}
             onClick={() => {
               setEditing(null);
               setDialogOpen(true);
@@ -593,8 +595,7 @@ export const EmployeeEvaluationsTab = ({
       </div>
       {canCreate && !loading && selectable.length === 0 && (
         <p className="mt-2 text-[11.5px] text-muted-foreground">
-          Chưa có biểu mẫu thử việc hoặc định kỳ đang dùng. Tạo ở Tuyển dụng ›
-          Biểu mẫu đánh giá.
+          {noTemplateReason}
         </p>
       )}
 
