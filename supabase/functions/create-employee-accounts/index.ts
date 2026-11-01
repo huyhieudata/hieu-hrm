@@ -250,7 +250,7 @@ async function createOne(ctx: Ctx, row: Row, seen: Set<string>): Promise<Result>
     });
     if (createError || !created.user) throw new Error(createError?.message ?? "Không tạo được tài khoản.");
     targetUserId = created.user.id;
-    await ctx.admin.from("profiles").update({ must_change_password: true }).eq("id", targetUserId);
+    await ctx.admin.from("profiles").update({ must_change_password: true, temp_password_expires_at: new Date(Date.now() + 24 * 3600 * 1000).toISOString() }).eq("id", targetUserId);
     await ensureMembership(ctx, targetUserId, null, row.role);
     await applyGroup(ctx, emp?.id ?? null, row.group_id);
     if (emp) {
@@ -298,7 +298,7 @@ async function resetOne(ctx: Ctx, employeeId: string): Promise<Result> {
     const password = generatePassword();
     const { error } = await ctx.admin.auth.admin.updateUserById(uid, { password });
     if (error) { console.error("reset password", error); throw new Error("Không đặt lại được mật khẩu."); }
-    await ctx.admin.from("profiles").update({ must_change_password: true }).eq("id", targetUserId);
+    await ctx.admin.from("profiles").update({ must_change_password: true, temp_password_expires_at: new Date(Date.now() + 24 * 3600 * 1000).toISOString() }).eq("id", targetUserId);
     r.result = "reset";
     r.mail_status = await sendCredentials(ctx, r.email, r.full_name, password);
     if (r.mail_status === "sent") r.message = "Đã đặt lại và gửi email.";

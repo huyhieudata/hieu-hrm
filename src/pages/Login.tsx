@@ -1,3 +1,4 @@
+import { passwordProblem } from "@/lib/password-rules";
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -42,7 +43,7 @@ const validateEmail = (value: string) => {
 
 const validatePassword = (value: string) => {
   if (!value) return "Vui lòng nhập mật khẩu.";
-  if (value.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự.";
+  if (value.length < 6) return "Mật khẩu không đúng định dạng.";
   return null;
 };
 
@@ -91,7 +92,8 @@ const Login = () => {
     const emailError = validateEmail(email);
     if (emailError) errors.email = emailError;
     if (mode !== "forgot") {
-      const passwordError = validatePassword(password);
+      // Đăng ký: luật mới ≥ 8 ký tự, có chữ và số. Đăng nhập: không chặn mật khẩu cũ ngắn hơn.
+      const passwordError = mode === "signup" ? (password ? passwordProblem(password) : "Vui lòng nhập mật khẩu.") : validatePassword(password);
       if (passwordError) errors.password = passwordError;
     }
     if (mode === "signup") {

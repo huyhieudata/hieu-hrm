@@ -38,7 +38,7 @@ export const AccountResultsView = ({ results, onCleared }: { results: AccountRes
         <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-[12px]">
           <p className="font-semibold">{pending.length} tài khoản chưa gửi được email.</p>
           <p className="mt-1 text-muted-foreground">
-            Tải CSV tên đăng nhập + mật khẩu tạm để tự gửi cho nhân viên. Tệp chỉ tải được <b>một lần</b> trong phiên này; máy
+            Tải CSV tên đăng nhập + mật khẩu tạm để tự gửi cho nhân viên. Mật khẩu tạm <b>hết hạn sau 24 giờ</b> nếu chưa đổi. Tệp chỉ tải được <b>một lần</b> trong phiên này; máy
             chủ không lưu mật khẩu. Nếu lỡ mất, dùng “Đặt lại mật khẩu và gửi lại”.
           </p>
           <Button
