@@ -48,7 +48,7 @@ const validatePassword = (value: string) => {
 };
 
 const SIGNUP_NOTICE =
-  "Nếu email này chưa đăng ký, bạn sẽ nhận thư xác thực. Nếu đã có tài khoản, hãy đăng nhập hoặc dùng Quên mật khẩu.";
+  "Đã gửi thư xác thực. Mở hộp thư (kể cả mục Spam/Quảng cáo) và bấm liên kết để kích hoạt tài khoản, sau đó đăng nhập để tạo công ty. Nếu email này đã có tài khoản, sẽ không có thư mới — hãy đăng nhập hoặc dùng Quên mật khẩu.";
 
 const Login = () => {
   const navigate = useNavigate();
