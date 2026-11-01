@@ -99,10 +99,11 @@ interface PolicyDraft {
 const emptyItem = (): ItemDraft => ({ name: "", days: "12", carries_over: true });
 
 const LeavePolicies = () => {
-  const { activeCompany, can, canManageModule } = useCompany();
+  const { activeCompany, can, canManageModule, role } = useCompany();
   const { user } = useAuth();
   const companyId = activeCompany?.id ?? null;
-  const canManage = canManageModule("leave");
+  // Chính sách nghỉ phép là cấu hình: chỉ Owner/Admin/HR (server cũng chặn bằng RLS).
+  const canManage = (role === "owner" || role === "admin" || role === "hr") && canManageModule("leave");
 
   const [year, setYear] = useState(new Date().getFullYear());
   const [policies, setPolicies] = useState<LeavePolicy[]>([]);
