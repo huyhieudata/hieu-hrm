@@ -59,14 +59,32 @@ const EmployeeSurveys = () => {
 
   return (
     <AppShell>
-      {isHr && (
-        <Button className="mb-3 w-full gap-1.5 rounded-full bg-brand-orange text-white hover:bg-brand-orange/90" onClick={() => setCreating(true)}>
-          <Plus className="h-4 w-4" /> Tạo khảo sát
-        </Button>
-      )}
-      {!loading && surveys.length === 0 ? (
-        <EmptyState emoji="📋" title="Chưa có khảo sát" description="Khi công ty mở khảo sát, bạn sẽ thấy ở đây." />
+      {loading && surveys.length === 0 ? (
+        <div className="space-y-3">
+          {[0, 1].map((i) => <div key={i} className="h-24 animate-pulse rounded-[20px] bg-card" />)}
+        </div>
       ) : null}
+      {!loading && surveys.length === 0 ? (
+        <div className="space-y-3 text-center">
+          <EmptyState
+            emoji="📋"
+            title="Chưa có khảo sát"
+            description={isHr ? "Tạo khảo sát để lấy ý kiến nhân viên. Có thể bật ẩn danh." : "Khi công ty mở khảo sát, bạn sẽ thấy ở đây."}
+          />
+          {isHr && (
+            <Button size="sm" className="h-10 gap-1.5 rounded-full bg-brand-orange px-5 text-white hover:bg-brand-orange/90" onClick={() => setCreating(true)}>
+              <Plus className="h-4 w-4" /> Tạo khảo sát
+            </Button>
+          )}
+        </div>
+      ) : null}
+      {isHr && surveys.length > 0 && (
+        <div className="mb-3 flex justify-end">
+          <Button size="sm" className="h-10 gap-1.5 rounded-full bg-brand-orange px-4 text-white hover:bg-brand-orange/90" onClick={() => setCreating(true)}>
+            <Plus className="h-4 w-4" /> Tạo khảo sát
+          </Button>
+        </div>
+      )}
       <div className="space-y-3">
         {surveys.map((s) => {
           const answered = done.has(s.id);

@@ -25,7 +25,7 @@ interface LogoProps {
   size?: "sm" | "md";
 }
 
-export const Logo = ({ collapsed = false, className, subtitle = "People Platform", size = "md" }: LogoProps) => {
+export const Logo = ({ collapsed = false, className, subtitle = "Quản trị nhân sự", size = "md" }: LogoProps) => {
   if (collapsed) {
     return (
       <div className={cn("flex items-center justify-center", className)}>

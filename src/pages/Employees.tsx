@@ -603,7 +603,7 @@ const Employees = () => {
               ...(role === "owner" ? [{ value: "role:admin", label: "Quản trị" }] : []),
               ...permissionGroups.map((g) => ({ value: `group:${g.id}`, label: `Nhóm quyền: ${g.name}` })),
             ],
-            helper: "Email hồ sơ là tên đăng nhập. Tạo hồ sơ xong hệ thống tự tạo tài khoản + gửi mật khẩu tạm qua email.",
+            hint: "Hồ sơ có email sẽ tự tạo tài khoản đăng nhập và gửi mật khẩu tạm qua email này. Không có email thì chưa tạo tài khoản.",
           },
         ]
       : baseFields;

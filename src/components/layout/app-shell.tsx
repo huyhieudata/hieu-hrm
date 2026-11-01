@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { MobileHeader } from "@/components/mobile/MobileHeader";
@@ -125,6 +125,9 @@ const mobileTitle = (pathname: string) => {
   if (pathname.startsWith("/toi/bang-cong")) return "Bảng công của tôi";
   if (pathname.startsWith("/toi/phieu-luong")) return "Phiếu lương";
   if (pathname.startsWith("/toi/tin-tuc")) return "Tin tức";
+  if (pathname.startsWith("/toi/khao-sat")) return "Khảo sát";
+  if (pathname.startsWith("/toi/tai-lieu")) return "Tài liệu";
+  if (pathname.startsWith("/toi/quet-qr")) return "Quét QR chấm công";
   if (pathname.startsWith("/hoi-nhap")) return "Hội nhập";
   if (pathname.startsWith("/hop-dong")) return "Hợp đồng";
   if (pathname.startsWith("/nghi-phep")) return "Nghỉ phép";
@@ -163,7 +166,10 @@ const AdminMobileShell = ({ children }: { children: ReactNode }) => {
   const name = displayName(profile, user?.email);
 
   return (
-    <div className="employee-canvas font-display relative min-h-[100dvh] w-full text-foreground">
+    <div
+      className="employee-canvas font-display relative min-h-[100dvh] w-full overflow-x-clip text-foreground"
+      style={{ "--fixed-bar-offset": hideTabs ? "0px" : "calc(var(--tabbar-h) + env(safe-area-inset-bottom))" } as CSSProperties}
+    >
       <MobileHeader
         variant={home ? "hero" : "bar"}
         compact
@@ -180,7 +186,10 @@ const AdminMobileShell = ({ children }: { children: ReactNode }) => {
       />
       <main
         ref={mainRef}
-        className="mobile-cards mx-auto w-full max-w-2xl px-3 pb-[calc(var(--tabbar-h)+40px+env(safe-area-inset-bottom))] pt-4"
+        className={cn(
+          "mobile-cards mx-auto w-full max-w-2xl px-3 pt-4",
+          hideTabs ? "pb-[calc(24px+env(safe-area-inset-bottom))]" : "pb-[calc(var(--tabbar-h)+var(--tabbar-bump)+24px+env(safe-area-inset-bottom))]",
+        )}
       >
         <div key={pathname} className="animate-fade-up space-y-4">
           {inSettings ? (

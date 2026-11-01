@@ -67,7 +67,7 @@ const AdminDashboard = () => {
               >
                 <Link to="/cai-dat/widget-trang-chu">
                   <LayoutGrid className="h-3.5 w-3.5" />
-                  Tuỳ chỉnh widget
+                  Tùy chỉnh widget
                 </Link>
               </Button>
             )}

@@ -87,7 +87,7 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
       day.device?.status === "approved" ? "Đã đăng ký" : day.deviceBlocked ? "Chưa duyệt" : null;
     return (
       <AppShell>
-        <div className="-mx-4 space-y-2">
+        <div className="-mx-3 space-y-2">
           <section className="flex items-center gap-4 bg-card px-5 py-5">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary text-[20px] font-bold text-brand-navy">
               {personInitials(fullName)}

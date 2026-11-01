@@ -87,6 +87,7 @@
     --glass-border: 0 0% 100%;
     --touch-min: 44px;
     --tabbar-h: 92px;
+    --tabbar-bump: 28px;
     --header-h: 56px;
     /* Gradients built from brand tokens so .dark can retune them. */
     --brand-navy-2: 214 64% 32%;
@@ -488,5 +489,12 @@ label.touch-check {
 @media (min-width: 1024px) {
   .matrix-sticky {
     box-shadow: none;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

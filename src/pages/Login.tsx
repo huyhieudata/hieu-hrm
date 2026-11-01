@@ -157,7 +157,7 @@ const Login = () => {
         <div className="pointer-events-none absolute -right-16 bottom-10 h-80 w-80 rounded-full bg-chart-2/10 blur-3xl" />
 
         <div className="relative flex items-center justify-between">
-          <Logo subtitle="People Platform" />
+          <Logo subtitle="Quản trị nhân sự" />
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-card/70 px-3 py-1.5 text-[11px] font-semibold text-primary">
             <Sparkles className="h-3 w-3" />
             Bản 1.0
@@ -225,7 +225,7 @@ const Login = () => {
       <section className="relative flex min-h-[100dvh] flex-col bg-card px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-10 lg:min-h-0 lg:border-l lg:border-border/70">
         <div className="flex items-center justify-between">
           <div className="lg:hidden">
-            <Logo subtitle="People Platform" />
+            <Logo subtitle="Quản trị nhân sự" />
           </div>
           <div className="ml-auto flex items-center gap-2">
             <span className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
