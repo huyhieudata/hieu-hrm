@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { FieldDialog, type FieldDef } from "@/components/employee/field-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   APPENDIX_TYPE_LABELS,
   getEmployee,
@@ -62,22 +63,32 @@ export const ContractLegalWarnings = ({ contract, history }: { contract: Contrac
 };
 
 /** Xuất Word / PDF từ mẫu (Cài đặt → Mẫu hợp đồng), tự điền dữ liệu hồ sơ. */
+export const exportContract = async (contract: ContractRow, companyName: string, kind: "word" | "pdf") => {
+  const [employee, templates] = await Promise.all([
+    getEmployee(contract.employee_id),
+    listContractTemplates(contract.company_id).catch(() => []),
+  ]);
+  const html = renderContractTemplate(
+    pickTemplate(templates, contract.contract_type),
+    buildContractVars(contract, employee, companyName),
+  );
+  const title = `HDLD ${contract.contract_no ?? ""} ${employee?.full_name ?? ""}`.trim();
+  if (kind === "word") downloadContractWord(title, html);
+  else printContractPdf(title, html);
+};
+
+/** Dùng cho menu "…": xuất + báo lỗi bằng toast. */
+export const runContractExport = (contract: ContractRow, companyName: string, kind: "word" | "pdf") =>
+  exportContract(contract, companyName, kind).catch((error: unknown) =>
+    toast.error("Không xuất được hợp đồng", { description: getErrorMessage(error) }),
+  );
+
 export const ContractExportButtons = ({ contract, companyName }: { contract: ContractRow; companyName: string }) => {
   const [busy, setBusy] = useState<"word" | "pdf" | null>(null);
   const run = async (kind: "word" | "pdf") => {
     setBusy(kind);
     try {
-      const [employee, templates] = await Promise.all([
-        getEmployee(contract.employee_id),
-        listContractTemplates(contract.company_id).catch(() => []),
-      ]);
-      const html = renderContractTemplate(
-        pickTemplate(templates, contract.contract_type),
-        buildContractVars(contract, employee, companyName),
-      );
-      const title = `HDLD ${contract.contract_no ?? ""} ${employee?.full_name ?? ""}`.trim();
-      if (kind === "word") downloadContractWord(title, html);
-      else printContractPdf(title, html);
+      await exportContract(contract, companyName, kind);
     } catch (error) {
       toast.error("Không xuất được hợp đồng", { description: getErrorMessage(error) });
     } finally {
@@ -220,6 +231,49 @@ export const ContractAppendicesPanel = ({
           onChanged?.();
         }}
       />
+    </div>
+  );
+};
+
+/** Nút gọn cho từng dòng hợp đồng (hồ sơ 360°): Word · PDF · Phụ lục. */
+export const ContractRowDocActions = ({
+  contract,
+  companyName,
+  canManage,
+}: {
+  contract: ContractRow;
+  companyName: string;
+  canManage: boolean;
+}) => {
+  const [busy, setBusy] = useState<"word" | "pdf" | null>(null);
+  const [appendixOpen, setAppendixOpen] = useState(false);
+  const run = async (kind: "word" | "pdf") => {
+    setBusy(kind);
+    await runContractExport(contract, companyName, kind);
+    setBusy(null);
+  };
+  return (
+    <div className="flex flex-wrap justify-end gap-1" onClick={(event) => event.stopPropagation()}>
+      <Button variant="ghost" size="sm" className="h-8 gap-1 px-2 text-[11.5px]" disabled={!!busy} onClick={() => void run("word")} title="Xuất Word">
+        {busy === "word" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
+        Word
+      </Button>
+      <Button variant="ghost" size="sm" className="h-8 gap-1 px-2 text-[11.5px]" disabled={!!busy} onClick={() => void run("pdf")} title="In / PDF">
+        {busy === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
+        PDF
+      </Button>
+      <Button variant="ghost" size="sm" className="h-8 gap-1 px-2 text-[11.5px]" onClick={() => setAppendixOpen(true)} title="Phụ lục hợp đồng">
+        <FileText className="h-3.5 w-3.5" />
+        Phụ lục
+      </Button>
+      <Dialog open={appendixOpen} onOpenChange={setAppendixOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Phụ lục hợp đồng {contract.contract_no ?? ""}</DialogTitle>
+          </DialogHeader>
+          {appendixOpen && <ContractAppendicesPanel contract={contract} canManage={canManage} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

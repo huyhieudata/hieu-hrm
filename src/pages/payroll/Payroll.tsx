@@ -248,6 +248,9 @@ const Payroll = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const [formOpen, setFormOpen] = useState(false);
+  const [confirmPeriod, setConfirmPeriod] = useState<{ label: string; resolve: (ok: boolean) => void } | null>(null);
+  const askCreatePeriod = (label: string) =>
+    new Promise<boolean>((resolve) => setConfirmPeriod({ label, resolve }));
   const [pendingDelete, setPendingDelete] = useState<PayrollPeriod | null>(null);
   const [pendingLock, setPendingLock] = useState<PayrollPeriod | null>(null);
   const [detailPeriod, setDetailPeriod] = useState<PayrollPeriod | null>(null);
@@ -456,6 +459,7 @@ const Payroll = () => {
     if (periods.some((period) => period.year === year && period.month === month)) {
       throw new Error(`Kỳ lương tháng ${month}/${year} đã tồn tại.`);
     }
+    if (!(await askCreatePeriod(`${month}/${year}`))) return;
 
     try {
       await createPayrollPeriod({
@@ -926,6 +930,36 @@ const Payroll = () => {
         submitLabel="Tạo kỳ lương"
         onSubmit={handleCreatePeriod}
       />
+
+      <AlertDialog
+        open={!!confirmPeriod}
+        onOpenChange={(open) => {
+          if (!open && confirmPeriod) {
+            confirmPeriod.resolve(false);
+            setConfirmPeriod(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tạo kỳ lương tháng {confirmPeriod?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kiểm tra lại tháng trước khi tạo — mỗi tháng chỉ có một kỳ lương.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                confirmPeriod?.resolve(true);
+                setConfirmPeriod(null);
+              }}
+            >
+              Tạo kỳ lương
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <FieldDialog
         open={!!adjustItem}

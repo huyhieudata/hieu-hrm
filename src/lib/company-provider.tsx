@@ -5,12 +5,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth-provider";
+import { withRetry } from "./net-retry";
 import { can as roleCan, permissionsForRole, type Permission, type Role } from "./roles";
 import { expandLegacyPermissions, toLegacyPermissions, type CrudAction } from "./permissions";
 
@@ -84,15 +86,32 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
   // otherwise a deep link (/employees) renders once with no role and gets redirected to "/".
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
 
+  const permissionPrefetch = useRef<{
+    companyId: string;
+    promise: Promise<{ data: unknown; error: unknown }>;
+  } | null>(null);
+
+  const prefetchedOnce = useRef(false);
   const loadMemberships = useCallback(async (id: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("company_members")
-        .select(MEMBERSHIP_COLUMNS)
-        .eq("user_id", id)
-        .eq("status", "active")
-        .order("joined_at", { ascending: true });
+      // Song song: tải quyền của công ty đã chọn lần trước cùng lúc với danh sách công ty.
+      const stored = window.localStorage.getItem(storageKey(id));
+      if (stored && !prefetchedOnce.current) {
+        prefetchedOnce.current = true;
+        permissionPrefetch.current = {
+          companyId: stored,
+          promise: withRetry(() => supabase.rpc("my_permissions", { target_company: stored })),
+        };
+      }
+      const { data, error } = await withRetry(() =>
+        supabase
+          .from("company_members")
+          .select(MEMBERSHIP_COLUMNS)
+          .eq("user_id", id)
+          .eq("status", "active")
+          .order("joined_at", { ascending: true }),
+      );
 
       if (error) throw error;
 
@@ -152,7 +171,12 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
       setPermissionLoading(true);
       setPermissionsReady(false);
       try {
-        const { data, error } = await supabase.rpc("my_permissions", { target_company: companyId });
+        const prefetched = permissionPrefetch.current;
+        permissionPrefetch.current = null;
+        const { data, error } =
+          prefetched && prefetched.companyId === companyId
+            ? await prefetched.promise.catch((err: unknown) => ({ data: null, error: err }))
+            : await withRetry(() => supabase.rpc("my_permissions", { target_company: companyId }));
         if (!error && Array.isArray(data)) {
           setPermissionKeys(data as string[]);
           return;

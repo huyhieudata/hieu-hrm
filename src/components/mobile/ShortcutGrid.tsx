@@ -10,7 +10,7 @@ interface Shortcut {
 }
 
 export const ShortcutGrid = ({ items }: { items: Shortcut[] }) => (
-  <div className="grid grid-cols-4 gap-y-4 px-1 py-5">
+  <div className="grid grid-cols-4 gap-y-3 px-1 pb-3 pt-4">
     {items.map((item) => {
       const Icon = item.icon;
       const inner = (

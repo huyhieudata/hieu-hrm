@@ -27,7 +27,6 @@ export interface EventDef {
 
 export const EVENTS: EventDef[] = [
   { key: "employee_created", label: "Tạo hồ sơ nhân viên", kind: "instant", vars: [] },
-  { key: "invite_sent", label: "Gửi lời mời tham gia", kind: "instant", vars: [["link_loi_moi", "Link lời mời"], ["han_loi_moi", "Hạn lời mời"], ["vai_tro", "Vai trò"]] },
   { key: "employee_joined", label: "Nhân viên tham gia (liên kết tài khoản)", kind: "instant", vars: [] },
   { key: "birthday", label: "Sinh nhật", kind: "daily", vars: [["ngay_sinh", "Ngày sinh"], ["tuoi", "Tuổi"]], offsetLabel: "Gửi trước (ngày)" },
   { key: "contract_expiring", label: "Hợp đồng sắp hết hạn", kind: "daily", vars: [["so_hop_dong", "Số hợp đồng"], ["loai_hop_dong", "Loại hợp đồng"], ["ngay_het_han", "Ngày hết hạn"], ["so_ngay_con_lai", "Số ngày còn lại"]], offsetLabel: "Trước hạn X ngày" },
@@ -37,7 +36,15 @@ export const EVENTS: EventDef[] = [
   { key: "late_threshold", label: "Đi muộn quá N lần/tháng", kind: "instant", vars: [["so_lan_di_muon", "Số lần đi muộn"], ["thang", "Tháng"]], threshold: true },
   { key: "attendance_reminder", label: "Nhắc chấm công (chưa chấm vào)", kind: "daily", vars: [] },
 ];
-export const eventDef = (k: string | null | undefined) => EVENTS.find((e) => e.key === k);
+/** Sự kiện chỉ dùng cho mẫu (không tạo luồng tự động được). "invite_sent" đã ngừng — giữ nhãn để đọc log cũ. */
+export const TEMPLATE_ONLY_EVENTS: { key: string; label: string; kind: "instant"; vars: [string, string][] }[] = [
+  { key: "account_created", label: "Tạo tài khoản nhân viên", kind: "instant", vars: [["ten_dang_nhap", "Tên đăng nhập"], ["mat_khau_tam", "Mật khẩu tạm"], ["link_dang_nhap", "Link đăng nhập"]] },
+];
+const LEGACY_EVENTS = [{ key: "invite_sent", label: "Lời mời tham gia (đã ngừng)", kind: "instant" as const, vars: [] as [string, string][] }];
+/** Mẫu email đã ngừng dùng — ẩn khỏi Cài đặt › Email (không xoá dữ liệu). */
+export const HIDDEN_TEMPLATE_CODES = ["loi_moi"];
+export const eventDef = (k: string | null | undefined): (Omit<EventDef, "key"> & { key: string }) | undefined =>
+  EVENTS.find((e) => e.key === k) ?? TEMPLATE_ONLY_EVENTS.find((e) => e.key === k) ?? LEGACY_EVENTS.find((e) => e.key === k);
 export const varsFor = (k: string | null | undefined): [string, string][] => [
   ...(COMMON_VARS as unknown as [string, string][]),
   ...(eventDef(k)?.vars ?? EVENTS.flatMap((e) => e.vars)),
@@ -47,6 +54,7 @@ export const SAMPLE_VARS: Record<string, string> = {
   ten_nhan_vien: "Nguyễn Văn A", ma_nhan_vien: "NV001", email_nhan_vien: "a@congty.vn", phong_ban: "Kinh doanh",
   chuc_danh: "Chuyên viên", ten_quan_ly: "Trần Thị B", ngay_vao_lam: "01/11/2026", ten_cong_ty: "Công ty mẫu",
   ngay: new Date().toLocaleDateString("vi-VN"), link_app: "https://hieu-hrm.vercel.app", ten_nguoi_nhan: "Nguyễn Văn A",
+  ten_dang_nhap: "a@congty.vn", mat_khau_tam: "Abcd-Efgh-2345", link_dang_nhap: "https://hieu-hrm.vercel.app/login",
   link_loi_moi: "https://hieu-hrm.vercel.app/tham-gia/mau", han_loi_moi: "15/11/2026", vai_tro: "Nhân viên",
   ngay_sinh: "01/11", tuoi: "30", so_hop_dong: "HD-001", loai_hop_dong: "Xác định thời hạn", ngay_het_han: "30/11/2026",
   so_ngay_con_lai: "30", ngay_het_thu_viec: "30/11/2026", loai_don: "Nghỉ phép", tu_ngay: "03/11/2026",

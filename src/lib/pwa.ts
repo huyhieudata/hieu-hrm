@@ -29,6 +29,6 @@ export const registerServiceWorker = () => {
   const localHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
   if (!import.meta.env.PROD && localHost) return;
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).catch(() => undefined);
   });
 };

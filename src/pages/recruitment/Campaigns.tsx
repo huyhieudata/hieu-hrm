@@ -221,7 +221,8 @@ const Campaigns = () => {
       throw new Error("SLA tuyển dụng phải trong khoảng 1 – 365 ngày.");
     const payload = {
       ...values,
-      status: values.status ?? "open",
+      status: values.status || "open",
+      priority: values.priority || "medium",
       headcount,
       sla_days: slaDays,
     };
@@ -283,7 +284,7 @@ const Campaigns = () => {
         )
       }
     >
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Card className="p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Đang tuyển

@@ -51,7 +51,7 @@ import {
   type MonthValues,
 } from "@/lib/planning";
 import { listDepartmentPositions, listDepartments, type DepartmentPosition, type DepartmentRecord } from "@/lib/settings";
-import { cn } from "@/lib/utils";
+import { cn, getErrorMessage } from "@/lib/utils";
 
 const EMPTY_MONTHS: MonthValues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -102,7 +102,8 @@ const Headcount = () => {
       setSelectedPlanId((current) =>
         current && planRows.some((plan) => plan.id === current)
           ? current
-          : (planRows.find((plan) => plan.year === new Date().getFullYear()) ?? planRows[0])?.id ?? "",
+          : // Mặc định năm hiện tại; chưa có ⇒ để trống (ô chọn hiện "Năm <hiện tại> · chưa có").
+            planRows.find((plan) => plan.year === new Date().getFullYear())?.id ?? "",
       );
     } catch (error) {
       toast.error("Không tải được kế hoạch định biên", {
@@ -246,6 +247,27 @@ const Headcount = () => {
     }
   };
 
+  const CURRENT_YEAR = new Date().getFullYear();
+  const hasCurrentYear = plans.some((plan) => plan.year === CURRENT_YEAR);
+
+  /** Năm hiện tại chưa có ⇒ tạo nháp ngay; đã có ⇒ mở form với năm kế tiếp. */
+  const handleAddYear = async () => {
+    if (!companyId) return;
+    if (!hasCurrentYear) {
+      try {
+        const id = await createPlan({ company_id: companyId, year: CURRENT_YEAR, note: "Nháp" });
+        setSelectedPlanId(id);
+        toast.success(`Đã tạo bản nháp định biên năm ${CURRENT_YEAR}`);
+        await loadPlanning();
+      } catch (error) {
+        toast.error("Không tạo được định biên", { description: getErrorMessage(error) });
+      }
+      return;
+    }
+    setEditingPlan(null);
+    setFormOpen(true);
+  };
+
   const handlePlanSubmit = async (values: Record<string, string | number | null>) => {
     if (!companyId) throw new Error("Chưa chọn công ty.");
     const year = Number(values.year ?? 0);
@@ -351,10 +373,7 @@ const Headcount = () => {
             {canManage && (
               <Button
                 className="h-9 gap-1.5 text-[12.5px]"
-                onClick={() => {
-                  setEditingPlan(null);
-                  setFormOpen(true);
-                }}
+                onClick={() => void handleAddYear()}
               >
                 <Plus className="h-4 w-4" /> Thêm năm
               </Button>
@@ -365,11 +384,25 @@ const Headcount = () => {
 
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+          <Select
+            value={selectedPlanId || (!hasCurrentYear ? "new-current" : "")}
+            onValueChange={(value) => {
+              if (value === "new-current") {
+                if (canManage) void handleAddYear();
+                return;
+              }
+              setSelectedPlanId(value);
+            }}
+          >
             <SelectTrigger className="h-9 w-[190px] text-[12.5px]">
               <SelectValue placeholder="Chọn năm định biên" />
             </SelectTrigger>
             <SelectContent>
+              {!hasCurrentYear && (
+                <SelectItem value="new-current">
+                  Năm {CURRENT_YEAR} · {canManage ? "chưa có — chọn để tạo nháp" : "chưa có"}
+                </SelectItem>
+              )}
               {plans.map((plan) => (
                 <SelectItem key={plan.id} value={plan.id}>
                   Năm {plan.year}
@@ -426,10 +459,12 @@ const Headcount = () => {
         <Card className="flex items-center justify-center gap-2 p-16 text-[12.5px] text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Đang tải kế hoạch định biên…
         </Card>
-      ) : plans.length === 0 ? (
+      ) : !selectedPlan ? (
         <Card className="p-14 text-center">
           <FileSpreadsheet className="mx-auto h-7 w-7 text-muted-foreground/70" />
-          <p className="mt-2.5 text-[13.5px] font-semibold text-foreground">Chưa có bản ghi định biên</p>
+          <p className="mt-2.5 text-[13.5px] font-semibold text-foreground">
+            {plans.length === 0 ? "Chưa có bản ghi định biên" : `Chưa có định biên năm ${CURRENT_YEAR}`}
+          </p>
           <p className="mx-auto mt-1 max-w-md text-[12px] leading-5 text-muted-foreground">
             Mỗi năm là một bản ghi. Tạo bản ghi đầu tiên để nhập số lượng định biên theo tháng cho từng phòng ban và
             vị trí.
@@ -437,12 +472,9 @@ const Headcount = () => {
           {canManage && (
             <Button
               className="mt-4 h-9 gap-1.5 text-[12.5px]"
-              onClick={() => {
-                setEditingPlan(null);
-                setFormOpen(true);
-              }}
+              onClick={() => void handleAddYear()}
             >
-              <Plus className="h-4 w-4" /> Tạo định biên năm {new Date().getFullYear()}
+              <Plus className="h-4 w-4" /> Tạo định biên năm {CURRENT_YEAR}
             </Button>
           )}
         </Card>
@@ -565,7 +597,11 @@ const Headcount = () => {
         title={editingPlan ? "Sửa bản ghi định biên" : "Tạo bản ghi định biên"}
         description="Mỗi năm chỉ có một bản ghi định biên."
         fields={planFields}
-        initial={editingPlan ?? { year: new Date().getFullYear() }}
+        initial={
+          editingPlan ?? {
+            year: hasCurrentYear ? Math.max(...plans.map((plan) => plan.year)) + 1 : new Date().getFullYear(),
+          }
+        }
         submitLabel={editingPlan ? "Lưu thay đổi" : "Tạo bản ghi"}
         onSubmit={handlePlanSubmit}
       />

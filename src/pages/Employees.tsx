@@ -20,7 +20,6 @@ import {
   UserMinus,
   UserPlus,
   Users,
-  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { findEmployeeDuplicates } from "@/lib/change-requests";
@@ -45,7 +44,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SelectionBar } from "@/components/common/selection-bar";
-import { InviteEmployeeDialog } from "@/components/employee/invite-employee-dialog";
+import { CreateAccountsDialog } from "@/components/employee/account-dialog";
 import { useSelection } from "@/lib/use-selection";
 import {
   DropdownMenu,
@@ -152,6 +151,7 @@ const Employees = () => {
   const [bulkOpen, setBulkOpen] = useState(false);
   const { selected, toggle, selectAll, clear, prune } = useSelection();
   const [bulkInviteOpen, setBulkInviteOpen] = useState(false);
+  const [importAccountsOpen, setImportAccountsOpen] = useState(false);
   const [positionOptionsByDepartment, setPositionOptionsByDepartment] =
     useState<Record<string, { value: string; label: string }[]>>({});
   const [departmentNameOptions, setDepartmentNameOptions] = useState<string[]>(
@@ -620,6 +620,16 @@ const Employees = () => {
             </Button>
             {canManage && (
               <>
+                {(role === "owner" || role === "admin" || role === "hr") && (
+                  <Button
+                    variant="outline"
+                    className="h-9 gap-2 text-[12.5px]"
+                    onClick={() => setImportAccountsOpen(true)}
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    Tạo tài khoản từ Excel/CSV
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="h-9 gap-2 text-[12.5px]"
@@ -707,7 +717,7 @@ const Employees = () => {
               className="h-8 gap-1.5 text-[11.5px]"
               onClick={() => setBulkInviteOpen(true)}
             >
-              <Send className="h-3.5 w-3.5" /> Gửi lời mời {selected.length}{" "}
+              <UserPlus className="h-3.5 w-3.5" /> Tạo tài khoản cho {selected.length}{" "}
               người
             </Button>
           </div>
@@ -928,13 +938,15 @@ const Employees = () => {
                   className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/25"
                 >
                   {canDelete && (
-                    <input
-                      type="checkbox"
-                      aria-label={`Chọn ${person.full_name}`}
-                      className="h-3.5 w-3.5 shrink-0 accent-primary"
-                      checked={selected.includes(person.id)}
-                      onChange={() => toggle(person.id)}
-                    />
+                    <label className="touch-check">
+                      <input
+                        type="checkbox"
+                        aria-label={`Chọn ${person.full_name}`}
+                        className="h-3.5 w-3.5 shrink-0 accent-primary"
+                        checked={selected.includes(person.id)}
+                        onChange={() => toggle(person.id)}
+                      />
+                    </label>
                   )}
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <Avatar name={person.full_name} src={person.avatar_url} />
@@ -1199,12 +1211,34 @@ const Employees = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <InviteEmployeeDialog
-        open={bulkInviteOpen}
-        onOpenChange={setBulkInviteOpen}
-        employees={employees.filter((e) => selected.includes(e.id))}
-        onDone={clear}
-      />
+      {companyId && (role === "owner" || role === "admin" || role === "hr") && (
+        <>
+          <CreateAccountsDialog
+            open={bulkInviteOpen}
+            onOpenChange={setBulkInviteOpen}
+            companyId={companyId}
+            targets={employees
+              .filter((e) => selected.includes(e.id))
+              .map((e) => ({
+                id: e.id,
+                full_name: e.full_name,
+                email: e.work_email || e.personal_email || null,
+                has_account: Boolean(e.user_id),
+              }))}
+            onDone={() => {
+              clear();
+              void load();
+            }}
+          />
+          <CreateAccountsDialog
+            open={importAccountsOpen}
+            onOpenChange={setImportAccountsOpen}
+            companyId={companyId}
+            allowImport
+            onDone={() => void load()}
+          />
+        </>
+      )}
     </AppShell>
   );
 };

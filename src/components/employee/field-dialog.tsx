@@ -171,7 +171,7 @@ export const FieldDialog = ({
         nextErrors[field.name] = `${field.label} phải là số.`;
         continue;
       }
-      const invalid = raw && field.validate ? field.validate(raw) : null;
+      const invalid = raw && field.validate ? field.validate(raw, values) : null;
       if (invalid) nextErrors[field.name] = invalid;
     }
     setFieldErrors(nextErrors);

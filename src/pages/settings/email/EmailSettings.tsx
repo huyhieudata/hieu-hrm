@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useCompany } from "@/lib/company-provider";
 import {
-  EVENTS, SAMPLE_VARS, deleteRule, deleteTemplate, eventDef, invokeMailer, listLogs, listQueue, listRules,
+  EVENTS, HIDDEN_TEMPLATE_CODES, SAMPLE_VARS, TEMPLATE_ONLY_EVENTS, deleteRule, deleteTemplate, eventDef, invokeMailer, listLogs, listQueue, listRules,
   listTemplates, renderTemplate, retryQueue, runDailyNow, sanitizeEmailHtml, saveRule, saveTemplate, varsFor,
   type EmailLog, type EmailQueueRow, type EmailRule, type EmailTemplate, type EventKey,
 } from "@/lib/email-automation";
@@ -35,7 +35,7 @@ const TemplatesTab = ({ companyId }: { companyId: string }) => {
   const [edit, setEdit] = useState<Partial<EmailTemplate> | null>(null);
   const [preview, setPreview] = useState(false);
   const [busy, setBusy] = useState(false);
-  const load = useCallback(() => listTemplates(companyId).then(setRows).catch((e) => toast.error(getErrorMessage(e))), [companyId]);
+  const load = useCallback(() => listTemplates(companyId).then((list) => setRows(list.filter((t) => !HIDDEN_TEMPLATE_CODES.includes(t.code)))).catch((e) => toast.error(getErrorMessage(e))), [companyId]);
   useEffect(() => { void load(); }, [load]);
 
   const save = async () => {
@@ -109,7 +109,7 @@ const TemplatesTab = ({ companyId }: { companyId: string }) => {
                 <div><Label htmlFor="tpl-code">Mã (dùng nội bộ)</Label><Input id="tpl-code" value={edit.code ?? ""} disabled={!!edit.id && edit.is_default} onChange={(e) => setEdit({ ...edit, code: e.target.value.toLowerCase() })} /></div>
                 <div><Label htmlFor="tpl-event">Loại sự kiện (gợi ý biến)</Label>
                   <select id="tpl-event" className={selectCls} value={edit.event_key ?? ""} onChange={(e) => setEdit({ ...edit, event_key: e.target.value || null })}>
-                    <option value="">Chung</option>{EVENTS.map((ev) => <option key={ev.key} value={ev.key}>{ev.label}</option>)}
+                    <option value="">Chung</option>{[...EVENTS, ...TEMPLATE_ONLY_EVENTS].map((ev) => <option key={ev.key} value={ev.key}>{ev.label}</option>)}
                   </select></div>
               </div>
               <div><Label htmlFor="tpl-subject">Tiêu đề</Label><Input id="tpl-subject" value={edit.subject ?? ""} onChange={(e) => setEdit({ ...edit, subject: e.target.value })} /></div>
@@ -264,7 +264,6 @@ const RulesTab = ({ companyId }: { companyId: string }) => {
                     <label key={k} className="flex min-h-[44px] items-center gap-2"><Switch checked={!!edit.recipients?.[k]} onCheckedChange={(v) => setEdit({ ...edit, recipients: { ...edit.recipients, [k]: v } })} />{l}</label>
                   ))}
                 </div>
-                {edit.event_key === "invite_sent" && <p className="text-[11px] text-muted-foreground">Thư mời cho chính người được mời do nút “Gửi lời mời” gửi (dùng mẫu mã <b>loi_moi</b>); luồng này dùng để báo cho quản lý/HR/email khác.</p>}
                 <Label htmlFor="r-emails" className="mt-2 block">Email cố định (cách nhau dấu phẩy)</Label>
                 <Input id="r-emails" value={csv(edit.recipients?.emails)} onChange={(e) => setEdit({ ...edit, recipients: { ...edit.recipients, emails: parseCsv(e.target.value) } })} />
               </div>
@@ -319,7 +318,7 @@ const ConfigTab = ({ companyId }: { companyId: string }) => {
   const [res, setRes] = useState<string>("");
   return (
     <div className="max-w-2xl space-y-3 rounded-xl border bg-card p-5 text-sm">
-      <p>Máy chủ gửi mail dùng chung cho nút “Gửi lời mời” và các luồng tự động, cấu hình bằng secret của Supabase Edge Function: <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code>, <code>MAIL_FROM</code>, <code>MAIL_FROM_NAME</code> (hoặc <code>BREVO_API_KEY</code>). Mật khẩu không hiển thị ở đây.</p>
+      <p>Máy chủ gửi mail dùng chung cho email tài khoản nhân viên (mẫu <b>tai_khoan_moi</b>) và các luồng tự động, cấu hình bằng secret của Supabase Edge Function: <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code>, <code>MAIL_FROM</code>, <code>MAIL_FROM_NAME</code> (hoặc <code>BREVO_API_KEY</code>). Mật khẩu không hiển thị ở đây.</p>
       <p>Hàng đợi được xử lý tự động mỗi 10 phút (pg_cron). Sự kiện theo ngày (sinh nhật, hợp đồng, thử việc, nhắc chấm công) được xếp khi tới giờ gửi của luồng. Mỗi sự kiện chỉ gửi một lần cho mỗi người nhận.</p>
       <Button onClick={async () => { const r = await invokeMailer({ mode: "process", company_id: companyId }); setRes(r.error ? String(r.error) : r.configured ? `Đã cấu hình. Xử lý ${r.processed} thư.` : "Chưa cấu hình SMTP/Brevo — thư sẽ ghi lỗi NOT_CONFIGURED."); }}>
         Kiểm tra cấu hình & xử lý hàng đợi

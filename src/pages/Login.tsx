@@ -31,18 +31,39 @@ type Mode = (typeof tabs)[number]["id"];
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+type FieldKey = "fullName" | "email" | "password" | "confirm";
+
+const validateEmail = (value: string) => {
+  const email = value.trim();
+  if (!email) return "Vui lòng nhập email.";
+  if (!EMAIL_PATTERN.test(email)) return "Email không hợp lệ. Ví dụ: ten@congty.vn";
+  return null;
+};
+
+const validatePassword = (value: string) => {
+  if (!value) return "Vui lòng nhập mật khẩu.";
+  if (value.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự.";
+  return null;
+};
+
+const SIGNUP_NOTICE =
+  "Nếu email này chưa đăng ký, bạn sẽ nhận thư xác thực. Nếu đã có tài khoản, hãy đăng nhập hoặc dùng Quên mật khẩu.";
+
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { session, loading: authLoading, signIn, signUp } = useAuth();
+  const { session, loading: authLoading, signIn, signUp, requestPasswordReset } = useAuth();
 
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode | "forgot">("signin");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
 
   const redirectTarget = searchParams.get("redirect") || "/";
 
@@ -50,31 +71,53 @@ const Login = () => {
     if (!authLoading && session) navigate(redirectTarget, { replace: true });
   }, [authLoading, navigate, redirectTarget, session]);
 
+  const switchMode = (next: Mode | "forgot") => {
+    setMode(next);
+    setError(null);
+    setNotice(null);
+    setFieldErrors({});
+  };
+
+  const clearField = (key: FieldKey) =>
+    setFieldErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setNotice(null);
 
-    if (!EMAIL_PATTERN.test(email.trim())) {
-      setError("Email không hợp lệ. Ví dụ: ten@congty.vn");
-      return;
+    const errors: Partial<Record<FieldKey, string>> = {};
+    if (mode === "signup" && fullName.trim().length < 2) errors.fullName = "Vui lòng nhập họ và tên (ít nhất 2 ký tự).";
+    const emailError = validateEmail(email);
+    if (emailError) errors.email = emailError;
+    if (mode !== "forgot") {
+      const passwordError = validatePassword(password);
+      if (passwordError) errors.password = passwordError;
     }
-    if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
-      return;
+    if (mode === "signup") {
+      if (!confirm) errors.confirm = "Vui lòng nhập lại mật khẩu.";
+      else if (confirm !== password) errors.confirm = "Mật khẩu nhập lại không khớp.";
     }
-    if (mode === "signup" && fullName.trim().length < 2) {
-      setError("Vui lòng nhập họ và tên của bạn.");
+    setFieldErrors(errors);
+    const order: FieldKey[] = ["fullName", "email", "password", "confirm"];
+    const first = order.find((key) => errors[key]);
+    if (first) {
+      document.getElementById(first)?.focus();
       return;
     }
 
     setLoading(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        await requestPasswordReset(email);
+        setNotice(
+          "Nếu email này đã đăng ký, bạn sẽ nhận thư hướng dẫn đặt lại mật khẩu trong vài phút. Hãy kiểm tra cả mục Spam.",
+        );
+      } else if (mode === "signup") {
         const { needsConfirmation } = await signUp({ email: email.trim(), password, fullName });
         if (needsConfirmation) {
-          toast.success("Kiểm tra hộp thư để xác thực tài khoản", {
-            description: `Chúng tôi đã gửi liên kết xác thực tới ${email.trim()}.`,
-          });
+          // Supabase cố ý trả giống nhau cho email đã/ chưa đăng ký (chống dò email).
+          setNotice(SIGNUP_NOTICE);
           return;
         }
         toast.success("Tài khoản đã được tạo", {
@@ -90,6 +133,20 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const inputClass = (key: FieldKey, extra = "pr-3") =>
+    cn(
+      "h-11 w-full rounded-md border bg-card pl-10 text-[13.5px] text-foreground shadow-xs outline-none transition-all placeholder:text-muted-foreground/70 hover:border-primary/30 focus:border-primary focus:shadow-focus",
+      extra,
+      fieldErrors[key] ? "border-destructive" : "border-input",
+    );
+
+  const fieldError = (key: FieldKey) =>
+    fieldErrors[key] ? (
+      <p id={`${key}-error`} className="text-[11.5px] font-medium leading-4 text-destructive" role="alert">
+        {fieldErrors[key]}
+      </p>
+    ) : null;
 
   return (
     <div className="grid min-h-[100dvh] w-full bg-card lg:grid-cols-[1.06fr_1fr]">
@@ -184,12 +241,14 @@ const Login = () => {
             </div>
 
             <h2 className="font-display text-[28px] font-semibold leading-9 tracking-[-0.02em] text-foreground">
-              {mode === "signin" ? "Đăng nhập" : "Tạo tài khoản"}
+              {mode === "signin" ? "Đăng nhập" : mode === "signup" ? "Tạo tài khoản" : "Quên mật khẩu"}
             </h2>
             <p className="mt-1.5 text-[13.5px] leading-6 text-muted-foreground">
               {mode === "signin"
                 ? "Chào mừng bạn quay trở lại. Tiếp tục quản lý đội ngũ của bạn."
-                : "Chỉ mất một phút để bắt đầu không gian làm việc đầu tiên."}
+                : mode === "signup"
+                  ? "Chỉ mất một phút để bắt đầu không gian làm việc đầu tiên."
+                  : "Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết đặt lại mật khẩu."}
             </p>
 
             <div className="mt-6 flex rounded-md border border-border/70 bg-muted/60 p-1">
@@ -197,10 +256,7 @@ const Login = () => {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => {
-                    setMode(tab.id);
-                    setError(null);
-                  }}
+                  onClick={() => switchMode(tab.id)}
                   className={cn(
                     "min-h-11 flex-1 rounded-[9px] px-2 py-2 text-[13px] font-medium transition-all duration-200",
                     mode === tab.id
@@ -213,7 +269,7 @@ const Login = () => {
               ))}
             </div>
 
-            <form className="mt-5 space-y-4" onSubmit={onSubmit}>
+            <form className="mt-5 space-y-4" onSubmit={onSubmit} noValidate>
               {mode === "signup" && (
                 <div className="space-y-1.5">
                   <label htmlFor="fullName" className="block text-[12.5px] font-medium text-foreground">
@@ -226,11 +282,17 @@ const Login = () => {
                       type="text"
                       autoComplete="name"
                       value={fullName}
-                      onChange={(event) => setFullName(event.target.value)}
+                      onChange={(event) => {
+                        setFullName(event.target.value);
+                        clearField("fullName");
+                      }}
+                      aria-invalid={!!fieldErrors.fullName}
+                      aria-describedby={fieldErrors.fullName ? "fullName-error" : undefined}
                       placeholder="Nguyễn Minh Anh"
-                      className="h-11 w-full rounded-md border border-input bg-card pl-10 pr-3 text-[13.5px] text-foreground shadow-xs outline-none transition-all placeholder:text-muted-foreground/70 hover:border-primary/30 focus:border-primary focus:shadow-focus"
+                      className={inputClass("fullName")}
                     />
                   </div>
+                  {fieldError("fullName")}
                 </div>
               )}
 
@@ -243,16 +305,23 @@ const Login = () => {
                   <input
                     id="email"
                     type="email"
-                    required
+                    inputMode="email"
                     autoComplete="email"
                     value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                      clearField("email");
+                    }}
+                    aria-invalid={!!fieldErrors.email}
+                    aria-describedby={fieldErrors.email ? "email-error" : undefined}
                     placeholder="email@congty.vn"
-                    className="h-11 w-full rounded-md border border-input bg-card pl-10 pr-3 text-[13.5px] text-foreground shadow-xs outline-none transition-all placeholder:text-muted-foreground/70 hover:border-primary/30 focus:border-primary focus:shadow-focus"
+                    className={inputClass("email")}
                   />
                 </div>
+                {fieldError("email")}
               </div>
 
+              {mode !== "forgot" && (
               <div className="space-y-1.5">
                 <label htmlFor="password" className="block text-[12.5px] font-medium text-foreground">
                   Mật khẩu
@@ -262,12 +331,16 @@ const Login = () => {
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    required
                     autoComplete={mode === "signin" ? "current-password" : "new-password"}
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    onChange={(event) => {
+                      setPassword(event.target.value);
+                      clearField("password");
+                    }}
+                    aria-invalid={!!fieldErrors.password}
+                    aria-describedby={fieldErrors.password ? "password-error" : undefined}
                     placeholder={mode === "signin" ? "Nhập mật khẩu" : "Tối thiểu 6 ký tự"}
-                    className="h-11 w-full rounded-md border border-input bg-card pl-10 pr-11 text-[13.5px] text-foreground shadow-xs outline-none transition-all placeholder:text-muted-foreground/70 hover:border-primary/30 focus:border-primary focus:shadow-focus"
+                    className={inputClass("password", "pr-11")}
                   />
                   <button
                     type="button"
@@ -278,7 +351,55 @@ const Login = () => {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {fieldError("password")}
               </div>
+              )}
+
+              {mode === "signin" && (
+                <div className="-mt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => switchMode("forgot")}
+                    className="inline-flex min-h-9 items-center px-1 text-[12px] font-medium text-primary hover:underline"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+              )}
+
+              {mode === "signup" && (
+              <div className="space-y-1.5">
+                <label htmlFor="confirm" className="block text-[12.5px] font-medium text-foreground">
+                  Xác nhận mật khẩu
+                </label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    id="confirm"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={confirm}
+                    onChange={(event) => {
+                      setConfirm(event.target.value);
+                      clearField("confirm");
+                    }}
+                    aria-invalid={!!fieldErrors.confirm}
+                    aria-describedby={fieldErrors.confirm ? "confirm-error" : undefined}
+                    placeholder="Nhập lại mật khẩu"
+                    className={inputClass("confirm", "pr-11")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {fieldError("confirm")}
+              </div>
+              )}
 
               {error && (
                 <div
@@ -287,6 +408,28 @@ const Login = () => {
                 >
                   <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span>{error}</span>
+                </div>
+              )}
+
+              {notice && (
+                <div
+                  role="status"
+                  className="space-y-1.5 rounded-md border border-primary/25 bg-primary-subtle px-3 py-2.5 text-[12px] leading-5 text-foreground"
+                >
+                  <p className="flex items-start gap-2">
+                    <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                    <span>{notice}</span>
+                  </p>
+                  <p className="flex flex-wrap gap-x-3 pl-5">
+                    <button type="button" className="font-semibold text-primary hover:underline" onClick={() => switchMode("signin")}>
+                      Chuyển sang Đăng nhập
+                    </button>
+                    {mode !== "forgot" && (
+                      <button type="button" className="font-semibold text-primary hover:underline" onClick={() => switchMode("forgot")}>
+                        Quên mật khẩu
+                      </button>
+                    )}
+                  </p>
                 </div>
               )}
 
@@ -301,10 +444,14 @@ const Login = () => {
                   {loading
                     ? mode === "signin"
                       ? "Đang đăng nhập…"
-                      : "Đang tạo tài khoản…"
+                      : mode === "signup"
+                        ? "Đang tạo tài khoản…"
+                        : "Đang gửi…"
                     : mode === "signin"
                       ? "Đăng nhập"
-                      : "Tạo tài khoản"}
+                      : mode === "signup"
+                        ? "Tạo tài khoản"
+                        : "Gửi liên kết đặt lại"}
                 </span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -321,10 +468,7 @@ const Login = () => {
                   Chưa có tài khoản?{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      setMode("signup");
-                      setError(null);
-                    }}
+                    onClick={() => switchMode("signup")}
                     className="inline-flex min-h-11 items-center px-1 font-semibold text-primary hover:underline"
                   >
                     Tạo tài khoản mới
@@ -332,13 +476,10 @@ const Login = () => {
                 </>
               ) : (
                 <>
-                  Đã có tài khoản?{" "}
+                  {mode === "forgot" ? "Nhớ mật khẩu rồi?" : "Đã có tài khoản?"}{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      setMode("signin");
-                      setError(null);
-                    }}
+                    onClick={() => switchMode("signin")}
                     className="inline-flex min-h-11 items-center px-1 font-semibold text-primary hover:underline"
                   >
                     Đăng nhập

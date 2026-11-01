@@ -10,6 +10,8 @@ import {
   Plus,
   Search,
   Trash2,
+  Printer,
+  Files,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -71,6 +73,7 @@ import { todayIso } from "@/lib/attendance";
 import {
   ContractAppendicesPanel,
   ContractExportButtons,
+  runContractExport,
   ContractLegalWarnings,
 } from "@/components/contracts/contract-extras";
 import { contractLegalWarnings } from "@/lib/contract-docs";
@@ -577,20 +580,22 @@ const Contracts = () => {
                 <tr className="bg-muted/40 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
                   {canManage && (
                     <th className="w-[40px] px-2 py-2.5 text-center font-semibold">
-                      <input
-                        type="checkbox"
-                        aria-label="Chọn tất cả hợp đồng"
-                        className="h-3.5 w-3.5 accent-primary"
-                        checked={
-                          filtered.length > 0 &&
-                          filtered.every((contract) =>
-                            selected.includes(contract.id),
-                          )
-                        }
-                        onChange={() =>
-                          selectAll(filtered.map((contract) => contract.id))
-                        }
-                      />
+                      <label className="touch-check">
+                        <input
+                          type="checkbox"
+                          aria-label="Chọn tất cả hợp đồng"
+                          className="h-3.5 w-3.5 accent-primary"
+                          checked={
+                            filtered.length > 0 &&
+                            filtered.every((contract) =>
+                              selected.includes(contract.id),
+                            )
+                          }
+                          onChange={() =>
+                            selectAll(filtered.map((contract) => contract.id))
+                          }
+                        />
+                      </label>
                     </th>
                   )}
                   <th className="px-4 py-2.5 text-left font-semibold">
@@ -624,13 +629,15 @@ const Contracts = () => {
                     >
                       {canManage && (
                         <td className="px-2 py-2.5 text-center">
-                          <input
-                            type="checkbox"
-                            aria-label={`Chọn hợp đồng ${contract.contract_no ?? ""}`}
-                            className="h-3.5 w-3.5 accent-primary"
-                            checked={selected.includes(contract.id)}
-                            onChange={() => toggle(contract.id)}
-                          />
+                          <label className="touch-check">
+                            <input
+                              type="checkbox"
+                              aria-label={`Chọn hợp đồng ${contract.contract_no ?? ""}`}
+                              className="h-3.5 w-3.5 accent-primary"
+                              checked={selected.includes(contract.id)}
+                              onChange={() => toggle(contract.id)}
+                            />
+                          </label>
                         </td>
                       )}
                       <td className="px-4 py-2.5">
@@ -708,7 +715,7 @@ const Contracts = () => {
                         </Badge>
                       </td>
                       <td className="px-2 py-2.5 text-right">
-                        {canManage && (
+                        {(
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -721,8 +728,28 @@ const Contracts = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="w-[190px]"
+                              className="w-[200px]"
                             >
+                              <DropdownMenuItem
+                                className="gap-2 text-[12.5px]"
+                                onSelect={() => void runContractExport(contract, activeCompany?.name ?? "", "word")}
+                              >
+                                <FileDown className="h-3.5 w-3.5" /> Xuất Word
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2 text-[12.5px]"
+                                onSelect={() => void runContractExport(contract, activeCompany?.name ?? "", "pdf")}
+                              >
+                                <Printer className="h-3.5 w-3.5" /> In / PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2 text-[12.5px]"
+                                onSelect={() => setDetailContract(contract)}
+                              >
+                                <Files className="h-3.5 w-3.5" /> Phụ lục hợp đồng
+                              </DropdownMenuItem>
+                              {canManage && (
+                              <>
                               <DropdownMenuItem
                                 className="gap-2 text-[12.5px]"
                                 onSelect={() => {
@@ -738,6 +765,8 @@ const Contracts = () => {
                               >
                                 <Trash2 className="h-3.5 w-3.5" /> Xoá hợp đồng
                               </DropdownMenuItem>
+                              </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}

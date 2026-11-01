@@ -19,6 +19,7 @@ import {
   type SensitiveAuditRow,
 } from "@/lib/change-requests";
 import { getErrorMessage } from "@/lib/utils";
+import { validateEmailAddress, validateNationalId, validatePhone, validateTaxCode } from "@/lib/field-defs";
 
 const when = (value: string) =>
   new Date(value).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
@@ -42,6 +43,11 @@ const ChangeList = ({ changes }: { changes: Record<string, string | null> }) => 
 );
 
 /** Nhân viên tự đề nghị cập nhật liên hệ / khẩn cấp / ngân hàng; HR duyệt mới áp dụng. */
+const CHANGE_VALIDATORS: Record<string, (value: string) => string | null> = {
+  national_id: validateNationalId,
+  tax_code: validateTaxCode,
+};
+
 export const SelfChangeRequestCard = ({ companyId, employee }: { companyId: string; employee: EmployeeRecord }) => {
   const [requests, setRequests] = useState<ChangeRequest[]>([]);
   const [open, setOpen] = useState(false);
@@ -59,7 +65,11 @@ export const SelfChangeRequestCard = ({ companyId, employee }: { companyId: stri
   const pending = requests.find((r) => r.status === "pending");
   const latest = requests[0];
   const fields: FieldDef[] = [
-    ...SELF_EDITABLE_FIELDS.map((f) => ({ ...f, span: f.type === "textarea" ? (2 as const) : undefined })),
+    ...SELF_EDITABLE_FIELDS.map((f) => ({
+      ...f,
+      span: f.type === "textarea" ? (2 as const) : undefined,
+      validate: CHANGE_VALIDATORS[f.name] ?? (f.type === "tel" ? validatePhone : f.type === "email" ? validateEmailAddress : undefined),
+    })),
     { name: "__note", label: "Ghi chú cho HR", type: "textarea" as const, span: 2 as const },
   ];
   const record = employee as unknown as Record<string, string | null>;

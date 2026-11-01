@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/common/page-header";
 import { PermissionMatrix } from "@/components/permissions/permission-matrix";
-import { InviteDialog } from "@/components/team/invite-dialog";
+import { CreateAccountsDialog } from "@/components/employee/account-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,7 +54,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { listEmployees, updateEmployee, type EmployeeRecord } from "@/lib/employee-records";
-import { copyInviteLink } from "@/lib/invite-link";
 import {
   PERMISSION_MODULES,
   SPECIAL_PERMISSION_OPTIONS,
@@ -120,7 +119,6 @@ const Members = () => {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileRow>>({});
   const [employees, setEmployees] = useState<EmployeeRecord[]>([]);
-  const [invites, setInvites] = useState<InviteRow[]>([]);
   const [baselines, setBaselines] = useState<Record<string, string[]>>({});
   const [groups, setGroups] = useState<PermissionGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,18 +155,13 @@ const Members = () => {
     if (!companyId) return;
     setLoading(true);
     try {
-      const [memberResult, employeeRows, inviteResult, baselineResult, groupRows] = await Promise.all([
+      const [memberResult, employeeRows, baselineResult, groupRows] = await Promise.all([
         supabase
           .from("company_members")
           .select("id, company_id, user_id, role, status, job_title, department, joined_at")
           .eq("company_id", companyId)
           .order("joined_at", { ascending: true }),
         listEmployees(companyId),
-        supabase
-          .from("company_invites")
-          .select("id, token, email, role, expires_at, accepted_at, revoked")
-          .eq("company_id", companyId)
-          .order("created_at", { ascending: false }),
         supabase.from("company_role_permissions").select("company_id, role, permissions").eq("company_id", companyId),
         listPermissionGroups(companyId),
       ]);
@@ -190,7 +183,6 @@ const Members = () => {
       setMembers(memberRows);
       setProfiles(profileMap);
       setEmployees(employeeRows);
-      setInvites(((inviteResult.data ?? []) as InviteRow[]).filter((invite) => !invite.accepted_at && !invite.revoked));
       const baselineMap: Record<string, string[]> = {};
       ((baselineResult.data ?? []) as RoleBaseline[]).forEach((row) => {
         baselineMap[row.role] = row.permissions;
@@ -390,17 +382,6 @@ const Members = () => {
     }
   };
 
-  const revokeInvite = async (invite: InviteRow) => {
-    try {
-      const { error } = await supabase.from("company_invites").update({ revoked: true }).eq("id", invite.id);
-      if (error) throw error;
-      toast.success("Đã thu hồi lời mời");
-      await load();
-    } catch (error) {
-      toast.error("Không thu hồi được lời mời", { description: getErrorMessage(error) });
-    }
-  };
-
   return (
     <AppShell>
       <PageHeader
@@ -408,9 +389,9 @@ const Members = () => {
         title="Thành viên & quyền"
         description="Quản lý người dùng trong công ty, liên kết tài khoản với hồ sơ nhân sự và cấu hình quyền nền."
         actions={
-          canInvite ? (
+          canInvite && (role === "owner" || role === "admin" || role === "hr") ? (
             <Button className="h-9 gap-1.5 text-[12.5px]" onClick={() => setInviteOpen(true)}>
-              <UserPlus className="h-4 w-4" /> Mời thành viên
+              <UserPlus className="h-4 w-4" /> Tạo tài khoản
             </Button>
           ) : undefined
         }
@@ -570,51 +551,6 @@ const Members = () => {
             </div>
           </Card>
 
-          {canInvite && invites.length > 0 && (
-            <Card className="p-4">
-              <p className="text-[12.5px] font-semibold text-foreground">Lời mời đang chờ ({invites.length})</p>
-              <ul className="mt-2 divide-y divide-border/50">
-                {invites.map((invite) => (
-                  <li key={invite.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                    <div>
-                      <p className="text-[12px] text-foreground">{invite.email ?? "Lời mời bằng liên kết"}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {ROLE_LABELS[invite.role]} · hết hạn {formatDate(invite.expires_at)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {canInvite && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 gap-1 text-[11.5px]"
-                            onClick={() => void copyInviteLink(invite.token)}
-                          >
-                            <Copy className="h-3 w-3" /> Sao chép
-                          </Button>
-                          <ConfirmAction
-                            title="Thu hồi lời mời?"
-                            description={`Lời mời gửi ${invite.email ?? ""} sẽ không dùng được nữa.`}
-                            confirmLabel="Thu hồi"
-                            onConfirm={() => revokeInvite(invite)}
-                          >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 gap-1 text-[11.5px] text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" /> Thu hồi
-                            </Button>
-                          </ConfirmAction>
-                        </>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
         </div>
       ) : tab === "roles" ? (
         <Card className="space-y-4 p-5">
@@ -765,17 +701,15 @@ const Members = () => {
         </div>
       )}
 
-      <InviteDialog
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
-        companyId={companyId ?? ""}
-        actorId={user?.id ?? ""}
-        allowedRoles={role === "owner" || role === "admin" ? ASSIGNABLE_ROLES : ["employee", "manager"]}
-        onCreated={() => {
-          void load();
-          void log("company", companyId ?? "", "member_invite", "Tạo lời mời thành viên");
-        }}
-      />
+      {companyId && (
+        <CreateAccountsDialog
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          companyId={companyId}
+          allowImport
+          onDone={() => void load()}
+        />
+      )}
 
       <Dialog open={!!linkMember} onOpenChange={(open) => !open && setLinkMember(null)}>
         <DialogContent className="sm:max-w-[520px]">

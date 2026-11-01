@@ -162,10 +162,8 @@ export const InstallPrompt = () => {
   }, [signedIn]);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.classList.toggle("has-install-banner", open);
+    return () => document.body.classList.remove("has-install-banner");
   }, [open]);
 
   if (!open || !signedIn) return null;
@@ -197,13 +195,13 @@ export const InstallPrompt = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-end justify-center bg-overlay/45 backdrop-blur-[3px] sm:items-center sm:p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Cài ONHRM vào màn hình chính"
-      onClick={(event) => event.currentTarget === event.target && dismiss()}
+      className="pointer-events-none fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[45] flex justify-center px-3 touch:bottom-[calc(var(--tabbar-h)+8px+env(safe-area-inset-bottom))]"
     >
-      <div className="w-full max-w-md animate-in slide-in-from-bottom rounded-t-[26px] border border-border/80 bg-card p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-overlay duration-300 sm:rounded-[26px] sm:pb-5">
+      <div
+        className="pointer-events-auto max-h-[52dvh] w-full max-w-md overflow-y-auto rounded-[22px] border border-border/80 bg-card p-4 shadow-overlay"
+        role="region"
+        aria-label="Cài ONHRM vào màn hình chính"
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <LogoMark className="h-12 w-12 rounded-[14px]" />
@@ -281,28 +279,21 @@ export const InstallPrompt = () => {
               </ol>
             )}
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <Button className="h-10" onClick={dismiss}>
+              <Button className="h-11" onClick={dismiss}>
                 Đã hiểu
               </Button>
-              <Button variant="ghost" className="h-10 text-[12px] text-muted-foreground" onClick={never}>
+              <Button variant="ghost" className="h-11 text-[12px] text-muted-foreground" onClick={never}>
                 Không hiện lại
               </Button>
             </div>
           </div>
         ) : (
           <>
-            <ul className="mt-4 space-y-2 rounded-xl border border-border/70 bg-muted/20 p-3">
-              {BENEFITS.map((benefit) => (
-                <li key={benefit} className="flex items-center gap-2 text-[11.5px] text-foreground">
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success-subtle text-success">
-                    <Check className="h-3 w-3" />
-                  </span>
-                  {benefit}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 grid gap-2">
-              <Button className="h-10 gap-2" onClick={() => void install()} disabled={installing}>
+            <p className="mt-3 text-[12px] leading-5 text-foreground">
+              {BENEFITS.join(" · ")}
+            </p>
+            <div className="mt-3 grid gap-2">
+              <Button className="h-11 gap-2" onClick={() => void install()} disabled={installing}>
                 <Download className={installing ? "h-4 w-4 animate-pulse" : "h-4 w-4"} />
                 {deferred ? "Cài đặt ngay" : "Thêm vào màn hình chính"}
               </Button>

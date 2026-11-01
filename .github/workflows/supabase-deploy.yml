@@ -49,7 +49,7 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           supabase functions deploy provision-workspace-admin --project-ref "$PROJECT_REF" --use-api
-          supabase functions deploy send-invite-email --project-ref "$PROJECT_REF" --use-api
+          supabase functions deploy create-employee-accounts --project-ref "$PROJECT_REF" --use-api
           supabase functions deploy send-queued-emails --project-ref "$PROJECT_REF" --use-api --no-verify-jwt
       - name: Đặt secret gửi email cho edge function
         if: steps.check.outputs.ok == 'true'
@@ -71,3 +71,20 @@ jobs:
           done
           if [ -s "$f" ]; then supabase secrets set --env-file "$f" --project-ref "$PROJECT_REF" >/dev/null && echo "Đã cập nhật secret email"; fi
           rm -f "$f"
+      - name: Thêm redirect URL đặt lại mật khẩu vào Auth
+        if: steps.check.outputs.ok == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          api="https://api.supabase.com/v1/projects/$PROJECT_REF/config/auth"
+          cur="$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api" | jq -r '.uri_allow_list // ""')"
+          next="$cur"
+          for u in "https://hieu-hrm.vercel.app/dat-lai-mat-khau" "https://hieu-hrm.vercel.app/**"; do
+            case ",$next," in *",$u,"*) ;; *) next="${next:+$next,}$u" ;; esac
+          done
+          if [ "$next" != "$cur" ]; then
+            jq -n --arg v "$next" '{uri_allow_list: $v}' | curl -fsS -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" --data @- "$api" >/dev/null
+            echo "Đã thêm redirect URL (chỉ append, giữ nguyên danh sách cũ)"
+          else
+            echo "Redirect URL đã có sẵn"
+          fi

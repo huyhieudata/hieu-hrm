@@ -139,16 +139,25 @@ export interface AttendanceRecord {
   device_out_id?: string | null;
   location_id?: string | null;
   flags?: string[] | null;
+  ip_in?: string | null;
+  user_agent_in?: string | null;
+  ip_out?: string | null;
+  user_agent_out?: string | null;
 }
 
-/** Bản ghi cũ / nhập tay: không ảnh, không GPS, không thiết bị (giữ nguyên, chỉ gắn nhãn). */
+/** Bản ghi nhập tay / không có bằng chứng: không ảnh, không GPS, không thiết bị (giữ nguyên, chỉ gắn nhãn). */
 export const isLegacyAttendance = (record: AttendanceRecord) =>
   !record.photo_path &&
   !record.photo_out_path &&
   record.latitude == null &&
   record.latitude_out == null &&
   !record.device_id &&
-  !record.device_out_id;
+  !record.device_out_id &&
+  // Bản ghi tạo qua RPC attendance_punch luôn ghi IP/user-agent ⇒ không phải nhập tay.
+  !record.ip_in &&
+  !record.user_agent_in &&
+  !record.ip_out &&
+  !record.user_agent_out;
 
 type AttendanceTable = "work_shifts" | "attendance_settings" | "shift_assignments" | "attendance_records";
 
@@ -407,14 +416,16 @@ export const listRecordsBetween = async (
   companyId: string,
   from: string,
   to: string,
+  employeeId?: string,
 ): Promise<AttendanceRecord[]> => {
-  const { data, error } = await db
+  let query = db
     .from("attendance_records")
     .select("*")
     .eq("company_id", companyId)
     .gte("work_date", from)
-    .lte("work_date", to)
-    .order("work_date", { ascending: true });
+    .lte("work_date", to);
+  if (employeeId) query = query.eq("employee_id", employeeId);
+  const { data, error } = await query.order("work_date", { ascending: true }).limit(5000);
   if (error) throw new Error(error.message ?? "Không tải được bảng công.");
   return (data ?? []) as AttendanceRecord[];
 };
