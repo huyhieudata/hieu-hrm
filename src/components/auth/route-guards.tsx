@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { canEnterStaffPath } from "@/lib/staff-routes";
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
@@ -56,7 +57,7 @@ export const RequireStaffPath = ({ children }: { children: ReactNode }) => {
   const { role, canManageModule, loading } = useCompany();
   const { pathname } = useLocation();
   if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
-  if (!canEnterStaffPath(pathname, role, canManageModule)) return <Navigate to="/toi" replace />;
+  if (!canEnterStaffPath(pathname, role, canManageModule)) return <DeniedRedirect />;
   return <>{children}</>;
 };
 
@@ -78,4 +79,11 @@ export const RequirePermission = ({
   if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
   if (!can(permission)) return <Navigate to="/" replace />;
   return <>{children}</>;
+};
+
+const DeniedRedirect = () => {
+  useEffect(() => {
+    toast.error("Bạn không có quyền truy cập trang này", { id: "no-access", duration: 6000 });
+  }, []);
+  return <Navigate to="/toi" replace />;
 };
