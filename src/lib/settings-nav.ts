@@ -36,7 +36,7 @@ export const buildSettingsGroups = ({ canDo, canManageModule, isPlatformAdmin, r
       label: "Tổ chức",
       items: pick([
         canDo("settings", "view") && { label: "Cơ cấu tổ chức", to: "/cai-dat/co-cau-to-chuc", icon: Network, description: "Phòng ban, chức danh, sơ đồ" },
-        canDo("members", "view") && role !== "employee" && { label: "Thành viên & quyền", to: "/cai-dat/thanh-vien", icon: ShieldCheck, description: "Tài khoản, vai trò, lời mời", legacy: ["/thanh-vien"] },
+        hrLike(role) && canDo("members", "view") && { label: "Thành viên & quyền", to: "/cai-dat/thanh-vien", icon: ShieldCheck, description: "Tài khoản, vai trò, lời mời", legacy: ["/thanh-vien"] },
         canDo("settings", "view") && { label: "Widget trang chủ", to: "/cai-dat/widget-trang-chu", icon: LayoutGrid, description: "Bố cục trang chủ sau đăng nhập" },
         canDo("settings", "view") && { label: "Checklist hội nhập", to: "/cai-dat/checklist-hoi-nhap", icon: ListChecks, description: "Việc cần làm khi nhận người mới" },
         canDo("settings", "view") && { label: "Checklist hồ sơ", to: "/cai-dat/checklist-ho-so", icon: FolderOpen, description: "Giấy tờ bắt buộc của hồ sơ" },
@@ -55,7 +55,7 @@ export const buildSettingsGroups = ({ canDo, canManageModule, isPlatformAdmin, r
       label: "Đơn từ & nghỉ phép",
       items: pick([
         canManageModule("requests") && { label: "Loại đơn", to: "/cai-dat/loai-don", icon: FileCog, description: "Danh mục đơn từ", legacy: ["/don-tu/loai-don"] },
-        canManageModule("requests") && { label: "Quy trình duyệt", to: "/cai-dat/quy-trinh-duyet", icon: GitBranch, description: "Các bước phê duyệt", legacy: ["/don-tu/quy-trinh-duyet"] },
+        hrLike(role) && canManageModule("requests") && { label: "Quy trình duyệt", to: "/cai-dat/quy-trinh-duyet", icon: GitBranch, description: "Các bước phê duyệt", legacy: ["/don-tu/quy-trinh-duyet"] },
         canDo("leave", "view") && { label: "Chính sách nghỉ phép", to: "/cai-dat/chinh-sach-phep", icon: CalendarClock, description: "Quỹ phép & chính sách", legacy: ["/don-tu/chinh-sach-phep"] },
       ]),
     },
