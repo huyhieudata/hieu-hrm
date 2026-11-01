@@ -108,7 +108,14 @@ export const listUsedTemplateIds = async (companyId: string): Promise<Set<string
     .eq("company_id", companyId)
     .not("template_id", "is", null);
   if (error) throw error;
-  return new Set(((data ?? []) as { template_id: string }[]).map((row) => row.template_id));
+  const used = new Set(((data ?? []) as { template_id: string }[]).map((row) => row.template_id));
+  // Phiếu đánh giá nhân viên (thử việc/định kỳ) cũng khoá biểu mẫu.
+  const { data: employeeRows } = await db
+    .from("employee_evaluations")
+    .select("template_id")
+    .eq("company_id", companyId);
+  ((employeeRows ?? []) as { template_id: string }[]).forEach((row) => used.add(row.template_id));
+  return used;
 };
 
 const criterionRow = (criterion: CriterionDraft, templateId: string, companyId: string, index: number) => ({

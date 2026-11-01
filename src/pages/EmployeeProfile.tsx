@@ -15,6 +15,7 @@ import {
   ChevronRight,
   FolderOpen,
   FileText,
+  ClipboardCheck,
   GraduationCap,
   HeartPulse,
   History,
@@ -54,6 +55,7 @@ import { OnboardingTab } from "@/components/employee/onboarding-tab";
 import { ResignationDialog } from "@/components/employee/resignation-dialog";
 import { DisciplineTab } from "@/components/employee/discipline-tab";
 import { DocumentsTab } from "@/components/employee/documents-tab";
+import { EmployeeEvaluationsTab } from "@/components/employee/evaluations-tab";
 import {
   AssetsTab,
   ContractsTab,
@@ -147,6 +149,7 @@ type TabId =
   | "insurance"
   | "rewards"
   | "training"
+  | "evaluations"
   | "assets"
   | "debts"
   | "dependents"
@@ -542,6 +545,7 @@ const EmployeeProfile = () => {
     }
     list.push({ id: "rewards", label: "Khen thưởng & kỷ luật", icon: Award });
     list.push({ id: "training", label: "Đào tạo", icon: GraduationCap });
+    list.push({ id: "evaluations", label: "Đánh giá", icon: ClipboardCheck });
     list.push({ id: "assets", label: "Tài sản", icon: Laptop });
     if (canSensitive) list.push({ id: "permissions", label: "Phân quyền", icon: KeyRound });
     if (canSensitive) list.push({ id: "debts", label: "Công nợ", icon: Banknote });
@@ -1341,6 +1345,13 @@ const EmployeeProfile = () => {
       )}
 
       {tab === "training" && <TrainingTab employeeId={employee.id} canManage={canManage} />}
+      {tab === "evaluations" && activeCompany && (
+        <EmployeeEvaluationsTab employeeId={employee.id} isSelf={employee.user_id === user?.id} />
+      )}
+
+      {tab === "evaluations" && activeCompany && (
+        <EmployeeEvaluationsTab employeeId={employee.id} isSelf={employee.user_id === user?.id} />
+      )}
 
       {tab === "assets" && (
         <div className="space-y-4">
