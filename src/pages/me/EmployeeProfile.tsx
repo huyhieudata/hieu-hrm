@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CalendarDays, ChevronRight, LogOut, Moon, Smartphone, User, Wallet } from "lucide-react";
+import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Moon, Smartphone, User, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { useMyDay } from "@/components/mobile/use-my-day";
+import { ChangePasswordDialog, NotificationSettingsDialog } from "@/components/mobile/AccountSettings";
 import { useDeviceMode } from "@/hooks/use-device-mode";
 import { initials as personInitials } from "@/lib/format";
 import { SelfChangeRequestCard } from "@/components/employee/change-requests";
@@ -36,6 +37,8 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
   const { activeCompany } = useCompany();
   const [me, setMe] = useState<EmployeeRecord | null>(null);
   const [dark, setDark] = useState(() => resolveDark());
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!activeCompany?.id || !user?.id) return;
@@ -126,6 +129,20 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
                 ) : null}
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
+              <button type="button" onClick={() => setPasswordOpen(true)} className="flex h-14 w-full items-center gap-3 border-t border-border text-left text-[15px] font-medium">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
+                  <KeyRound className="h-4 w-4" />
+                </span>
+                <span className="flex-1">Đổi mật khẩu</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button type="button" onClick={() => setNotifyOpen(true)} className="flex h-14 w-full items-center gap-3 border-t border-border text-left text-[15px] font-medium">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
+                  <Bell className="h-4 w-4" />
+                </span>
+                <span className="flex-1">Cài đặt thông báo</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
               <label className="flex h-14 items-center gap-3 border-t border-border text-[15px] font-medium">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-brand-navy">
                   <Moon className="h-4 w-4" />
@@ -148,6 +165,8 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
               </button>
             </section>
           )}
+          <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} email={user?.email} />
+          <NotificationSettingsDialog open={notifyOpen} onOpenChange={setNotifyOpen} userId={user?.id} />
           {infoOnly && me && activeCompany ? <div className="px-4"><SelfChangeRequestCard companyId={activeCompany.id} employee={me} /></div> : null}
           <p className="py-3 text-center text-[12px] text-muted-foreground">ONHRM</p>
         </div>
