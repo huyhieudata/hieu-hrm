@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="vi"><body style="margin:0;background:#f3f6fb;font-family:Arial,Helvetica,sans-serif;color:#0e2d58">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f6fb;padding:24px 0"><tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden">
+<tr><td style="background:#0e2d58;padding:20px 28px;color:#ffffff;font-size:22px;font-weight:bold">ON<span style="color:#fc600b">HRM</span></td></tr>
+<tr><td style="padding:28px;font-size:15px;line-height:1.6">
+<h2 style="margin:0 0 12px;font-size:19px;color:#0e2d58">Xác nhận email đăng ký</h2>
+<p>Xin chào,</p><p>Cảm ơn bạn đã đăng ký ONHRM với email <b>{{ .Email }}</b>. Vui lòng bấm nút bên dưới để xác nhận địa chỉ email.</p>
+<p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#fc600b;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:bold;display:inline-block">Xác nhận email</a></p>
+<p style="font-size:13px;color:#5a6b85">Nếu nút không bấm được, sao chép liên kết sau vào trình duyệt:<br><a href="{{ .ConfirmationURL }}" style="color:#0e2d58;word-break:break-all">{{ .ConfirmationURL }}</a></p>
+<p style="font-size:13px;color:#5a6b85">Liên kết có hiệu lực trong thời gian giới hạn và chỉ dùng được một lần.</p>
+</td></tr>
+<tr><td style="background:#f8fafc;padding:16px 28px;font-size:12px;color:#8592a6">Email tự động từ ONHRM – vui lòng không trả lời thư này. Nếu bạn không yêu cầu, hãy bỏ qua email.</td></tr>
+</table></td></tr></table></body></html>
