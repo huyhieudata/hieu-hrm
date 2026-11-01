@@ -12,6 +12,8 @@ q() { jq -n --arg q "$1" '{query:$q}' | curl -sS --fail-with-body -X POST "$API"
 applied=$(q "select version from supabase_migrations.schema_migrations" | jq -r '.[].version')
 shopt -s nullglob
 count=0
+dups=$(find supabase/migrations -maxdepth 1 -name "*.sql" -printf "%f\n" | cut -c1-14 | sort | uniq -d)
+if [ -n "$dups" ]; then echo "::error::Trùng version migration: $dups"; exit 1; fi
 for f in $(find supabase/migrations -maxdepth 1 -name "*.sql" | sort); do
   base=$(basename "$f" .sql)
   if [[ ! "$base" =~ ^([0-9]{14})_([a-z0-9_]+)$ ]]; then
