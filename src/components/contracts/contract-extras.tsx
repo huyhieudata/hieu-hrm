@@ -30,7 +30,7 @@ import { getErrorMessage } from "@/lib/utils";
 
 const money = (value: number | null) =>
   value === null || value === undefined ? null : `${new Intl.NumberFormat("vi-VN").format(Number(value))} đ`;
-const day = (value: string | null) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—");
+const day = (value: string | null) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—");
 
 type ContractRow = ContractLike & { id: string; status: string; employee_id: string; company_id: string };
 

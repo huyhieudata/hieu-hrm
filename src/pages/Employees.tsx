@@ -64,6 +64,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { buildEmployeeFields } from "@/lib/employee-fields";
@@ -170,6 +171,7 @@ const Employees = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<EmployeeRecord | null>(null);
   const [removal, setRemoval] = useState<EmployeeRecord | null>(null);
+  const [revokeAccess, setRevokeAccess] = useState(true);
   // Tạo hồ sơ → tự tạo tài khoản đăng nhập (email hồ sơ = tên đăng nhập) + gửi mail tai_khoan_moi.
   const [accountOutcome, setAccountOutcome] = useState<{ results: AccountResult[]; goTo: string } | null>(null);
   const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>([]);
@@ -495,17 +497,19 @@ const Employees = () => {
           company_id: companyId,
           created_by: user?.id ?? null,
         });
+        // Tải lại danh sách (xoá cache) TRƯỚC khi đóng/điều hướng → quay lại không phải F5.
+        await load().catch(() => undefined);
         setFormOpen(false);
         const goTo = `/employees/${createdId}${canProvision ? "?moi=1" : ""}`;
         const loginEmail = String(values.work_email || values.personal_email || "").trim();
         if (!canProvision) {
-          toast.success("Đã thêm nhân viên mới");
+          toast.success(`Đã tạo hồ sơ ${String(values.full_name ?? "")}`.trim(), { duration: 8000 });
           navigate(goTo);
           return;
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) {
           toast.warning("Đã tạo hồ sơ — CHƯA có tài khoản đăng nhập", {
-            description: "Hồ sơ chưa có email hợp lệ. Bổ sung email rồi bấm “Tạo tài khoản”.",
+            description: "Không gửi email tài khoản vì hồ sơ chưa có email hợp lệ. Bổ sung email rồi bấm “Tạo tài khoản”.",
             duration: 10000,
           });
           navigate(goTo);
@@ -522,10 +526,10 @@ const Employees = () => {
         ]);
         const r = results[0];
         if (r?.result === "created" && r.mail_status === "sent") {
-          toast.success("Đã tạo hồ sơ + tài khoản và gửi email", { description: `Tên đăng nhập: ${r.email}` });
+          toast.success("Đã tạo hồ sơ và tài khoản đăng nhập", { description: `Đã gửi email tài khoản tới ${r.email}`, duration: 8000 });
           navigate(goTo);
         } else if (r?.result === "linked" || r?.result === "exists") {
-          toast.success("Đã tạo hồ sơ và liên kết tài khoản sẵn có", { description: r.message });
+          toast.success("Đã tạo hồ sơ và liên kết tài khoản sẵn có", { description: `${r.message ?? ""} (không gửi email mới vì tài khoản ${r.email ?? loginEmail} đã có)`.trim(), duration: 8000 });
           navigate(goTo);
         } else {
           // Mail lỗi / chưa cấu hình / lỗi tạo: hiện kết quả rõ ràng (+ tải CSV một lần nếu có mật khẩu tạm).
@@ -565,8 +569,24 @@ const Employees = () => {
   const handleDelete = async () => {
     if (!removal) return;
     try {
+      const accountId = removal.user_id;
       await deleteEmployee(removal.id);
-      toast.success("Đã xoá hồ sơ nhân viên");
+      let revokeNote = "";
+      if (revokeAccess && accountId && companyId && accountId !== user?.id) {
+        const { data: gone, error: revokeError } = await supabase
+          .from("company_members")
+          .delete()
+          .eq("company_id", companyId)
+          .eq("user_id", accountId)
+          .neq("role", "owner")
+          .select("id");
+        revokeNote = revokeError
+          ? `Chưa gỡ được quyền truy cập: ${friendlyError(revokeError)}`
+          : gone?.length
+            ? "Đã gỡ quyền truy cập công ty của tài khoản."
+            : "Tài khoản không còn quyền truy cập công ty.";
+      }
+      toast.success("Đã xoá hồ sơ nhân viên", revokeNote ? { description: revokeNote, duration: 6000 } : undefined);
       setRemoval(null);
       await load();
     } catch (deleteError) {
@@ -1143,7 +1163,7 @@ const Employees = () => {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   className="gap-2 text-[12.5px] text-destructive focus:bg-destructive-subtle focus:text-destructive"
-                                  onSelect={() => window.setTimeout(() => setRemoval(person), 0)}
+                                  onSelect={() => window.setTimeout(() => { setRevokeAccess(true); setRemoval(person); }, 0)}
                                 >
                                   <Trash2 className="h-3.5 w-3.5" /> Xoá hồ sơ
                                 </DropdownMenuItem>
@@ -1293,7 +1313,10 @@ const Employees = () => {
 
       <AlertDialog
         open={!!removal}
-        onOpenChange={(open) => !open && setRemoval(null)}
+        onOpenChange={(open) => {
+          if (!open) setRemoval(null);
+          else setRevokeAccess(true);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1303,6 +1326,12 @@ const Employees = () => {
               lương, bảo hiểm, khen thưởng, kỷ luật, đào tạo và tài liệu — sẽ bị
               xoá vĩnh viễn.
             </AlertDialogDescription>
+            {removal?.user_id && removal.user_id !== user?.id ? (
+              <label className="mt-2 flex items-start gap-2 text-[13px] text-foreground">
+                <Checkbox checked={revokeAccess} onCheckedChange={(v) => setRevokeAccess(v === true)} className="mt-0.5" />
+                Đồng thời gỡ quyền truy cập công ty của tài khoản này?
+              </label>
+            ) : null}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Huỷ</AlertDialogCancel>

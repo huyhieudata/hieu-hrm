@@ -1,3 +1,4 @@
+import { DOCUMENT_ACCEPT, documentFileProblem } from "@/lib/employee-records";
 import { confirmDialog } from "@/components/common/confirm-dialog";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Eye, FileText, Search, Trash2, Upload } from "lucide-react";
@@ -77,7 +78,7 @@ const EmployeeDocuments = () => {
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-subtle text-brand-navy"><FileText className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] font-semibold">{d.title}</p>
-                  <p className="truncate text-[11.5px] text-muted-foreground">{d.file_name} · {size(d.size_bytes)} · {new Date(d.created_at).toLocaleDateString("vi-VN")}</p>
+                  <p className="truncate text-[11.5px] text-muted-foreground">{d.file_name} · {size(d.size_bytes)} · {new Date(d.created_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}</p>
                 </div>
                 <Button size="icon" variant="ghost" className="h-11 w-11" aria-label="Xem" onClick={() => open(d, false)}><Eye className="h-4 w-4" /></Button>
                 <Button size="icon" variant="ghost" className="h-11 w-11" aria-label="Tải về" onClick={() => open(d, true)}><Download className="h-4 w-4" /></Button>
@@ -122,7 +123,7 @@ const UploadDialog = ({ companyId, categories, onClose, onDone }: { companyId: s
       <DialogContent>
         <DialogHeader><DialogTitle>Tải lên tài liệu</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <input ref={fileRef} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0] ?? null; setFile(f); if (f && !title) setTitle(f.name.replace(/\.[^.]+$/, "")); }} />
+          <input ref={fileRef} type="file" accept={DOCUMENT_ACCEPT} className="hidden" onChange={(e) => { const f = e.target.files?.[0] ?? null; const problem = f ? documentFileProblem(f) : null; if (problem) { toast.error(problem); e.target.value = ""; return; } setFile(f); if (f && !title) setTitle(f.name.replace(/\.[^.]+$/, "")); }} />
           <Button variant="outline" className="w-full" onClick={() => fileRef.current?.click()}>{file ? `${file.name} (${size(file.size)})` : "Chọn tệp (tối đa 20MB)"}</Button>
           <Input placeholder="Tiêu đề" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} />
           <Input placeholder="Danh mục (VD: Nội quy, Biểu mẫu)" list="doc-cats" value={category} onChange={(e) => setCategory(e.target.value)} />

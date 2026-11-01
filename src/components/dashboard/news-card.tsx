@@ -59,7 +59,7 @@ export const NewsCard = ({ companyId }: { companyId: string }) => {
                 {post.summary && <p className="truncate text-[12px] text-muted-foreground">{post.summary}</p>}
                 {post.published_at && (
                   <p className="text-[11px] text-muted-foreground">
-                    {new Date(post.published_at).toLocaleDateString("vi-VN")}
+                    {new Date(post.published_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                   </p>
                 )}
               </div>

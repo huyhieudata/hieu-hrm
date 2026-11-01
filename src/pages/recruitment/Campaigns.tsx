@@ -439,7 +439,7 @@ const Campaigns = () => {
                     {row.start_date && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                         <CalendarClock className="h-3 w-3" />
-                        {new Date(row.start_date).toLocaleDateString("vi-VN")}
+                        {new Date(row.start_date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                       </span>
                     )}
                     {canManage && (

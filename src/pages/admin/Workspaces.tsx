@@ -42,7 +42,7 @@ import {
   type ServicePlan,
 } from "@/lib/platform";
 
-const formatDate = (value: string | null) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—");
+const formatDate = (value: string | null) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—");
 
 const statusTone = (workspace: PlatformWorkspace) => {
   const days = workspaceDaysLeft(workspace.subscription_expires_at);
@@ -380,7 +380,7 @@ const Workspaces = () => {
                       <td className="px-4 py-2.5">
                         <p className="text-[12px] font-medium text-foreground">{workspace.name}</p>
                         <p className="text-[11px] text-muted-foreground">
-                          Tạo {new Date(workspace.created_at).toLocaleDateString("vi-VN")}
+                          Tạo {new Date(workspace.created_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                         </p>
                       </td>
                       <td className="px-3 py-2.5 text-[11.5px] text-foreground">{workspace.plan_name ?? "Chưa gán"}</td>

@@ -308,7 +308,7 @@ const NewsWidget = ({ surface, size, companyId, audience }: WidgetProps) => {
               ) : null}
               {post.published_at ? (
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  {new Date(post.published_at).toLocaleDateString("vi-VN")}
+                  {new Date(post.published_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                 </p>
               ) : null}
             </li>

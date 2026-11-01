@@ -93,7 +93,7 @@ const money = (value: number | null) =>
   value === null || value === undefined ? "—" : `${new Intl.NumberFormat("vi-VN").format(Number(value))} đ`;
 
 const formatDay = (value: string | null) =>
-  value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—";
+  value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
 
 const Assets = () => {
   const { activeCompany, can, canManageModule } = useCompany();

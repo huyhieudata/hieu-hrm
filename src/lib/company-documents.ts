@@ -1,3 +1,4 @@
+import { documentFileProblem } from "@/lib/employee-records";
 import { supabase } from "@/integrations/supabase/client";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,6 +28,8 @@ const safeName = (name: string) =>
   name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-80);
 
 export const uploadDocument = async (companyId: string, file: File, meta: { title: string; category: string; description?: string }) => {
+  const problem = documentFileProblem(file);
+  if (problem) throw new Error(problem);
   if (file.size > 20 * 1024 * 1024) throw new Error("Tệp tối đa 20MB.");
   const path = `${companyId}/${crypto.randomUUID()}-${safeName(file.name)}`;
   const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type || undefined });

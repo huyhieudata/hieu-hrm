@@ -24,7 +24,7 @@ const relative = (value: string) => {
   if (minutes < 60) return `${minutes} phút trước`;
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours} giờ trước`;
-  return new Date(value).toLocaleDateString("vi-VN");
+  return new Date(value).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 };
 
 /** News plus request decisions. There is no separate notification table. */
@@ -201,7 +201,7 @@ const EmployeeNews = () => {
                 <p className="text-[14px] font-bold">{post.title}</p>
                 {post.summary ? <p className="mt-1 line-clamp-3 text-[12.5px] leading-5 text-muted-foreground">{post.summary}</p> : null}
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  {[post.author_name, post.published_at ? new Date(post.published_at).toLocaleDateString("vi-VN") : null].filter(Boolean).join(" · ")}
+                  {[post.author_name, post.published_at ? new Date(post.published_at).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : null].filter(Boolean).join(" · ")}
                 </p>
               </div>
             </article>

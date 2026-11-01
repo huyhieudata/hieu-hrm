@@ -159,6 +159,10 @@ const Devices = () => {
           <AppInstallSummary
             installed={installs.filter((row) => row.installed).length}
             total={installs.length}
+            note={(() => {
+              const noAccount = Math.max(0, employeeMap.size - installs.filter((row) => row.employee_id).length);
+              return noAccount ? `${noAccount} hồ sơ chưa có tài khoản đăng nhập không tính` : undefined;
+            })()}
             onlyMissing={onlyNoApp}
             onToggle={setOnlyNoApp}
             missingNames={installs
