@@ -280,7 +280,9 @@ export const buildNavGroups = ({
     },
     {
       label: "Mở rộng",
-      items: [{ label: "Đánh giá hiệu suất", icon: Star, soon: true }],
+      items: [
+        (canDo("evaluations", "view") || role === "manager") && { label: "Đánh giá hiệu suất", to: "/danh-gia", icon: Star },
+      ].filter(Boolean) as NavItem[],
     },
   ].filter((group) => group.items.length > 0);
   // Vai trò Nhân viên: ẩn menu quản trị (Hồ sơ nhân viên, Chấm công quản lý, Cài đặt).
