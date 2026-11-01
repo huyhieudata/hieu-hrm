@@ -117,6 +117,7 @@ const Workspaces = lazy("/cai-dat/he-thong/workspace", () => import("./pages/adm
 const ServicePlans = lazy("/cai-dat/he-thong/goi-dich-vu", () => import("./pages/admin/ServicePlans"));
 const PermissionGroups = lazy("/cai-dat/he-thong/phan-quyen", () => import("./pages/admin/PermissionGroups"));
 const Requests = lazy("/don-tu", () => import("./pages/requests/Requests"), true);
+const ActivityLogPage = lazy("/cai-dat/nhat-ky-hoat-dong", () => import("./pages/settings/ActivityLog"));
 const RequestTypes = lazy("/cai-dat/loai-don", () => import("./pages/requests/RequestTypes"));
 const LeavePolicies = lazy(
   ["/nghi-phep", "/cai-dat/chinh-sach-phep"],
@@ -496,6 +497,15 @@ export const routers = [
         <LeavePolicies />
       </PageSuspense>,
       "leave",
+    ),
+  },
+  {
+    path: "/cai-dat/nhat-ky-hoat-dong",
+    name: "activity-log",
+    element: companyScoped(
+      <PageSuspense>
+        <ActivityLogPage />
+      </PageSuspense>,
     ),
   },
   {
