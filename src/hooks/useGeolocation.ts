@@ -59,7 +59,7 @@ export const useGeofence = (companyId: string | null, maxAccuracyM: number): Geo
           ...EMPTY,
           phase: "ready",
           hasZones: false,
-          message: "Công ty chưa cấu hình vùng chấm công.",
+          message: "Công ty chưa khai báo địa điểm chấm công — chưa thể chấm.",
         });
         return;
       }

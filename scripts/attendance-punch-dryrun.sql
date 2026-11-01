@@ -116,5 +116,23 @@ begin
   -- 18 máy khác (hash khác) -> chặn
   r := public.attendance_punch(v_emp.company_id, 'in', 'afternoon', repeat('c', 64), 21.0286, 105.8543, 20, v_path);
   out := out || '18 ' || (r->>'reason') || '; ';
+  -- 19 tự huỷ yêu cầu pending của mình; không huỷ được máy đã duyệt/thu hồi
+  reset role;
+  insert into public.employee_devices(company_id, employee_id, device_hash, device_name, status)
+    values (v_emp.company_id, v_emp.id, repeat('d', 64), 'Máy chờ', 'pending') returning * into d;
+  set local role authenticated;
+  perform public.cancel_my_attendance_device(d.id);
+  out := out || '19 ' || case when exists (select 1 from public.employee_devices where id = d.id) then 'FAIL' else 'ok' end || '; ';
+  begin
+    perform public.cancel_my_attendance_device((select id from public.employee_devices where employee_id = v_emp.id and status = 'revoked' limit 1));
+    out := out || '20 FAIL cancel revoked; ';
+  exception when others then out := out || '20 ok(' || left(sqlerrm, 40) || '); ';
+  end;
+  -- 21 không huỷ được máy của người khác
+  begin
+    perform public.cancel_my_attendance_device((select id from public.employee_devices where employee_id <> v_emp.id limit 1));
+    out := out || '21 FAIL; ';
+  exception when others then out := out || '21 ok; ';
+  end;
   raise exception 'DRYRUN %', out;
 end $$;

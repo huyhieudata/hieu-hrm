@@ -105,8 +105,9 @@ export const EmployeeCheckInView = ({
   const action: "in" | "out" = record?.check_in && !record.check_out ? "out" : "in";
   const finished = Boolean(record?.check_in && record?.check_out);
   const offDay = Boolean(shift && !isWorkingDay(shift, today));
-  const requireDevice = Boolean(policy?.require_device);
-  const requireGps = Boolean(policy?.require_gps);
+  // Server chặn cứng: luôn bắt buộc đúng thiết bị đã duyệt, GPS đủ chính xác và trong bán kính.
+  const requireDevice = true;
+  const requireGps = true;
   const liveGeo = useGeofence(geoOverride || offDay ? null : companyId, policy?.max_accuracy_m ?? 150);
   const geo = geoOverride ?? liveGeo;
 
@@ -116,17 +117,19 @@ export const EmployeeCheckInView = ({
   const waitingZone = !geoOverride && Boolean(companyId) && (geo.phase === "idle" || geo.phase === "loading");
   const gpsUnknownBlocked =
     geo.hasZones && (geo.phase === "denied" || geo.phase === "error" || geo.phase === "loading" || geo.phase === "idle");
-  const blocked = deviceBlocked || zoneBlocked || accuracyBlocked || gpsUnknownBlocked || waitingZone;
+  const noZones = !geoOverride && geo.phase === "ready" && !geo.hasZones;
+  const blocked = deviceBlocked || zoneBlocked || accuracyBlocked || gpsUnknownBlocked || waitingZone || noZones;
   const busy = busySession === activeSession || Boolean(step);
 
-  const hardFlag = punchFlash?.flags.some((flag) => flag.startsWith("out_of_zone") || flag.startsWith("unregistered_device"));
+  // Máy chủ không còn chấp nhận lượt chấm kèm cờ ngoài vùng/sai thiết bị; lượt thành công luôn hợp lệ.
+  const hardFlag = false;
 
   const steps = useMemo<CheckStepItem[]>(() => {
     const gpsState: CheckStepState = step?.includes("GPS")
       ? "loading"
       : geo.phase === "loading"
         ? "loading"
-        : zoneBlocked
+        : zoneBlocked || noZones
           ? "bad"
           : accuracyBlocked
             ? "warn"
@@ -154,7 +157,7 @@ export const EmployeeCheckInView = ({
         id: "gps",
         icon: "pin",
         label: "Vị trí GPS",
-        note: geo.message ?? (requireGps ? "Chờ" : "GPS tuỳ chọn"),
+        note: geo.message ?? "Chờ",
         state: gpsState,
       },
       {
@@ -165,7 +168,7 @@ export const EmployeeCheckInView = ({
         state: deviceState(device, requireDevice),
       },
     ];
-  }, [accuracyBlocked, action, cameraOpen, device, geo.hasZones, geo.message, geo.phase, hardFlag, policy?.require_photo, punchFlash, requireDevice, requireGps, step, zoneBlocked]);
+  }, [accuracyBlocked, action, cameraOpen, device, geo.hasZones, geo.message, geo.phase, hardFlag, policy?.require_photo, punchFlash, requireDevice, step, zoneBlocked, noZones]);
 
   const dateLabel = new Date(`${today}T00:00:00`).toLocaleDateString("vi-VN", {
     weekday: "long",
@@ -240,12 +243,10 @@ export const EmployeeCheckInView = ({
         </section>
       ) : null}
 
-      {hardFlag ? (
+      {noZones ? (
         <section className="rounded-3xl bg-destructive-subtle px-4 py-3 text-[13px] text-destructive">
-          <p className="font-bold">Máy chủ ghi nhận cờ chặn</p>
-          <p className="mt-1 leading-5">
-            Lượt này có cờ ngoài vùng hoặc sai thiết bị. Giao diện không còn cho chấm kèm cảnh báo — hãy tạo đơn hoặc liên hệ HR.
-          </p>
+          <p className="font-bold">Chưa thể chấm công</p>
+          <p className="mt-1 leading-5">Công ty chưa khai báo địa điểm chấm công. Liên hệ HR để thiết lập trước khi chấm.</p>
         </section>
       ) : null}
 
@@ -286,7 +287,7 @@ export const EmployeeCheckInView = ({
           current
           note={
             device?.status === "pending"
-              ? "Sai máy hoặc máy chưa được duyệt thì không chấm công được. Chờ HR, không có chế độ chấm kèm cảnh báo."
+              ? "Sai máy hoặc máy chưa được duyệt thì không chấm công được. Vui lòng chờ HR duyệt."
               : device?.status === "rejected"
                 ? "Yêu cầu bị từ chối. Gửi lại đăng ký hoặc liên hệ HR. Nút chấm công vẫn khoá."
                 : "Đăng ký đúng điện thoại đã được HR duyệt. Máy khác bị chặn hoàn toàn."
