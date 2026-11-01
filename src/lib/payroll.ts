@@ -30,6 +30,9 @@ export interface PayrollItem {
   position_allowance: number;
   responsibility_allowance: number;
   other_allowance: number;
+  overtime_hours?: number;
+  overtime_pay?: number;
+  overtime_taxable?: number;
   gross_salary: number;
   insurance_salary: number;
   insurance_employee: number;
@@ -181,6 +184,7 @@ const payslipBody = (input: { companyName: string; period: PayrollPeriod; item: 
     ["Phụ cấp chức vụ", item.position_allowance],
     ["Phụ cấp trách nhiệm", item.responsibility_allowance],
     ["Phụ cấp ăn ca / khác", item.other_allowance],
+    [`Tăng ca (${Number(item.overtime_hours ?? 0)} giờ)`, item.overtime_pay ?? 0],
   ]
     .filter(([, value]) => Number(value) > 0)
     .map(([label, value]) => `<tr><td>${label}</td><td class="num">${money(Number(value))}</td></tr>`)

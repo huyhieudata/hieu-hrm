@@ -31,3 +31,14 @@ eq(Number(adj.negative_net), 1, "cảnh báo thực nhận âm");
   if (ins({ insuranceSalary: 10e6, unpaidDays: 10, year: 2027, month: 2 }) !== 0) throw new Error("FAIL applyPayrollParameters exempt");
   console.log("ok applyPayrollParameters");
 }
+
+// Tăng ca: lương 26tr, 26 công -> lương giờ 125.000; 2h ngày thường + 1h lễ.
+{
+  const { computeOvertimePay } = await import("../src/lib/payroll-calc.ts");
+  const ot = computeOvertimePay(26_000_000, 26, [{ hours: 2, kind: "weekday" }, { hours: 1, kind: "holiday" }]);
+  eq(ot.hours, 3, "OT giờ");
+  eq(ot.pay, 750_000, "OT tiền (2×1.5 + 1×3)×125k");
+  eq(ot.taxable, 375_000, "OT chịu thuế (100%)");
+  const w = computeOvertimePay(26_000_000, 26, [{ hours: 4, kind: "weekend" }]);
+  eq(w.pay, 1_000_000, "OT cuối tuần 200%");
+}

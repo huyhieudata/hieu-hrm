@@ -508,7 +508,7 @@ const Payroll = () => {
         supabase.from("request_types").select("id, category, deduct_leave").eq("company_id", companyId),
         supabase
           .from("requests")
-          .select("employee_id, start_date, end_date, leave_days, status, request_type_id")
+          .select("employee_id, start_date, end_date, leave_days, status, request_type_id, ot_hours, ot_kind")
           .eq("company_id", companyId)
           .eq("status", "approved")
           .lte("start_date", end)
@@ -526,13 +526,15 @@ const Payroll = () => {
         ),
       );
       const leaves: PayrollLeaveInput[] = (
-        (leaveResult.data ?? []) as {
+        (leaveResult.data ?? []) as unknown as {
           employee_id: string;
           start_date: string;
           end_date: string;
           leave_days: number | null;
           status: string;
           request_type_id: string | null;
+          ot_hours: number | null;
+          ot_kind: string | null;
         }[]
       ).flatMap((row) => {
         const type = row.request_type_id ? typeById.get(row.request_type_id) : null;
@@ -546,6 +548,8 @@ const Payroll = () => {
             status: row.status,
             category: type.category,
             deduct_leave: type.deduct_leave,
+            ot_hours: row.ot_hours,
+            ot_kind: row.ot_kind,
           },
         ];
       });
@@ -677,6 +681,8 @@ const Payroll = () => {
     "Lương cơ bản",
     "Phụ cấp",
     "Tổng thu nhập",
+    "Giờ tăng ca",
+    "Tiền tăng ca",
     "BH nhân viên",
     "Thuế TNCN",
     "Thực nhận",
@@ -693,6 +699,8 @@ const Payroll = () => {
       Number(item.base_salary),
       Number(item.position_allowance) + Number(item.responsibility_allowance) + Number(item.other_allowance),
       Number(item.gross_salary),
+      Number(item.overtime_hours ?? 0),
+      Number(item.overtime_pay ?? 0),
       Number(item.insurance_employee),
       Number(item.tax_amount),
       Number(item.net_salary),

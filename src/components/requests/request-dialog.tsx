@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock, FileText, Home, Loader2, LogOut, MapPin, PenLine } from "lucide-react";
 
+import { OT_KIND_LABELS } from "@/lib/payroll-calc";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,7 +37,7 @@ interface RequestDialogProps {
   onSubmit: (values: Record<string, unknown>) => Promise<void>;
 }
 
-const TIME_CATEGORIES = ["late", "early_leave", "attendance_fix", "outside"];
+const TIME_CATEGORIES = ["late", "early_leave", "attendance_fix", "outside", "overtime"];
 const SESSION_CATEGORIES = ["leave", "remote", "late", "early_leave", "outside", "attendance_fix"];
 
 const CATEGORY_ICONS: Record<string, typeof FileText> = {
@@ -64,6 +65,7 @@ const RequestDialog = ({
   const [startDate, setStartDate] = useState(todayIso());
   const [endDate, setEndDate] = useState(todayIso());
   const [session, setSession] = useState("full_day");
+  const [otKind, setOtKind] = useState("weekday");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [reason, setReason] = useState("");
@@ -136,6 +138,10 @@ const RequestDialog = ({
       setError(`Loại đơn này tối đa ${selectedType.max_days} ngày.`);
       return;
     }
+    if (category === "overtime" && (!startTime || !endTime)) {
+      setError("Đơn tăng ca cần giờ bắt đầu và giờ kết thúc.");
+      return;
+    }
     if (needsTime && !startTime && !endTime) {
       setError("Vui lòng nhập giờ cụ thể cho đơn.");
       return;
@@ -165,6 +171,7 @@ const RequestDialog = ({
         session: needsSession ? session : null,
         start_time: needsTime ? startTime || null : null,
         end_time: needsTime ? endTime || null : null,
+        ...(category === "overtime" ? { ot_kind: otKind, end_date: startDate } : {}),
         leave_days: category === "leave" ? leaveDayCount : 0,
         reason: reason.trim(),
         status: "pending",
@@ -308,6 +315,27 @@ const RequestDialog = ({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {category === "overtime" && (
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Loại ngày tăng ca</Label>
+              <Select value={otKind} onValueChange={setOtKind}>
+                <SelectTrigger className="h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(OT_KIND_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                Số giờ do hệ thống tự tính từ giờ bắt đầu/kết thúc (qua nửa đêm vẫn tính, tối đa 12 giờ/đơn).
+              </p>
             </div>
           )}
 
