@@ -1,3 +1,4 @@
+import { setExportAuditCompany } from "@/lib/export-utils";
 /* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
@@ -148,6 +149,10 @@ export const CompanyProvider = ({ children }: { children: ReactNode }) => {
       return memberships[0]?.company_id ?? null;
     });
   }, [memberships, userId]);
+
+  useEffect(() => {
+    setExportAuditCompany(activeId ?? null);
+  }, [activeId]);
 
   useEffect(() => {
     if (userId && activeId) {
