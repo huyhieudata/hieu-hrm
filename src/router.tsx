@@ -68,7 +68,7 @@ const DocumentChecklist = lazy(
   "/cai-dat/checklist-ho-so",
   () => import("./pages/settings/DocumentChecklist"),
 );
-const WorkforceReport = lazy("/bao-cao", () => import("./pages/reports/WorkforceReport"));
+const WorkforceReport = lazy("/bao-cao", () => import("./pages/bao-cao/WorkforceReport"));
 const Headcount = lazy("/hoach-dinh", () => import("./pages/planning/Headcount"));
 const CheckIn = lazy(["/cham-cong", "/toi/cham-cong"], () => import("./pages/attendance/CheckIn"));
 const Timesheet = lazy("/cham-cong/bang-cong", () => import("./pages/attendance/Timesheet"));
