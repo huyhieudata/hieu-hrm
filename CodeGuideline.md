@@ -163,3 +163,9 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Ảnh selfie: bucket riêng `attendance-photos`, đường dẫn `company_id/employee_id/*.jpg`, xem bằng signed URL.
 - Client: `src/lib/attendance-verify.ts`; trang `/cham-cong/thiet-bi`, `/cham-cong/nhat-ky`; cấu hình nằm ở `/cham-cong/cai-dat`.
 - Kiểm thử SQL: `scripts/attendance-punch-dryrun.sql` (luôn rollback).
+
+## Widget trang chủ
+- Cấu hình: bảng `home_widget_settings` (company, surface desktop|mobile, widget_key, enabled, sort_order, size sm|md|lg, audiences admin|manager|employee). Chỉ ghi qua RPC `save_home_widgets` / `reset_home_widgets` (owner/admin/hr). Không có dòng ⇒ dùng `defaultWidgetConfig()`.
+- Dữ liệu: một RPC `home_dashboard_summary(p_company)` (SECURITY DEFINER, phạm vi theo vai trò: manager = phòng ban mình, employee = bản thân). Bản tin lấy client-side qua RLS.
+- Thêm widget mới: thêm key vào `WIDGET_LIBRARY` (src/lib/home-widgets.ts), component vào `WIDGET_COMPONENTS` (src/components/home-widgets/widgets.tsx), dữ liệu (nếu cần) vào RPC summary. Widget mới tự xuất hiện ở trạng thái tắt với công ty đã tuỳ chỉnh.
+- Mỗi widget phải có trạng thái loading/empty/error (WidgetSkeleton/WidgetEmpty/WidgetError).
