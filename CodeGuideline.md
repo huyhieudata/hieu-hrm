@@ -215,3 +215,8 @@ Whenever a new module (such as a component, hook, or utility) or a new page is a
 - Truy vấn khởi động dùng `withRetry` / `noticeIfSlow` trong `src/lib/net-retry.ts`.
 - Lỗi hiển thị qua `getErrorMessage` → `translateDbError` (utils.ts); thêm nhãn cột/constraint mới vào `COLUMN_LABELS`/`CONSTRAINT_MESSAGES`.
 - `FieldDef.validate(value, values)` nhận cả form để kiểm tra chéo trường. Ràng buộc client phải khớp ràng buộc DB/RPC.
+
+## Tài khoản nhân viên
+- Tạo/đặt lại tài khoản chỉ qua `src/lib/employee-accounts.ts` → edge function `create-employee-accounts`. Không tạo user từ client, không lưu/log mật khẩu tạm; mật khẩu chỉ trả về khi mail lỗi và chỉ giữ trong state để tải CSV một lần.
+- `profiles.must_change_password` chỉ service_role đổi được; client xoá cờ bằng RPC `clear_must_change_password()` sau khi đổi mật khẩu. `RequireAuth` chặn app bằng `ForcePasswordChange`.
+- Không thêm lại luồng mời qua email/link.

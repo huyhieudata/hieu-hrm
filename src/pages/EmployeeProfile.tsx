@@ -69,8 +69,7 @@ import {
 import { BankInfoCard } from "@/components/employee/bank-info-card";
 import { OnboardingTab } from "@/components/employee/onboarding-tab";
 import { ResignationDialog } from "@/components/employee/resignation-dialog";
-import { InviteEmployeeDialog } from "@/components/employee/invite-employee-dialog";
-import { InviteStatusBar } from "@/components/employee/invite-status-card";
+import { AccountStatusBar } from "@/components/employee/account-dialog";
 import { DisciplineTab } from "@/components/employee/discipline-tab";
 import { DocumentsTab } from "@/components/employee/documents-tab";
 import { EmployeeEvaluationsTab } from "@/components/employee/evaluations-tab";
@@ -405,8 +404,6 @@ const EmployeeProfile = () => {
   const canDelete = isManagerial(role);
 
   const [employee, setEmployee] = useState<EmployeeRecord | null>(null);
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteReload, setInviteReload] = useState(0);
   const [colleagues, setColleagues] = useState<EmployeeRecord[]>([]);
   const [departments, setDepartments] = useState<DepartmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -726,16 +723,6 @@ const EmployeeProfile = () => {
     }
   }, [searchParams, tabs]);
 
-  // Vừa tạo hồ sơ (?moi=1): mở ngay popup gửi lời mời.
-  useEffect(() => {
-    if (
-      canInvite &&
-      employee &&
-      !employee.user_id &&
-      searchParams.get("moi") === "1"
-    )
-      setInviteOpen(true);
-  }, [canInvite, employee, searchParams]);
 
   const loadDocumentData = async () => {
     if (!employee || !activeCompany) return null;
@@ -1068,11 +1055,10 @@ const EmployeeProfile = () => {
               </div>
               {canInvite && activeCompany && (
                 <div className="mt-3">
-                  <InviteStatusBar
+                  <AccountStatusBar
                     companyId={activeCompany.id}
-                    employeeId={employee.id}
-                    reloadKey={inviteReload}
-                    onInvite={() => setInviteOpen(true)}
+                    employee={employee}
+                    onChanged={load}
                   />
                 </div>
               )}
@@ -2036,14 +2022,6 @@ const EmployeeProfile = () => {
         submitLabel="Lưu thay đổi"
         onSubmit={handleSave}
       />
-      {canInvite && (
-        <InviteEmployeeDialog
-          open={inviteOpen}
-          onOpenChange={setInviteOpen}
-          employees={[employee]}
-          onDone={() => setInviteReload((n) => n + 1)}
-        />
-      )}
     </AppShell>
   );
 };

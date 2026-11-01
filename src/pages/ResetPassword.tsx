@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { clearMustChangePassword } from "@/lib/employee-accounts";
 import { AlertCircle, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
@@ -55,6 +56,7 @@ const ResetPassword = () => {
     setSaving(true);
     try {
       await updatePassword(password);
+      await clearMustChangePassword().catch(() => undefined);
       toast.success("Đã đặt lại mật khẩu");
       navigate("/", { replace: true });
     } catch (submitError) {
