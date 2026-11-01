@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCompany } from "@/lib/company-provider";
+import { supabase } from "@/integrations/supabase/client";
 import { createSetting, listDepartments } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +45,7 @@ const STEPS = [
 /** Wizard tạo công ty 3 bước: (1) tên/ngành/quy mô → (2) phòng ban mặc định → (3) mời nhân sự (bỏ qua được). */
 const SetupWizard = () => {
   const navigate = useNavigate();
-  const { createCompany } = useCompany();
+  const { createCompany, refreshMemberships } = useCompany();
   const [step, setStep] = useState(0);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -55,15 +56,29 @@ const SetupWizard = () => {
   const [custom, setCustom] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
 
   const submitCompany = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (name.trim().length < 2) return setError("Tên công ty cần ít nhất 2 ký tự.");
+    setNameError(null);
+    if (!name.trim()) return setNameError("Vui lòng nhập tên công ty.");
+    if (name.trim().length < 2) return setNameError("Tên công ty cần ít nhất 2 ký tự.");
     setBusy(true);
     try {
-      const id = await createCompany({ name, industry, companySize: size });
+      if (companyId) {
+        // Đã tạo ở lần trước (người dùng bấm Quay lại): chỉ cập nhật, không tạo công ty mới.
+        const { error: upErr } = await supabase
+          .from("companies")
+          .update({ name: name.trim(), industry, company_size: size })
+          .eq("id", companyId);
+        if (upErr) throw upErr;
+        await refreshMemberships();
+        setStep(1);
+        return;
+      }
+      const id = await createCompany({ name: name.trim(), industry, companySize: size });
       setCompanyId(id);
       const list = departmentsFor(industry);
       setDepartments(list);
@@ -143,8 +158,10 @@ const SetupWizard = () => {
             <form className="space-y-3.5" onSubmit={submitCompany}>
               <h1 className="text-[16px] font-semibold">Bước 1/3 · Thông tin công ty</h1>
               <div className="space-y-1.5">
-                <Label htmlFor="wz-name">Tên công ty</Label>
-                <Input id="wz-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Công ty TNHH An Phát" className="h-10" autoFocus />
+                <Label htmlFor="wz-name">Tên công ty <span className="text-destructive">*</span></Label>
+                <Input id="wz-name" value={name} onChange={(e) => { setName(e.target.value); setNameError(null); }} placeholder="Công ty TNHH An Phát"
+                  className={cn("h-10", nameError && "border-destructive")} aria-invalid={!!nameError} aria-describedby="wz-name-err" autoFocus />
+                {nameError && <p id="wz-name-err" className="text-[12px] text-destructive">{nameError}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Lĩnh vực</Label>
@@ -160,13 +177,18 @@ const SetupWizard = () => {
                   <SelectContent>{SIZES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+              <p className="text-[11.5px] text-muted-foreground">
+                {companyId
+                  ? "Công ty đã được tạo; sửa thông tin ở đây sẽ cập nhật công ty đó, không tạo thêm công ty mới."
+                  : "Công ty được tạo ngay khi bấm nút dưới. Nếu dừng giữa chừng, công ty vẫn nằm trong danh sách Công ty của bạn (chọn lại để dùng tiếp, phòng ban/nhân sự thêm sau ở Cài đặt)."}
+              </p>
               {error && <p className="rounded-md bg-destructive-subtle px-3 py-2 text-[12px] text-destructive">{error}</p>}
               <div className="flex justify-between pt-1">
                 <Button type="button" variant="ghost" className="gap-1.5" onClick={() => navigate("/cong-ty")}>
                   <ArrowLeft className="h-4 w-4" /> Quay lại
                 </Button>
                 <Button type="submit" disabled={busy} className="gap-2">
-                  {busy && <Loader2 className="h-4 w-4 animate-spin" />} Tạo công ty & tiếp tục
+                  {busy && <Loader2 className="h-4 w-4 animate-spin" />} {companyId ? "Lưu & tiếp tục" : "Tạo công ty & tiếp tục"}
                 </Button>
               </div>
             </form>
@@ -203,7 +225,12 @@ const SetupWizard = () => {
               </div>
               {error && <p className="rounded-md bg-destructive-subtle px-3 py-2 text-[12px] text-destructive">{error}</p>}
               <div className="flex justify-between pt-1">
-                <Button type="button" variant="ghost" onClick={() => setStep(2)} disabled={busy}>Bỏ qua</Button>
+                <span className="flex gap-1">
+                  <Button type="button" variant="ghost" className="gap-1.5" onClick={() => { setError(null); setStep(0); }} disabled={busy}>
+                    <ArrowLeft className="h-4 w-4" /> Quay lại
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setStep(2)} disabled={busy}>Bỏ qua</Button>
+                </span>
                 <Button onClick={() => void submitDepartments()} disabled={busy} className="gap-2">
                   {busy && <Loader2 className="h-4 w-4 animate-spin" />} Tạo {selected.size} phòng ban & tiếp tục
                 </Button>
@@ -221,7 +248,12 @@ const SetupWizard = () => {
                 <UserPlus className="h-4 w-4" /> Mời nhân sự
               </Button>
               <div className="flex justify-between pt-1">
-                <Button variant="ghost" onClick={() => finish(true)}>Bỏ qua</Button>
+                <span className="flex gap-1">
+                  <Button variant="ghost" className="gap-1.5" onClick={() => setStep(1)}>
+                    <ArrowLeft className="h-4 w-4" /> Quay lại
+                  </Button>
+                  <Button variant="ghost" onClick={() => finish(true)}>Bỏ qua</Button>
+                </span>
                 <Button onClick={() => finish(false)}>Hoàn tất</Button>
               </div>
             </div>
