@@ -75,7 +75,7 @@ interface SessionRow {
   windowLabel: string;
 }
 
-const CheckIn = () => {
+const CheckIn = ({ personal = false }: { personal?: boolean }) => {
   const { user } = useAuth();
   const { activeCompany, role } = useCompany();
   const companyId = activeCompany?.id ?? null;
@@ -315,7 +315,7 @@ const CheckIn = () => {
 
   return (
     <AppShell>
-      {role === "employee" ? (
+      {role === "employee" || personal ? (
         employeeView
       ) : (
       <>
@@ -340,7 +340,7 @@ const CheckIn = () => {
         </Card>
       ) : (
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
             <Card className="p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 Công tháng này

@@ -37,6 +37,7 @@ const screenMeta = (pathname: string): ScreenMeta => {
     return { title: "Thiết bị của tôi", tab: "me", back: true };
   if (pathname.startsWith("/toi/bang-cong") || pathname.startsWith("/cham-cong/bang-cong"))
     return { title: "Bảng công", tab: "me", back: true };
+  if (pathname.startsWith("/toi/cham-cong")) return { title: "Chấm công", tab: "checkin" };
   if (pathname.startsWith("/toi/phieu-luong")) return { title: "Phiếu lương", tab: "me", back: true };
   if (pathname.startsWith("/toi/ho-so")) return { title: "Thông tin cá nhân", tab: "me", back: true };
   if (pathname === "/toi") return { title: "Cá nhân", tab: "me" };

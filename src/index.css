@@ -381,14 +381,29 @@
   main input[type="checkbox"] {
     position: relative;
   }
+  main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  main select,
+  main [role="combobox"],
+  [role="dialog"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  [role="dialog"] select,
+  [role="dialog"] button:not([role="checkbox"]):not([role="switch"]) {
+    min-height: 44px;
+  }
+  main label:has(> [role="checkbox"]),
+  main label:has(> input[type="checkbox"]),
+  [role="dialog"] label:has(> [role="checkbox"]) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
   main [role="checkbox"]::after {
     content: "";
     position: absolute;
     inset: -12px;
   }
-  main a.text-xs,
-  main a.text-sm,
-  main a[class*="text-[1"] {
+  main a.text-xs:not(.flex):not(.grid):not(.block),
+  main a.text-sm:not(.flex):not(.grid):not(.block),
+  main a[class*="text-[1"]:not(.flex):not(.grid):not(.block) {
     display: inline-flex;
     align-items: center;
     min-height: 44px;

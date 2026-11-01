@@ -6,7 +6,14 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RouteErrorBoundary } from "./components/error-boundary/route-error-boundary";
 import { InstallPrompt } from "./components/pwa/install-prompt";
 import { InstallReporter } from "./components/pwa/install-reporter";
-import { routers } from "./router";
+import { preloadRoutes, routers } from "./router";
+
+if (typeof window !== "undefined") {
+  const schedule =
+    (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback ??
+    ((cb: () => void) => window.setTimeout(cb, 2500));
+  window.addEventListener("load", () => schedule(preloadRoutes), { once: true });
+}
 import { AuthProvider } from "./lib/auth-provider";
 import { CompanyProvider } from "./lib/company-provider";
 

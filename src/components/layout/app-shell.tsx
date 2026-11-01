@@ -114,6 +114,20 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
 
 const mobileTitle = (pathname: string) => {
   if (pathname === "/") return "";
+  if (pathname === "/toi") return "Hồ sơ cá nhân";
+  if (pathname.startsWith("/toi/ho-so")) return "Thông tin cá nhân";
+  if (pathname.startsWith("/toi/cham-cong")) return "Chấm công của tôi";
+  if (pathname.startsWith("/toi/thiet-bi")) return "Thiết bị chấm công";
+  if (pathname.startsWith("/toi/bang-cong")) return "Bảng công của tôi";
+  if (pathname.startsWith("/toi/phieu-luong")) return "Phiếu lương";
+  if (pathname.startsWith("/toi/tin-tuc")) return "Tin tức";
+  if (pathname.startsWith("/hoi-nhap")) return "Hội nhập";
+  if (pathname.startsWith("/hop-dong")) return "Hợp đồng";
+  if (pathname.startsWith("/nghi-phep")) return "Nghỉ phép";
+  if (pathname.startsWith("/bao-hiem")) return "Bảo hiểm";
+  if (pathname.startsWith("/tai-san")) return "Tài sản";
+  if (pathname.startsWith("/hoach-dinh")) return "Hoạch định";
+  if (pathname.startsWith("/danh-gia")) return "Đánh giá";
   if (pathname.startsWith("/employees")) return "Nhân sự";
   if (pathname.startsWith("/cham-cong")) return "Chấm công";
   if (pathname.startsWith("/don-tu")) return "Duyệt đơn";

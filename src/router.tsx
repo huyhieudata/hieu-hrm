@@ -1,4 +1,16 @@
-import { lazy, type ReactNode } from "react";
+import { lazy as reactLazy, type ComponentType, type ReactNode } from "react";
+
+// Ghi lại loader của mọi trang lazy để tải trước khi rảnh: chuyển trang sau đó không
+// còn bị Suspense hiện màn chờ toàn màn hình (cảm giác như tải lại).
+const routeLoaders: Array<() => Promise<unknown>> = [];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lazy = <T extends ComponentType<any>>(loader: () => Promise<{ default: T }>) => {
+  routeLoaders.push(loader);
+  return reactLazy(loader);
+};
+export const preloadRoutes = () => {
+  routeLoaders.forEach((load) => void load().catch(() => undefined));
+};
 import { Navigate } from "react-router-dom";
 
 import {
@@ -452,6 +464,16 @@ export const routers = [
     element: companyScoped(
       <PageSuspense>
         <EmployeeDevicesPage />
+      </PageSuspense>,
+      "attendance",
+    ),
+  },
+  {
+    path: "/toi/cham-cong",
+    name: "me-check-in",
+    element: companyScoped(
+      <PageSuspense>
+        <CheckIn personal />
       </PageSuspense>,
       "attendance",
     ),

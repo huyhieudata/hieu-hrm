@@ -93,11 +93,11 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
           <p className="py-3 text-[12px] text-muted-foreground">Hồ sơ chỉ xem. Nhờ HR khi cần sửa thông tin.</p>
         </section>
       ) : (
-        <section className="shadow-mobile rounded-3xl bg-card px-2">
+        <section className="shadow-mobile divide-y divide-border/70 rounded-3xl bg-card px-2">
           {LINKS.map((item) => {
             const Icon = item.icon;
             return (
-              <Link key={item.to} to={item.to} className="flex min-h-12 items-center gap-3 rounded-2xl px-2 text-[14px] font-semibold">
+              <Link key={item.to} to={item.to} className="flex min-h-12 w-full items-center gap-3 px-2 text-[14px] font-semibold">
                 <Icon className="h-4 w-4 text-primary" />
                 <span className="flex-1">{item.label}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />

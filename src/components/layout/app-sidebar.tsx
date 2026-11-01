@@ -118,7 +118,7 @@ export const buildNavGroups = ({
     {
       label: "Của tôi",
       items: [
-        { label: "Chấm công của tôi", to: "/cham-cong", icon: Fingerprint, exact: true },
+        { label: "Chấm công của tôi", to: "/toi/cham-cong", icon: Fingerprint },
         { label: "Thiết bị chấm công", to: "/toi/thiet-bi", icon: Smartphone },
         { label: "Bảng công của tôi", to: "/toi/bang-cong", icon: CalendarDays },
         { label: "Phiếu lương", to: "/toi/phieu-luong", icon: Wallet },
