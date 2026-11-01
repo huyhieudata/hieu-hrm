@@ -17,6 +17,7 @@ import {
 } from "@/lib/attendance";
 import { useCompany } from "@/lib/company-provider";
 import { useDeviceMode } from "@/hooks/use-device-mode";
+import { loadMyLeaveRemaining } from "@/lib/leave";
 import { getErrorMessage } from "@/lib/utils";
 
 const CELL: Record<string, string> = {
@@ -34,6 +35,7 @@ const EmployeeTimesheet = () => {
   const [month, setMonth] = useState(currentMonthIso());
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [leaveRemaining, setLeaveRemaining] = useState<number | null>(null);
 
   const monthEnd = useMemo(() => {
     const [year, monthValue] = month.split("-").map(Number);
@@ -50,6 +52,7 @@ const EmployeeTimesheet = () => {
         setRecords([]);
         return;
       }
+      void loadMyLeaveRemaining(companyId, employee).then(setLeaveRemaining).catch(() => setLeaveRemaining(null));
       const rows = await listRecordsBetween(companyId, `${month}-01`, monthEnd);
       setRecords(rows.filter((row) => row.employee_id === employee.id));
     } catch (error) {
@@ -107,7 +110,7 @@ const EmployeeTimesheet = () => {
                 [String(worked), "Ngày công"],
                 [String(late), "Đi muộn"],
                 [String(leave), "Nghỉ phép"],
-                ["—", "Còn lại"],
+                [leaveRemaining == null ? "—" : String(leaveRemaining), "Còn lại"],
               ].map(([value, caption], index) => (
                 <div key={caption} className={index ? "border-l border-border" : ""}>
                   <b className="block text-[20px] font-bold">{value}</b>

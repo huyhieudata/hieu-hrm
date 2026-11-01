@@ -289,3 +289,22 @@ export const deletePayrollParameter = async (id: string) => {
   const { error } = await db.from("payroll_parameters").delete().eq("id", id);
   if (error) throw new Error(error.message ?? "Không xoá được tham số lương.");
 };
+
+/** Phiếu lương của chính nhân viên: chỉ kỳ đã chốt/đã chi trả (RPC my_payslips, mới nhất trước). */
+export const listMyPayslips = async (companyId: string): Promise<{ items: PayrollItem[]; periods: PayrollPeriod[] }> => {
+  const { data, error } = await (supabase as unknown as { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: Error | null }> }).rpc("my_payslips", { p_company_id: companyId });
+  if (error) throw error;
+  const rows = (Array.isArray(data) ? data : []) as unknown as Array<PayrollItem & { period_month: number; period_year: number; period_status: string; standard_work_days: number | null }>;
+  const periods = new Map<string, PayrollPeriod>();
+  for (const row of rows) {
+    periods.set(row.period_id, {
+      id: row.period_id,
+      company_id: row.company_id,
+      month: row.period_month,
+      year: row.period_year,
+      status: row.period_status,
+      standard_work_days: row.standard_work_days,
+    } as unknown as PayrollPeriod);
+  }
+  return { items: rows, periods: [...periods.values()] };
+};
