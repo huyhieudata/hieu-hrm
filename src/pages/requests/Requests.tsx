@@ -60,6 +60,7 @@ import {
   applyAttendanceFix,
   createRequestRow,
   deleteRequestRow,
+  cancelApprovedRequest,
   listRequestTypes,
   listRequests,
   REQUEST_SESSION_LABELS,
@@ -85,7 +86,9 @@ const Requests = () => {
   const { user } = useAuth();
   const { activeCompany, can, canManageModule, role } = useCompany();
   const companyId = activeCompany?.id ?? null;
-  const canManage = canManageModule("requests");
+  // Quản lý toàn bộ đơn (chọn tất cả, xoá hàng loạt, duyệt thay) chỉ dành cho Owner/Admin/HR.
+  const isHrPlus = role === "owner" || role === "admin" || role === "hr";
+  const canManage = isHrPlus && canManageModule("requests");
   const canApprove = can("leave.approve");
 
   const [requests, setRequests] = useState<EmployeeRequest[]>([]);
@@ -205,12 +208,14 @@ const Requests = () => {
       // Không tự duyệt đơn của chính mình (server cũng chặn).
       if (myEmployeeId && request.employee_id === myEmployeeId) return false;
       const current = currentApprovalFor(request.id);
-      if (!current) return canApprove;
-      if (current.approver_employee_id && current.approver_employee_id === myEmployeeId) return true;
-      if (!current.approver_employee_id && canManage) return true;
+      // Không có bước duyệt: HR+ hoặc Quản lý trực tiếp của người gửi (có quyền duyệt).
+      if (!current) return canApprove && (canManage || reportIds.has(request.employee_id));
+      // Bước hiện tại đã có người duyệt cụ thể (vd. Quản lý trực tiếp): chỉ người đó, HR+ được duyệt thay.
+      if (current.approver_employee_id) return current.approver_employee_id === myEmployeeId || canManage;
+      // Bước theo vai trò (HR/Admin) chưa gán người: chỉ HR+.
       return canManage;
     },
-    [canApprove, canManage, currentApprovalFor, myEmployeeId],
+    [canApprove, canManage, currentApprovalFor, myEmployeeId, reportIds],
   );
 
   const tabs = useMemo(() => {
@@ -292,10 +297,40 @@ const Requests = () => {
     [requests, typeById, year],
   );
 
+  const [cancelTarget, setCancelTarget] = useState<EmployeeRequest | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancelApproved = async () => {
+    if (!cancelTarget) return;
+    if (cancelReason.trim().length < 5) {
+      toast.error("Vui lòng nhập lý do huỷ (tối thiểu 5 ký tự).");
+      return;
+    }
+    setCancelling(true);
+    try {
+      await cancelApprovedRequest(cancelTarget.id, cancelReason.trim());
+      toast.success("Đã huỷ đơn đã duyệt (đã ghi nhật ký)");
+      setCancelTarget(null);
+      await load();
+    } catch (error) {
+      toast.error("Không huỷ được đơn", { description: getErrorMessage(error) });
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   const handleBulkDelete = async () => {
     try {
-      await Promise.all(selected.map((id) => deleteRequestRow(id)));
-      toast.success(`Đã xoá ${selected.length} đơn`);
+      const approvedIds = new Set(requests.filter((item) => item.status === "approved").map((item) => item.id));
+      const deletable = selected.filter((id) => !approvedIds.has(id));
+      await Promise.all(deletable.map((id) => deleteRequestRow(id)));
+      toast.success(`Đã xoá ${deletable.length} đơn`, {
+        description:
+          deletable.length < selected.length
+            ? `Bỏ qua ${selected.length - deletable.length} đơn đã duyệt — đơn đã duyệt chỉ có thể huỷ kèm lý do.`
+            : undefined,
+      });
       clear();
       setBulkOpen(false);
       await load();
@@ -679,7 +714,20 @@ const Requests = () => {
                         Huỷ
                       </Button>
                     )}
-                    {canManage && request.status !== "pending" && (
+                    {canManage && request.status === "approved" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 text-[11.5px] text-muted-foreground"
+                        onClick={() => {
+                          setCancelTarget(request);
+                          setCancelReason("");
+                        }}
+                      >
+                        Huỷ đơn đã duyệt
+                      </Button>
+                    )}
+                    {canManage && request.status !== "pending" && request.status !== "approved" && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -754,6 +802,35 @@ const Requests = () => {
             >
               {deciding && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {decision?.status === "approved" ? "Duyệt đơn" : "Từ chối"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Huỷ đơn đã duyệt</DialogTitle>
+            <DialogDescription>
+              Đơn đã duyệt không thể xoá. Huỷ cần lý do; thao tác được ghi vào nhật ký và báo cho nhân viên.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            rows={3}
+            value={cancelReason}
+            onChange={(event) => setCancelReason(event.target.value)}
+            placeholder="Lý do huỷ (bắt buộc)…"
+          />
+          <DialogFooter>
+            <Button variant="outline" className="h-9" onClick={() => setCancelTarget(null)} disabled={cancelling}>
+              Đóng
+            </Button>
+            <Button
+              className="h-9 gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => void handleCancelApproved()}
+              disabled={cancelling}
+            >
+              {cancelling && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Huỷ đơn
             </Button>
           </DialogFooter>
         </DialogContent>

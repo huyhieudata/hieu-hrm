@@ -229,7 +229,6 @@ const PositionsDialog = ({ department, positions, open, onOpenChange, canManage,
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1.5 truncate text-[12.5px] font-medium text-foreground">
                         <span className="truncate">{position.title}</span>
-                        {position.is_management && <Badge variant="subtle">Quản lý</Badge>}
                       </p>
                       <p className="truncate text-[11px] text-muted-foreground">
                         {position.level ?? "Chưa xếp cấp bậc"}
@@ -242,7 +241,7 @@ const PositionsDialog = ({ department, positions, open, onOpenChange, canManage,
                           ? "border-primary/30 bg-primary-subtle text-primary-subtle-foreground"
                           : "border-border bg-card text-muted-foreground"
                       } ${canManage ? "cursor-pointer" : ""}`}
-                      title="Đánh dấu là vị trí quản lý bộ phận"
+                      title="Đánh dấu là vị trí quản lý bộ phận (chỉ là nhãn tổ chức, không cấp vai trò Quản lý trong hệ thống)"
                     >
                       <Checkbox
                         checked={position.is_management}
@@ -250,7 +249,7 @@ const PositionsDialog = ({ department, positions, open, onOpenChange, canManage,
                         onCheckedChange={(checked) => void toggleManagement(position, checked === true)}
                         className="h-3.5 w-3.5"
                       />
-                      Quản lý
+                      Vị trí quản lý
                     </label>
                     {canManage && (
                       <>

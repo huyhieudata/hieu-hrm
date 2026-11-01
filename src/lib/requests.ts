@@ -97,6 +97,11 @@ export const updateRequestRow = async (id: string, values: Record<string, unknow
   if (error) throw new Error(error.message ?? "Không cập nhật được đơn.");
 };
 
+export const cancelApprovedRequest = async (id: string, reason: string) => {
+  const { error } = await db.rpc("cancel_approved_request", { p_request: id, p_reason: reason });
+  if (error) throw error;
+};
+
 export const deleteRequestRow = async (id: string) => {
   const { error } = await db.from("requests").delete().eq("id", id);
   if (error) throw new Error(error.message ?? "Không xoá được đơn.");

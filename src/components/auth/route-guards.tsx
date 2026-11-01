@@ -64,7 +64,7 @@ export const RequireStaffPath = ({ children }: { children: ReactNode }) => {
 export const RequireModule = ({ moduleKey, children }: { moduleKey: string; children: ReactNode }) => {
   const { canDo, loading } = useCompany();
   if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
-  if (!canDo(moduleKey, "view")) return <Navigate to="/" replace />;
+  if (!canDo(moduleKey, "view")) return <DeniedRedirect />;
   return <>{children}</>;
 };
 
@@ -77,13 +77,15 @@ export const RequirePermission = ({
 }) => {
   const { can, loading } = useCompany();
   if (loading) return <FullPageLoader label="Đang kiểm tra quyền truy cập…" />;
-  if (!can(permission)) return <Navigate to="/" replace />;
+  if (!can(permission)) return <DeniedRedirect />;
   return <>{children}</>;
 };
 
+/** Chặn trang thống nhất: toast + về trang chủ theo vai trò (Nhân viên ⇒ /toi, còn lại ⇒ /). */
 const DeniedRedirect = () => {
+  const { role } = useCompany();
   useEffect(() => {
     toast.error("Bạn không có quyền truy cập trang này", { id: "no-access", duration: 6000 });
   }, []);
-  return <Navigate to="/toi" replace />;
+  return <Navigate to={role === "employee" ? "/toi" : "/"} replace />;
 };

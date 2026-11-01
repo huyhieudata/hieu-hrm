@@ -141,6 +141,12 @@ const RequestDialog = ({
       setError("Giờ kết thúc phải sau giờ bắt đầu.");
       return;
     }
+    if (category === "leave" && selectedType.deduct_leave && leaveInfo && leaveDayCount > leaveInfo.remaining) {
+      setError(
+        `Số ngày nghỉ (${leaveDayCount}) vượt quỹ phép còn lại (${Number(leaveInfo.remaining.toFixed(1))} ngày). Hãy giảm số ngày hoặc chọn loại nghỉ không trừ phép (vd. nghỉ không lương).`,
+      );
+      return;
+    }
     if (!reason.trim()) {
       setError("Vui lòng nhập lý do.");
       return;

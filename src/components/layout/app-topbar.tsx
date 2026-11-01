@@ -29,6 +29,7 @@ import {
 import { displayName, useAuth } from "@/lib/auth-provider";
 import { useCompany } from "@/lib/company-provider";
 import { ROLE_LABELS } from "@/lib/roles";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 const routeMeta: Record<string, { group: string; label: string }> = {
   "/": { group: "Không gian làm việc", label: "Bảng điều khiển" },
@@ -180,29 +181,7 @@ export const AppTopbar = ({ onOpenSidebar }: AppTopbarProps) => {
             </kbd>
           </form>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label="Thông báo"
-                className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors touch:h-11 touch:w-11 hover:bg-muted hover:text-foreground focus-visible:shadow-focus"
-              >
-                <Bell className="h-[18px] w-[18px]" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[320px] rounded-lg p-0 shadow-overlay">
-              <div className="border-b border-border px-4 py-3">
-                <p className="text-sm font-semibold text-foreground">Thông báo</p>
-              </div>
-              <div className="px-4 py-8 text-center">
-                <Bell className="mx-auto h-5 w-5 text-muted-foreground" />
-                <p className="mt-2 text-[12.5px] font-medium text-foreground">Chưa có thông báo mới</p>
-                <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground">
-                  Các hoạt động của đội ngũ sẽ xuất hiện tại đây.
-                </p>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationBell />
 
           <div className="mx-0.5 hidden h-6 w-px bg-border sm:block" />
 
