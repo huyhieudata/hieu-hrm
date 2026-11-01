@@ -11,7 +11,12 @@ const STAFF_PREFIXES: { prefix: string; module: string | null }[] = [
   { prefix: "/bao-hiem", module: "insurance" },
   { prefix: "/tinh-luong", module: "payroll" },
   { prefix: "/tuyen-dung", module: "recruitment" },
+  // Khớp menu: Nghỉ phép chỉ hiện khi quản lý được module leave.
+  { prefix: "/nghi-phep", module: "leave" },
 ];
+
+/** Trang cấu hình chỉ Owner/Admin/HR (Quản lý cũng không vào). */
+const HR_ONLY_PREFIXES = ["/cai-dat/thanh-vien", "/cai-dat/quy-trinh-duyet", "/thanh-vien"];
 
 export const isStaffPath = (path: string) =>
   STAFF_PREFIXES.some(({ prefix }) => path === prefix || path.startsWith(`${prefix}/`));
@@ -20,6 +25,8 @@ export const isStaffPath = (path: string) =>
 const EMPLOYEE_ALLOWED = ["/cham-cong/lich-lam-viec"];
 
 export const canEnterStaffPath = (path: string, role: Role | null, canManageModule: (key: string) => boolean) => {
+  const hrPlus = role === "owner" || role === "admin" || role === "hr";
+  if (!hrPlus && HR_ONLY_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) return false;
   if (role !== "employee") return true;
   if (EMPLOYEE_ALLOWED.includes(path)) return true;
   const hit = STAFF_PREFIXES.find(({ prefix }) => path === prefix || path.startsWith(`${prefix}/`));

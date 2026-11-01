@@ -92,6 +92,7 @@ export const CreateAccountsDialog = ({
 }) => {
   const [fileRows, setFileRows] = useState<AccountRowInput[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [results, setResults] = useState<AccountResult[] | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -114,7 +115,14 @@ export const CreateAccountsDialog = ({
     }
     setBusy(true);
     try {
-      const res = await createEmployeeAccounts(companyId, rows);
+      // Gửi theo lô nhỏ để hiện tiến độ i/N.
+      const BATCH = 10;
+      const res: AccountResult[] = [];
+      setProgress({ done: 0, total: rows.length });
+      for (let i = 0; i < rows.length; i += BATCH) {
+        res.push(...(await createEmployeeAccounts(companyId, rows.slice(i, i + BATCH))));
+        setProgress({ done: Math.min(i + BATCH, rows.length), total: rows.length });
+      }
       setResults(res);
       const ok = res.filter((r) => r.result === "created" || r.result === "linked").length;
       toast.success(`Đã xử lý ${res.length} dòng · tạo/gắn ${ok}`);
@@ -123,7 +131,18 @@ export const CreateAccountsDialog = ({
       toast.error("Không tạo được tài khoản", { description: getErrorMessage(error) });
     } finally {
       setBusy(false);
+      setProgress(null);
     }
+  };
+
+  const downloadTemplate = () => {
+    const csv = "\uFEFFEmail,Họ tên\nnguyenvana@congty.vn,Nguyễn Văn A\n";
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mau-tao-tai-khoan.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const hasPasswords = results?.some((r) => r.temporary_password);
@@ -177,7 +196,15 @@ export const CreateAccountsDialog = ({
                 <Button variant="outline" size="sm" className="mt-2 gap-1.5" onClick={() => fileRef.current?.click()}>
                   <FileUp className="h-3.5 w-3.5" /> Chọn tệp .xlsx / .csv
                 </Button>
+                <Button variant="ghost" size="sm" className="ml-2 mt-2 gap-1.5" onClick={downloadTemplate}>
+                  <Download className="h-3.5 w-3.5" /> Tải tệp mẫu
+                </Button>
               </div>
+            )}
+            {progress && (
+              <p className="font-medium text-primary">
+                Đang tạo tài khoản {progress.done}/{progress.total}…
+              </p>
             )}
             {fileRows ? (
               <p>Đã đọc <b>{fileRows.length}</b> dòng từ tệp.{" "}
