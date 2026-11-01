@@ -104,27 +104,34 @@ Deno.serve(async (req) => {
     const rows: Row[] = Array.isArray(body.rows) ? body.rows : [];
     if (rows.length === 0) return json({ error: "Không có dòng nào." }, 400);
     if (rows.length > MAX_ROWS) return json({ error: `Tối đa ${MAX_ROWS} dòng mỗi lần.` }, 400);
-    const results: Result[] = [];
+    const results: Result[] = new Array(rows.length);
     const seen = new Set<string>();
-    for (const [i, raw] of rows.entries()) {
+    const handleRow = async (raw: Row, i: number): Promise<Result> => {
       const row: Row = { ...raw, key: String(raw?.key ?? i) };
       // Quyền gán khi tạo: kiểm tra phía server (owner mới gán admin; nhóm quyền phải thuộc công ty).
       const role = typeof row.role === "string" && row.role ? row.role : "employee";
       if (!ASSIGNABLE_ROLES.includes(role) || (role === "admin" && member.role !== "owner")) {
-        results.push({ key: row.key, employee_id: row.employee_id ?? null, full_name: row.full_name ?? "", email: row.email ?? "", result: "error",
-          message: role === "admin" ? "Chỉ Chủ sở hữu được gán quyền Quản trị." : "Quyền không hợp lệ." });
-        continue;
+        return { key: row.key, employee_id: row.employee_id ?? null, full_name: row.full_name ?? "", email: row.email ?? "", result: "error",
+          message: role === "admin" ? "Chỉ Chủ sở hữu được gán quyền Quản trị." : "Quyền không hợp lệ." };
       }
       row.role = role;
       if (row.group_id) {
         const { data: grp } = await admin.from("permission_groups").select("id, company_id").eq("id", row.group_id).maybeSingle();
         if (!grp || (grp.company_id && grp.company_id !== companyId)) {
-          results.push({ key: row.key, employee_id: row.employee_id ?? null, full_name: row.full_name ?? "", email: row.email ?? "", result: "error", message: "Nhóm quyền không thuộc công ty." });
-          continue;
+          return { key: row.key, employee_id: row.employee_id ?? null, full_name: row.full_name ?? "", email: row.email ?? "", result: "error", message: "Nhóm quyền không thuộc công ty." };
         }
       }
-      results.push(await createOne(ctx, row, seen));
-    }
+      return await createOne(ctx, row, seen);
+    };
+    // Song song có giới hạn (5 luồng) thay vì tuần tự; giữ đúng thứ tự kết quả.
+    let next = 0;
+    const worker = async () => {
+      while (next < rows.length) {
+        const i = next++;
+        results[i] = await handleRow(rows[i], i);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(5, rows.length) }, worker));
     return json({ results });
   } catch (err) {
     console.error("create-employee-accounts failed", (err as Error)?.message);
