@@ -16,6 +16,7 @@ import {
   deleteContractTemplate,
   listContractTemplates,
   renderContractTemplate,
+  sanitizeContractHtml,
   saveContractTemplate,
   type ContractTemplate,
 } from "@/lib/contract-docs";
@@ -149,7 +150,7 @@ const ContractTemplates = () => {
               <p className="mb-1 text-[12px] font-semibold text-muted-foreground">Xem trước</p>
               <div
                 className="max-h-[420px] overflow-auto rounded-md border border-border bg-white p-4 text-[13px] text-black"
-                dangerouslySetInnerHTML={{ __html: preview }}
+                dangerouslySetInnerHTML={{ __html: sanitizeContractHtml(preview) }}
               />
             </div>
           </Card>
