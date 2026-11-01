@@ -221,7 +221,8 @@ const Campaigns = () => {
       throw new Error("SLA tuyển dụng phải trong khoảng 1 – 365 ngày.");
     const payload = {
       ...values,
-      status: values.status ?? "open",
+      status: values.status || "open",
+      priority: values.priority || "medium",
       headcount,
       sla_days: slaDays,
     };
