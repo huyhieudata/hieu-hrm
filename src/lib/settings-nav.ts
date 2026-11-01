@@ -57,6 +57,7 @@ export const buildSettingsGroups = ({ canDo, canManageModule, isPlatformAdmin, r
       items: pick([
         canManageModule("requests") && { label: "Loại đơn", to: "/cai-dat/loai-don", icon: FileCog, description: "Danh mục đơn từ", legacy: ["/don-tu/loai-don"] },
         hrLike(role) && canManageModule("requests") && { label: "Quy trình duyệt", to: "/cai-dat/quy-trinh-duyet", icon: GitBranch, description: "Các bước phê duyệt", legacy: ["/don-tu/quy-trinh-duyet"] },
+        hrLike(role) && { label: "Lịch làm việc & ngày lễ", to: "/cai-dat/lich-lam-viec", icon: CalendarClock, description: "T2–T6/T2–T7, ngày lễ khi tính ngày nghỉ" },
         hrLike(role) && canDo("leave", "view") && { label: "Chính sách nghỉ phép", to: "/cai-dat/chinh-sach-phep", icon: CalendarClock, description: "Quỹ phép & chính sách", legacy: ["/don-tu/chinh-sach-phep"] },
       ]),
     },

@@ -119,6 +119,7 @@ const PermissionGroups = lazy("/cai-dat/he-thong/phan-quyen", () => import("./pa
 const Requests = lazy("/don-tu", () => import("./pages/requests/Requests"), true);
 const ActivityLogPage = lazy("/cai-dat/nhat-ky-hoat-dong", () => import("./pages/settings/ActivityLog"));
 const PerformanceOverview = lazy("/danh-gia", () => import("./pages/evaluations/PerformanceOverview"));
+const WorkCalendarPage = lazy("/cai-dat/lich-lam-viec", () => import("./pages/settings/WorkCalendar"));
 const RequestTypes = lazy("/cai-dat/loai-don", () => import("./pages/requests/RequestTypes"));
 const LeavePolicies = lazy(
   ["/nghi-phep", "/cai-dat/chinh-sach-phep"],
@@ -516,6 +517,15 @@ export const routers = [
     element: companyScoped(
       <PageSuspense>
         <ActivityLogPage />
+      </PageSuspense>,
+    ),
+  },
+  {
+    path: "/cai-dat/lich-lam-viec",
+    name: "work-calendar",
+    element: companyScoped(
+      <PageSuspense>
+        <WorkCalendarPage />
       </PageSuspense>,
     ),
   },

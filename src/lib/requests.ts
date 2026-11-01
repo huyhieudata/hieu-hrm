@@ -1,3 +1,4 @@
+import { countWorkdays, type WorkCalendar } from "./work-calendar";
 import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -135,8 +136,8 @@ export const REQUEST_CATEGORY_ORDER = [
   "other",
 ];
 
-export const leaveDays = (start: string, end: string, session: string | null) => {
-  const days = listDates(start, end).length;
+export const leaveDays = (start: string, end: string, session: string | null, cal?: WorkCalendar) => {
+  const days = countWorkdays(start, end, cal);
   const factor = !session || session === "full_day" ? 1 : 0.5;
   return Number((days * factor).toFixed(1));
 };

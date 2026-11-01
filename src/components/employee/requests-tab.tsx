@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useWorkCalendar } from "@/lib/work-calendar";
 import { FileText, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -66,6 +67,7 @@ const formatDay = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateS
 const shortTime = (value: string | null) => (value ? value.slice(0, 5) : "");
 
 const RequestsTab = ({ employeeId, companyId, canManage }: RequestsTabProps) => {
+  const calendar = useWorkCalendar(companyId);
   const { user } = useAuth();
   const { can } = useCompany();
   const canApprove = can("leave.approve");
@@ -173,7 +175,7 @@ const RequestsTab = ({ employeeId, companyId, canManage }: RequestsTabProps) => 
         session: needsSession ? session : null,
         start_time: needsTime ? startTime || null : null,
         end_time: needsTime ? endTime || null : null,
-        leave_days: category === "leave" ? leaveDays(startDate, endDate, session) : 0,
+        leave_days: category === "leave" ? leaveDays(startDate, endDate, session, calendar) : 0,
         reason: reason.trim() || null,
         status,
         ...(status === "pending"
@@ -435,7 +437,7 @@ const RequestsTab = ({ employeeId, companyId, canManage }: RequestsTabProps) => 
 
             {category === "leave" && (
               <p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-[11.5px] text-muted-foreground">
-                Nghỉ {leaveDays(startDate, endDate, session)} ngày
+                Nghỉ {leaveDays(startDate, endDate, session, calendar)} ngày
                 {selectedType?.deduct_leave ? " · trừ ngày phép năm" : " · không trừ ngày phép"}
               </p>
             )}
