@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Calculator,
+  Bell,
   Download,
   Fingerprint,
   LayoutDashboard,
@@ -65,58 +65,19 @@ export const MobileNav = () => {
     [canDo, canManageModule, isPlatformAdmin, role],
   );
 
+  // Tab theo vai trò: Trang chủ, Nhân sự (hoặc Chấm công), Duyệt đơn, Thông báo, Thêm.
   const primary = useMemo<PrimaryTab[]>(() => {
-    const candidates: PrimaryTab[] = [
-      { to: "/", label: "Tổng quan", icon: LayoutDashboard, match: (path) => path === "/" },
-      {
-        to: "/employees",
-        label: "Nhân sự",
-        icon: Users,
-        match: (path) => path.startsWith("/employees"),
-      },
-      {
-        to: "/cham-cong",
-        label: "Chấm công",
-        icon: Fingerprint,
-        match: (path) => path.startsWith("/cham-cong"),
-      },
-      {
-        to: "/don-tu",
-        label: "Đơn từ",
-        icon: FileText,
-        match: (path) => path.startsWith("/don-tu"),
-      },
-      {
-        to: "/hoi-nhap",
-        label: "Hội nhập",
-        icon: Users,
-        match: (path) => path.startsWith("/hoi-nhap"),
-      },
-      {
-        to: "/tinh-luong",
-        label: "Lương",
-        icon: Calculator,
-        match: (path) => path.startsWith("/tinh-luong"),
-      },
-      {
-        to: "/tuyen-dung",
-        label: "Tuyển dụng",
-        icon: Users,
-        match: (path) => path.startsWith("/tuyen-dung"),
-      },
+    const tabs: PrimaryTab[] = [
+      { to: "/", label: "Trang chủ", icon: LayoutDashboard, match: (path) => path === "/" },
     ];
-
-    const allowed = candidates.filter((tab) => {
-      if (tab.to === "/") return true;
-      if (tab.to === "/employees") return canDo("employees", "view");
-      if (tab.to === "/cham-cong") return canDo("attendance", "view");
-      if (tab.to === "/don-tu") return canDo("requests", "view");
-      if (tab.to === "/hoi-nhap") return canDo("onboarding", "view");
-      if (tab.to === "/tinh-luong") return canDo("payroll", "view");
-      return canDo("recruitment", "view");
-    });
-
-    return allowed.slice(0, 4);
+    if (canDo("employees", "view"))
+      tabs.push({ to: "/employees", label: "Nhân sự", icon: Users, match: (path) => path.startsWith("/employees") });
+    else if (canDo("attendance", "view"))
+      tabs.push({ to: "/cham-cong", label: "Chấm công", icon: Fingerprint, match: (path) => path.startsWith("/cham-cong") });
+    if (canDo("requests", "view"))
+      tabs.push({ to: "/don-tu", label: "Duyệt đơn", icon: FileText, match: (path) => path.startsWith("/don-tu") });
+    tabs.push({ to: "/tin-tuc", label: "Thông báo", icon: Bell, match: (path) => path.startsWith("/tin-tuc") });
+    return tabs;
   }, [canDo]);
 
   const name = displayName(profile, user?.email);
@@ -132,7 +93,7 @@ export const MobileNav = () => {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-card/95 pb-[max(0.35rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-card/95 pb-[max(0.35rem,env(safe-area-inset-bottom))] backdrop-blur-xl"
         aria-label="Điều hướng di động"
       >
         <div
@@ -148,7 +109,7 @@ export const MobileNav = () => {
                 type="button"
                 onClick={() => go(tab.to)}
                 aria-current={active ? "page" : undefined}
-                className="flex min-h-[54px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[9.5px] font-medium transition-colors"
+                className="flex min-h-[54px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] font-medium transition-colors"
               >
                 <span
                   className={cn(
@@ -172,7 +133,7 @@ export const MobileNav = () => {
             onClick={() => setMoreOpen(true)}
             aria-expanded={moreOpen}
             aria-label="Mở tất cả tính năng"
-            className="flex min-h-[54px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[9.5px] font-medium"
+            className="flex min-h-[54px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] font-medium"
           >
             <span
               className={cn(
@@ -188,7 +149,7 @@ export const MobileNav = () => {
       </nav>
 
       {moreOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Tất cả tính năng">
+        <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Tất cả tính năng">
           <div
             className="absolute inset-0 bg-overlay/50 backdrop-blur-[2px] animate-in fade-in duration-200"
             onClick={() => setMoreOpen(false)}

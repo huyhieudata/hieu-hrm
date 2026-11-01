@@ -1,5 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+import { MobileHeader } from "@/components/mobile/MobileHeader";
+import { useTableCards } from "@/components/mobile/use-table-cards";
+import { useDeviceMode } from "@/hooks/use-device-mode";
 
 import { MobileShell } from "@/components/mobile/MobileShell";
 import { useCompany } from "@/lib/company-provider";
@@ -30,7 +34,11 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (role === "employee") return <MobileShell>{children}</MobileShell>;
+  const mode = useDeviceMode();
+  if (mode === "mobile") {
+    if (role === "employee") return <MobileShell>{children}</MobileShell>;
+    return <AdminMobileShell>{children}</AdminMobileShell>;
+  }
 
   return (
     <div className="relative flex min-h-[100dvh] w-full bg-background">
@@ -98,6 +106,58 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         </footer>
       </div>
 
+    </div>
+  );
+};
+
+const mobileTitle = (pathname: string) => {
+  if (pathname === "/") return "";
+  if (pathname.startsWith("/employees")) return "Nhân sự";
+  if (pathname.startsWith("/cham-cong")) return "Chấm công";
+  if (pathname.startsWith("/don-tu")) return "Duyệt đơn";
+  if (pathname.startsWith("/tin-tuc")) return "Thông báo";
+  if (pathname.startsWith("/cai-dat")) return "Cài đặt";
+  if (pathname.startsWith("/tinh-luong")) return "Tính lương";
+  if (pathname.startsWith("/tuyen-dung")) return "Tuyển dụng";
+  return "ONHRM";
+};
+
+const ROOT_TABS = ["/", "/employees", "/cham-cong", "/don-tu", "/tin-tuc"];
+
+/** Giao diện app cho admin/HR/quản lý trên điện thoại: header gọn, bảng thành thẻ, tab bar dưới. */
+const AdminMobileShell = ({ children }: { children: ReactNode }) => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const mainRef = useRef<HTMLElement>(null);
+  useTableCards(mainRef);
+  const title = mobileTitle(pathname);
+  const isRoot = ROOT_TABS.includes(pathname);
+  const inSettings = pathname === "/cai-dat" || pathname.startsWith("/cai-dat/");
+
+  return (
+    <div className="employee-canvas relative min-h-[100dvh] w-full text-foreground">
+      <MobileHeader
+        title={title}
+        hello={pathname === "/"}
+        back={!isRoot}
+        onBack={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+        onNotify={() => navigate("/tin-tuc")}
+      />
+      <main
+        ref={mainRef}
+        className="mobile-cards mx-auto w-full max-w-2xl px-3 pb-[calc(var(--tabbar-h)+40px+env(safe-area-inset-bottom))] pt-4"
+      >
+        <div key={pathname} className="animate-fade-up space-y-4">
+          {inSettings ? (
+            <div className="flex flex-col gap-4">
+              <SettingsNav />
+              <div className="min-w-0 space-y-4">{children}</div>
+            </div>
+          ) : (
+            children
+          )}
+        </div>
+      </main>
       <MobileNav />
     </div>
   );
