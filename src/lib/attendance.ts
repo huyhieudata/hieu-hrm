@@ -1,3 +1,4 @@
+import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
 import { EMPLOYEE_PUBLIC_COLUMNS, withSensitiveFields, type EmployeeRecord } from "@/lib/employee-records";
 
@@ -139,6 +140,15 @@ export interface AttendanceRecord {
   location_id?: string | null;
   flags?: string[] | null;
 }
+
+/** Bản ghi cũ / nhập tay: không ảnh, không GPS, không thiết bị (giữ nguyên, chỉ gắn nhãn). */
+export const isLegacyAttendance = (record: AttendanceRecord) =>
+  !record.photo_path &&
+  !record.photo_out_path &&
+  record.latitude == null &&
+  record.latitude_out == null &&
+  !record.device_id &&
+  !record.device_out_id;
 
 type AttendanceTable = "work_shifts" | "attendance_settings" | "shift_assignments" | "attendance_records";
 
@@ -377,7 +387,10 @@ export const isWorkingDay = (shift: WorkShift, date: string) => {
   return shift.work_days.includes(map[dayIndex]);
 };
 
-export const findMyEmployee = async (companyId: string, userId: string): Promise<EmployeeRecord | null> => {
+export const findMyEmployee = (companyId: string, userId: string): Promise<EmployeeRecord | null> =>
+  cached(`me:${companyId}:${userId}`, 60_000, () => findMyEmployeeRaw(companyId, userId));
+
+const findMyEmployeeRaw = async (companyId: string, userId: string): Promise<EmployeeRecord | null> => {
   const { data, error } = await db
     .from("employees")
     .select(EMPLOYEE_PUBLIC_COLUMNS)

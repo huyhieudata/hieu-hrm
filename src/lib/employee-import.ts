@@ -148,8 +148,11 @@ const normalizeGender = (value: string): string | null => {
 
 export const parseEmployeeFile = (
   text: string,
+): { rows: EmployeeImportRow[]; error: string | null } => parseEmployeeTable(parseCsv(text));
+
+export const parseEmployeeTable = (
+  table: string[][],
 ): { rows: EmployeeImportRow[]; error: string | null } => {
-  const table = parseCsv(text);
   if (table.length < 2) {
     return {
       rows: [],

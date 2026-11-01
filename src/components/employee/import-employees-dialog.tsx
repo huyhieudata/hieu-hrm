@@ -1,3 +1,5 @@
+import { getErrorMessage } from "@/lib/utils";
+import { readXlsxFirstSheet } from "@/lib/xlsx-reader";
 import { useState } from "react";
 import {
   AlertCircle,
@@ -22,6 +24,7 @@ import {
   downloadEmployeeTemplate,
   importEmployees,
   parseEmployeeFile,
+  parseEmployeeTable,
   type EmployeeImportRow,
   type ImportResult,
 } from "@/lib/employee-import";
@@ -62,17 +65,26 @@ export const ImportEmployeesDialog = ({
     setResult(null);
     setError(null);
 
-    if (!file.name.toLowerCase().endsWith(".csv")) {
-      setError(
-        "Chỉ hỗ trợ tệp CSV. Hãy tải file mẫu, điền dữ liệu rồi lưu dưới dạng CSV (UTF-8).",
-      );
+    const lower = file.name.toLowerCase();
+    const isXlsx = lower.endsWith(".xlsx");
+    if (!lower.endsWith(".csv") && !isXlsx) {
+      setError("Chỉ hỗ trợ tệp .xlsx hoặc .csv. Hãy tải file mẫu, điền dữ liệu rồi lưu lại.");
       setRows([]);
       setFileName(file.name);
       return;
     }
 
-    const text = await file.text();
-    const parsed = parseEmployeeFile(text);
+    let parsed: ReturnType<typeof parseEmployeeFile>;
+    try {
+      parsed = isXlsx
+        ? parseEmployeeTable(await readXlsxFirstSheet(await file.arrayBuffer()))
+        : parseEmployeeFile(await file.text());
+    } catch (readError) {
+      setError(getErrorMessage(readError));
+      setRows([]);
+      setFileName(file.name);
+      return;
+    }
     setFileName(file.name);
     setRows(parsed.rows);
     setError(parsed.error);
@@ -142,7 +154,7 @@ export const ImportEmployeesDialog = ({
             <label className="cursor-pointer">
               <input
                 type="file"
-                accept=".csv,text/csv"
+                accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
                 className="hidden"
                 onChange={(event) => {
                   void handleFile(event.target.files?.[0]);
@@ -150,7 +162,7 @@ export const ImportEmployeesDialog = ({
                 }}
               />
               <span className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground shadow-xs transition-colors hover:border-primary/35 hover:bg-primary-subtle">
-                <FileSpreadsheet className="h-3.5 w-3.5" /> Chọn tệp CSV
+                <FileSpreadsheet className="h-3.5 w-3.5" /> Chọn tệp Excel/CSV
               </span>
             </label>
 
@@ -256,9 +268,6 @@ export const ImportEmployeesDialog = ({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={() => handleOpenChange(false)}>
-            Đóng
-          </Button>
           <Button
             className="gap-2"
             onClick={() => void handleImport()}

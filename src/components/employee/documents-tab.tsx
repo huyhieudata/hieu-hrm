@@ -42,6 +42,7 @@ import {
   EMPLOYEE_DOCUMENT_MAX_BYTES,
   deleteEmployeeDocument,
   fetchRecords,
+  daysUntil,
   formatDate,
   formatFileSize,
   getDocumentSignedUrl,
@@ -70,7 +71,9 @@ const DEFAULT_CHECKLIST: { key: string; category: string; label: string }[] = [
   { key: "certificate", category: "certificate", label: "Chứng chỉ / Bằng nghề" },
   { key: "insurance", category: "insurance", label: "Sổ bảo hiểm xã hội" },
   { key: "medical", category: "medical", label: "Giấy khám sức khoẻ" },
-  { key: "other", category: "other", label: "Ảnh thẻ / Giấy tờ khác" },
+  { key: "cv", category: "cv", label: "CV / Sơ yếu lý lịch" },
+  { key: "photo", category: "photo", label: "Ảnh thẻ 3x4" },
+  { key: "other", category: "other", label: "Giấy tờ khác" },
 ];
 
 export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabProps) => {
@@ -80,6 +83,8 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [documentName, setDocumentName] = useState("");
   const [category, setCategory] = useState("contract");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [documentNo, setDocumentNo] = useState("");
   const [preset, setPreset] = useState<{ category: string; name: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,6 +150,8 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
     setPendingFile(file);
     setDocumentName(preset?.name ?? file.name.replace(/\.[^.]+$/, ""));
     setCategory(preset?.category ?? "contract");
+    setExpiryDate("");
+    setDocumentNo("");
     setError(null);
   };
 
@@ -164,6 +171,8 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
         file: pendingFile,
         name: documentName.trim(),
         category,
+        expiryDate: expiryDate || null,
+        documentNo,
       });
       toast.success("Đã tải lên tài liệu");
       setPendingFile(null);
@@ -395,6 +404,9 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
                   <p className="text-[11px] text-muted-foreground">
                     {DOCUMENT_CATEGORY_LABELS[document.category] ?? document.category} ·{" "}
                     {formatFileSize(document.size_bytes)} · {formatDate(document.created_at)}
+                    {document.expiry_date && (
+                      <ExpiryBadge date={document.expiry_date} />
+                    )}
                   </p>
                 </div>
                 <Button
@@ -484,6 +496,26 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="document-no" className="text-[12.5px]">
+                  Số giấy tờ (nếu có)
+                </Label>
+                <Input id="document-no" value={documentNo} onChange={(event) => setDocumentNo(event.target.value)} className="h-10" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="document-expiry" className="text-[12.5px]">
+                  Ngày hết hạn (nếu có)
+                </Label>
+                <Input
+                  id="document-expiry"
+                  type="date"
+                  value={expiryDate}
+                  onChange={(event) => setExpiryDate(event.target.value)}
+                  className="h-10"
+                />
+              </div>
+            </div>
             <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] leading-5 text-muted-foreground">
               {formatFileSize(pendingFile?.size ?? null)} · chỉ thành viên có quyền nhân sự của công ty mới xem được
               tệp này.
@@ -559,5 +591,22 @@ export const DocumentsTab = ({ employeeId, companyId, canManage }: DocumentsTabP
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+};
+
+/** Nhãn hạn giấy tờ: đỏ nếu đã hết hạn, vàng nếu còn ≤ 30 ngày. */
+export const ExpiryBadge = ({ date }: { date: string }) => {
+  const days = daysUntil(date);
+  const tone =
+    days !== null && days < 0
+      ? "text-destructive"
+      : days !== null && days <= 30
+        ? "text-warning"
+        : "text-muted-foreground";
+  return (
+    <span className={`ml-1 ${tone}`}>
+      · Hết hạn {formatDate(date)}
+      {days !== null && days < 0 ? " (đã quá hạn)" : days !== null && days <= 30 ? ` (còn ${days} ngày)` : ""}
+    </span>
   );
 };

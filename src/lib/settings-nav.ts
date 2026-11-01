@@ -40,6 +40,7 @@ export const buildSettingsGroups = ({ canDo, canManageModule, isPlatformAdmin, r
         canDo("settings", "view") && { label: "Widget trang chủ", to: "/cai-dat/widget-trang-chu", icon: LayoutGrid, description: "Bố cục trang chủ sau đăng nhập" },
         canDo("settings", "view") && { label: "Checklist hội nhập", to: "/cai-dat/checklist-hoi-nhap", icon: ListChecks, description: "Việc cần làm khi nhận người mới" },
         canDo("settings", "view") && { label: "Checklist hồ sơ", to: "/cai-dat/checklist-ho-so", icon: FolderOpen, description: "Giấy tờ bắt buộc của hồ sơ" },
+        canDo("contracts", "view") && { label: "Mẫu hợp đồng", to: "/cai-dat/mau-hop-dong", icon: ScrollText, description: "Mẫu Word/PDF hợp đồng lao động" },
       ]),
     },
     {

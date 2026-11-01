@@ -1,3 +1,4 @@
+import { cached } from "@/lib/query-cache";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -26,6 +27,8 @@ export interface EmployeeRecord {
   national_id_issue_date: string | null;
   national_id_issue_place: string | null;
   nationality: string | null;
+  ethnicity: string | null;
+  religion: string | null;
   marital_status: string | null;
   phone: string | null;
   personal_email: string | null;
@@ -92,9 +95,56 @@ export interface ContractRecord extends RecordBase {
   base_salary: number | null;
   allowance: number | null;
   insurance_salary: number | null;
+  work_location?: string | null;
+  signed_date?: string | null;
+  department_id?: string | null;
+  position_id?: string | null;
   status: string;
   note: string | null;
 }
+
+export interface CertificateRecord extends RecordBase {
+  name: string;
+  issuer: string | null;
+  certificate_no: string | null;
+  issue_date: string | null;
+  expiry_date: string | null;
+  note: string | null;
+}
+
+export interface ContractAppendixRecord {
+  id: string;
+  company_id: string;
+  contract_id: string;
+  employee_id: string;
+  appendix_no: string | null;
+  change_type: string;
+  effective_date: string;
+  base_salary: number | null;
+  insurance_salary: number | null;
+  allowance: number | null;
+  position: string | null;
+  department: string | null;
+  work_location: string | null;
+  content: string | null;
+  created_at: string;
+}
+
+export const APPENDIX_TYPE_LABELS: Record<string, string> = {
+  salary: "Điều chỉnh lương",
+  position: "Thay đổi chức danh",
+  location: "Thay đổi địa điểm",
+  other: "Khác",
+};
+
+/** Số ngày đến hạn (âm = đã quá hạn), null nếu không có ngày. */
+export const daysUntil = (date: string | null | undefined) => {
+  if (!date) return null;
+  const target = new Date(`${date.slice(0, 10)}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86400000);
+};
 
 export interface SalaryRecord extends RecordBase {
   effective_date: string;
@@ -213,6 +263,8 @@ export interface DocumentRecord extends RecordBase {
   mime_type: string | null;
   size_bytes: number | null;
   uploaded_by: string | null;
+  document_no?: string | null;
+  expiry_date?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -266,6 +318,7 @@ export const CONTRACT_TYPE_LABELS: Record<string, string> = {
   probation: "Thử việc",
   fixed_term: "Xác định thời hạn",
   indefinite: "Không xác định thời hạn",
+  seasonal: "Thời vụ",
   service: "Hợp đồng dịch vụ",
   internship: "Thực tập",
 };
@@ -378,6 +431,8 @@ export const DOCUMENT_CATEGORY_LABELS: Record<string, string> = {
   certificate: "Chứng chỉ",
   insurance: "Bảo hiểm",
   medical: "Hồ sơ y tế",
+  cv: "CV / Sơ yếu lý lịch",
+  photo: "Ảnh thẻ",
   other: "Khác",
 };
 
@@ -521,6 +576,7 @@ export const EMPLOYEE_PUBLIC_COLUMNS = [
   "emergency_contact_phone",
   "emergency_contact_relation",
   "employment_type",
+  "ethnicity",
   "full_name",
   "gender",
   "hire_date",
@@ -538,6 +594,7 @@ export const EMPLOYEE_PUBLIC_COLUMNS = [
   "phone",
   "position",
   "probation_end_date",
+  "religion",
   "resignation_date",
   "resignation_reason",
   "school",
@@ -570,7 +627,10 @@ export const withSensitiveFields = async <T extends { id: string; company_id: st
   });
 };
 
-export const listEmployees = async (companyId: string): Promise<EmployeeRecord[]> => {
+export const listEmployees = (companyId: string): Promise<EmployeeRecord[]> =>
+  cached(`employees:${companyId}`, 30_000, () => fetchEmployees(companyId)).then((rows) => [...rows]);
+
+const fetchEmployees = async (companyId: string): Promise<EmployeeRecord[]> => {
   const { data, error } = await db
     .from("employees")
     .select(EMPLOYEE_PUBLIC_COLUMNS)
@@ -629,7 +689,8 @@ type RecordTable =
   | "employee_dependents"
   | "employee_documents"
   | "employee_contacts"
-  | "employee_notes";
+  | "employee_notes"
+  | "employee_certificates";
 
 export const fetchRecords = async <T>(
   table: RecordTable,
@@ -704,6 +765,8 @@ export const uploadEmployeeDocument = async (input: {
   file: File;
   name: string;
   category: string;
+  expiryDate?: string | null;
+  documentNo?: string | null;
 }) => {
   const { companyId, employeeId, file, name, category } = input;
 
@@ -727,6 +790,8 @@ export const uploadEmployeeDocument = async (input: {
     file_path: path,
     mime_type: file.type || null,
     size_bytes: file.size,
+    expiry_date: input.expiryDate || null,
+    document_no: input.documentNo?.trim() || null,
   });
 
   if (insertError) {

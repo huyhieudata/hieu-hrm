@@ -1,4 +1,4 @@
-import type { FieldDef } from "@/lib/field-defs";
+import { validateNationalId, validateTaxCode, type FieldDef } from "@/lib/field-defs";
 import {
   EDUCATION_LEVELS,
   EMPLOYMENT_TYPE_LABELS,
@@ -88,7 +88,9 @@ export const buildEmployeeFields = (
 
     {
       name: "national_id",
-      label: "Số CCCD / CMND",
+      label: "Số CCCD",
+      placeholder: "12 chữ số",
+      validate: validateNationalId,
       section: "Giấy tờ tuỳ thân",
     },
     {
@@ -108,6 +110,8 @@ export const buildEmployeeFields = (
       placeholder: "Việt Nam",
       section: "Giấy tờ tuỳ thân",
     },
+    { name: "ethnicity", label: "Dân tộc", placeholder: "Kinh", section: "Giấy tờ tuỳ thân" },
+    { name: "religion", label: "Tôn giáo", placeholder: "Không", section: "Giấy tờ tuỳ thân" },
     {
       name: "marital_status",
       label: "Tình trạng hôn nhân",
@@ -125,7 +129,7 @@ export const buildEmployeeFields = (
 
     {
       name: "current_address",
-      label: "Địa chỉ hiện tại",
+      label: "Địa chỉ tạm trú / hiện tại",
       type: "textarea",
       section: "Địa chỉ liên hệ",
     },
@@ -239,6 +243,8 @@ export const buildEmployeeFields = (
     {
       name: "tax_code",
       label: "Mã số thuế TNCN",
+      placeholder: "10 hoặc 13 chữ số",
+      validate: validateTaxCode,
       section: "Lương & thanh toán",
     },
     {

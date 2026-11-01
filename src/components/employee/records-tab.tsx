@@ -43,7 +43,8 @@ interface RecordsTabProps<T extends { id: string }> {
     | "employee_training_records"
     | "employee_assets"
     | "employee_debts"
-    | "employee_dependents";
+    | "employee_dependents"
+    | "employee_certificates";
   employeeId: string;
   title: string;
   description?: string;

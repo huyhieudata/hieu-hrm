@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCompany } from "@/lib/company-provider";
 import { listEmployees, type EmployeeRecord } from "@/lib/employee-records";
 import {
+  isLegacyAttendance,
   ATTENDANCE_STATUS_LABELS,
   addDays,
   formatTime,
@@ -206,6 +207,11 @@ const AttendanceLog = () => {
                     <Badge variant={record.status === "on_time" ? "success" : "warning"}>
                       {ATTENDANCE_STATUS_LABELS[record.status] ?? record.status}
                     </Badge>
+                    {isLegacyAttendance(record) && (
+                      <Badge variant="outline" title="Bản ghi không có ảnh, GPS hay thiết bị — nhập tay hoặc dữ liệu cũ">
+                        Nhập tay/cũ
+                      </Badge>
+                    )}
                     {flags.map((flag) => (
                       <Badge key={flag} variant="destructive" className="gap-1">
                         <AlertTriangle className="h-3 w-3" /> {FLAG_LABELS[flag] ?? flag}

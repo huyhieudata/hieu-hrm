@@ -68,6 +68,12 @@ import {
   type CompanyContract,
 } from "@/lib/contracts";
 import { todayIso } from "@/lib/attendance";
+import {
+  ContractAppendicesPanel,
+  ContractExportButtons,
+  ContractLegalWarnings,
+} from "@/components/contracts/contract-extras";
+import { contractLegalWarnings } from "@/lib/contract-docs";
 
 const formatDay = (value: string | null) =>
   value ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN") : "—";
@@ -167,7 +173,8 @@ const Contracts = () => {
           ([value, label]) => ({ value, label }),
         ),
       },
-      { name: "start_date", label: "Ngày bắt đầu", type: "date" },
+      { name: "signed_date", label: "Ngày ký", type: "date" },
+      { name: "start_date", label: "Ngày bắt đầu", type: "date", required: true },
       {
         name: "end_date",
         label: "Ngày kết thúc",
@@ -175,6 +182,11 @@ const Contracts = () => {
         hint: "Bỏ trống nếu không xác định thời hạn.",
       },
       ...orgFieldDefs(org),
+      {
+        name: "work_location",
+        label: "Địa điểm làm việc",
+        placeholder: "Văn phòng Hà Nội",
+      },
       { name: "base_salary", label: "Lương cơ bản", type: "number" },
       { name: "allowance", label: "Phụ cấp", type: "number" },
       {
@@ -230,6 +242,10 @@ const Contracts = () => {
     ) {
       throw new Error("Ngày kết thúc phải sau ngày bắt đầu.");
     }
+    const type = String(values.contract_type ?? "fixed_term");
+    if (type !== "indefinite" && !values.end_date) {
+      throw new Error("Hợp đồng có thời hạn cần ngày kết thúc.");
+    }
 
     const payload = {
       employee_id: values.employee_id,
@@ -240,6 +256,8 @@ const Contracts = () => {
       end_date: values.end_date,
       position: values.position,
       department: values.department,
+      work_location: values.work_location,
+      signed_date: values.signed_date,
       base_salary:
         values.base_salary === null ? null : Number(values.base_salary),
       allowance: values.allowance === null ? null : Number(values.allowance),
@@ -643,6 +661,20 @@ const Contracts = () => {
                             contract.contract_type}
                           {contract.position ? ` · ${contract.position}` : ""}
                         </p>
+                        {contractLegalWarnings(
+                          contract,
+                          contracts.filter(
+                            (item) => item.employee_id === contract.employee_id,
+                          ),
+                        ).some((warning) => warning.tone === "danger") && (
+                          <button
+                            type="button"
+                            onClick={() => setDetailContract(contract)}
+                            className="text-[11px] font-medium text-destructive hover:underline"
+                          >
+                            ⚠ Cần xem lại theo BLLĐ
+                          </button>
+                        )}
                       </td>
                       <td className="px-3 py-2.5">
                         <p className="text-[11.5px] text-foreground">
@@ -760,6 +792,8 @@ const Contracts = () => {
                       "—",
                   ],
                   ["Chức danh", detailContract.position ?? "—"],
+                  ["Địa điểm làm việc", detailContract.work_location ?? "—"],
+                  ["Ngày ký", formatDay(detailContract.signed_date)],
                   [
                     "Thời hạn",
                     `${formatDay(detailContract.start_date)} → ${
@@ -788,6 +822,23 @@ const Contracts = () => {
                   </div>
                 ))}
               </div>
+
+              <ContractLegalWarnings
+                contract={detailContract}
+                history={contracts.filter(
+                  (item) => item.employee_id === detailContract.employee_id,
+                )}
+              />
+
+              <ContractExportButtons
+                contract={detailContract}
+                companyName={activeCompany?.name ?? ""}
+              />
+
+              <ContractAppendicesPanel
+                contract={detailContract}
+                canManage={canManage}
+              />
 
               {detailContract.note && (
                 <p className="rounded-md border border-border bg-muted/20 px-3 py-2 text-[11.5px] leading-5 text-muted-foreground">

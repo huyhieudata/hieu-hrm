@@ -4,6 +4,7 @@ import { CalendarDays, ChevronRight, LogOut, Moon, Smartphone, User, Wallet } fr
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { SelfChangeRequestCard } from "@/components/employee/change-requests";
 import { Switch } from "@/components/ui/switch";
 import { useAuth, displayName } from "@/lib/auth-provider";
 import { findMyEmployee } from "@/lib/attendance";
@@ -56,6 +57,10 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
         ["Điện thoại", me?.phone],
         ["Email", me?.work_email || profile?.email || user?.email],
         ["Ngày vào", me?.hire_date],
+        ["Thường trú", me?.permanent_address],
+        ["Tạm trú", me?.current_address],
+        ["Liên hệ khẩn cấp", [me?.emergency_contact_name, me?.emergency_contact_phone].filter(Boolean).join(" · ")],
+        ["Ngân hàng", [me?.bank_name, me?.bank_account].filter(Boolean).join(" · ")],
       ].filter((row): row is [string, string] => Boolean(row[1])),
     [me, profile?.email, user?.email],
   );
@@ -90,9 +95,10 @@ export const EmployeeProfile = ({ infoOnly = false }: { infoOnly?: boolean }) =>
               <span className="text-right font-semibold">{value}</span>
             </div>
           ))}
-          <p className="py-3 text-[12px] text-muted-foreground">Hồ sơ chỉ xem. Nhờ HR khi cần sửa thông tin.</p>
         </section>
-      ) : (
+      ) : null}
+      {infoOnly && me && activeCompany ? <SelfChangeRequestCard companyId={activeCompany.id} employee={me} /> : null}
+      {infoOnly ? null : (
         <section className="shadow-mobile divide-y divide-border/70 rounded-3xl bg-card px-2">
           {LINKS.map((item) => {
             const Icon = item.icon;
