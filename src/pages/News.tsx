@@ -25,7 +25,13 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useCompany } from "@/lib/company-provider";
 import {
+  NEWS_REACTIONS,
   NEWS_STATUS_LABELS,
+  listNewsDepartments,
+  listNewsReactions,
+  setNewsReaction,
+  type NewsReactionKey,
+  type NewsReactionSummary,
   createNewsCategory,
   createNewsPost,
   deleteNewsCategory,
@@ -70,6 +76,7 @@ interface EditorState {
   showOnHome: boolean;
   pinned: boolean;
   publishAt: string;
+  audience: string[];
 }
 
 const emptyEditor = (categoryId: string): EditorState => ({
@@ -83,6 +90,7 @@ const emptyEditor = (categoryId: string): EditorState => ({
   showOnHome: true,
   pinned: false,
   publishAt: "",
+  audience: [],
 });
 
 const NewsPage = () => {
@@ -102,14 +110,23 @@ const NewsPage = () => {
   const [deleting, setDeleting] = useState<NewsPost | null>(null);
   const [catOpen, setCatOpen] = useState(false);
   const [newCat, setNewCat] = useState("");
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [reactions, setReactions] = useState<Map<string, NewsReactionSummary>>(new Map());
 
   const load = useCallback(async () => {
     if (!companyId) return;
     setLoading(true);
     try {
-      const [p, c] = await Promise.all([listNewsPosts(companyId), listNewsCategories(companyId)]);
+      const [p, c, d, r] = await Promise.all([
+        listNewsPosts(companyId),
+        listNewsCategories(companyId),
+        listNewsDepartments(companyId),
+        listNewsReactions(companyId),
+      ]);
       setPosts(p);
       setCategories(c);
+      setDepartments(d);
+      setReactions(r);
     } catch (error) {
       toast.error(getErrorMessage(error, "Không tải được tin tức."));
     } finally {
@@ -139,7 +156,55 @@ const NewsPage = () => {
       showOnHome: post.show_on_home,
       pinned: post.pinned,
       publishAt: toLocalInput(post.published_at),
+      audience: post.audience_department_ids ?? [],
     });
+
+  const react = async (postId: string, key: NewsReactionKey) => {
+    if (!companyId) return;
+    const current = reactions.get(postId)?.mine ?? null;
+    try {
+      await setNewsReaction(postId, current === key ? null : key);
+      setReactions(await listNewsReactions(companyId));
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  const departmentName = new Map(departments.map((d) => [d.id, d.name]));
+  const audienceLabel = (ids: string[]) =>
+    ids.length === 0 ? null : ids.map((id) => departmentName.get(id) ?? "?").join(", ");
+
+  const ReactionBar = ({ post }: { post: NewsPost }) => {
+    const summary = reactions.get(post.id);
+    const canReact = post.status === "published" && !!post.published_at && new Date(post.published_at) <= new Date();
+    if (!canReact) return null;
+    return (
+      <div className="flex flex-wrap gap-1">
+        {NEWS_REACTIONS.map((r) => {
+          const count = summary?.counts[r.key] ?? 0;
+          const mine = summary?.mine === r.key;
+          return (
+            <Button
+              key={r.key}
+              type="button"
+              size="sm"
+              variant={mine ? "default" : "outline"}
+              className="h-7 px-2 text-xs"
+              title={r.label}
+              aria-pressed={mine}
+              onClick={(e) => {
+                e.stopPropagation();
+                void react(post.id, r.key);
+              }}
+            >
+              <span aria-hidden>{r.emoji}</span>
+              {count > 0 && <span className="ml-1">{count}</span>}
+            </Button>
+          );
+        })}
+      </div>
+    );
+  };
 
   const savePost = async () => {
     if (!editor || !companyId) return;
@@ -159,6 +224,7 @@ const NewsPage = () => {
         show_on_home: editor.showOnHome,
         pinned: editor.pinned,
         published_at: editor.publishAt ? new Date(editor.publishAt).toISOString() : null,
+        audience_department_ids: editor.audience,
       };
       if (editor.id) await updateNewsPost(editor.id, values);
       else await createNewsPost(companyId, values);
@@ -278,6 +344,11 @@ const NewsPage = () => {
                       <Pin className="h-3 w-3" /> Ghim
                     </Badge>
                   )}
+                  {audienceLabel(post.audience_department_ids ?? []) && (
+                    <Badge variant="outline" title={audienceLabel(post.audience_department_ids ?? []) ?? ""}>
+                      Giới hạn phòng ban
+                    </Badge>
+                  )}
                   {(canEdit || canCreate) && (
                     <Badge variant={statusVariant(post.status)}>{NEWS_STATUS_LABELS[post.status]}</Badge>
                   )}
@@ -329,6 +400,12 @@ const NewsPage = () => {
               )}
               {reading.summary && <p className="font-medium">{reading.summary}</p>}
               <div className="whitespace-pre-line break-words text-sm leading-relaxed">{reading.content}</div>
+              {audienceLabel(reading.audience_department_ids ?? []) && (
+                <p className="text-xs text-muted-foreground">
+                  Chỉ dành cho: {audienceLabel(reading.audience_department_ids ?? [])}
+                </p>
+              )}
+              <ReactionBar post={reading} />
             </>
           )}
         </DialogContent>
@@ -435,6 +512,35 @@ const NewsPage = () => {
               <p className="text-xs text-muted-foreground">
                 Để trống giờ đăng thì bài "Đã đăng" sẽ lên ngay khi lưu.
               </p>
+              <div className="space-y-2">
+                <Label>Người xem</Label>
+                <p className="text-xs text-muted-foreground">
+                  Không chọn phòng ban nào = cả công ty. Chọn phòng ban thì chỉ nhân viên phòng đó (kể cả phòng con) xem được.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {departments.map((d) => {
+                    const on = editor.audience.includes(d.id);
+                    return (
+                      <Button
+                        key={d.id}
+                        type="button"
+                        size="sm"
+                        variant={on ? "default" : "outline"}
+                        aria-pressed={on}
+                        onClick={() =>
+                          setEditor({
+                            ...editor,
+                            audience: on ? editor.audience.filter((x) => x !== d.id) : [...editor.audience, d.id],
+                          })
+                        }
+                      >
+                        {d.name}
+                      </Button>
+                    );
+                  })}
+                  {departments.length === 0 && <span className="text-xs text-muted-foreground">Chưa có phòng ban.</span>}
+                </div>
+              </div>
             </div>
           )}
           <DialogFooter>

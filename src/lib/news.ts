@@ -31,6 +31,7 @@ export interface NewsPost {
   pinned: boolean;
   published_at: string | null;
   author_name: string | null;
+  audience_department_ids: string[];
   created_at: string;
   updated_at: string;
 }
@@ -45,10 +46,12 @@ export interface NewsPostInput {
   show_on_home: boolean;
   pinned: boolean;
   published_at: string | null;
+  /** Rỗng = cả công ty. */
+  audience_department_ids: string[];
 }
 
 const POST_COLUMNS =
-  "id, company_id, category_id, title, summary, content, cover_image_url, status, show_on_home, pinned, published_at, author_name, created_at, updated_at";
+  "id, company_id, category_id, title, summary, content, cover_image_url, status, show_on_home, pinned, published_at, author_name, audience_department_ids, created_at, updated_at";
 
 /** Ghim trước, rồi bài mới đăng trước (bài chưa đăng xếp theo ngày tạo). */
 export const sortNewsPosts = (posts: NewsPost[]) =>
@@ -153,4 +156,65 @@ export const updateNewsPost = async (id: string, values: NewsPostInput) => {
 export const deleteNewsPost = async (id: string) => {
   const { error } = await db.from("news_posts").delete().eq("id", id);
   if (error) throw new Error(error.message ?? "Không xoá được bài viết.");
+};
+
+export const NEWS_REACTIONS = [
+  { key: "like", emoji: "👍", label: "Thích" },
+  { key: "love", emoji: "❤️", label: "Yêu thích" },
+  { key: "clap", emoji: "👏", label: "Hoan hô" },
+  { key: "haha", emoji: "😆", label: "Haha" },
+  { key: "wow", emoji: "😮", label: "Wow" },
+  { key: "sad", emoji: "😢", label: "Buồn" },
+] as const;
+export type NewsReactionKey = (typeof NEWS_REACTIONS)[number]["key"];
+
+export interface NewsReactionSummary {
+  counts: Partial<Record<NewsReactionKey, number>>;
+  mine: NewsReactionKey | null;
+}
+
+/** Gom cảm xúc theo bài: số lượng từng loại và cảm xúc của chính mình. */
+export const summarizeReactions = (
+  rows: { post_id: string; user_id: string; reaction: NewsReactionKey }[],
+  me: string | null,
+) => {
+  const map = new Map<string, NewsReactionSummary>();
+  for (const row of rows) {
+    const entry = map.get(row.post_id) ?? { counts: {}, mine: null };
+    entry.counts[row.reaction] = (entry.counts[row.reaction] ?? 0) + 1;
+    if (me && row.user_id === me) entry.mine = row.reaction;
+    map.set(row.post_id, entry);
+  }
+  return map;
+};
+
+export const listNewsReactions = async (companyId: string) => {
+  const [{ data, error }, { data: auth }] = await Promise.all([
+    db.from("news_reactions").select("post_id, user_id, reaction").eq("company_id", companyId).limit(5000),
+    supabase.auth.getUser(),
+  ]);
+  if (error) throw new Error(error.message ?? "Không tải được cảm xúc.");
+  return summarizeReactions(data ?? [], auth.user?.id ?? null);
+};
+
+/** Thả, đổi hoặc bỏ (bấm lại đúng cảm xúc đang chọn) cảm xúc của mình cho một bài. */
+export const setNewsReaction = async (postId: string, reaction: NewsReactionKey | null) => {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("Bạn cần đăng nhập.");
+  const { error } = reaction
+    ? await db.from("news_reactions").upsert({ post_id: postId, user_id: userId, reaction }, { onConflict: "post_id,user_id" })
+    : await db.from("news_reactions").delete().eq("post_id", postId).eq("user_id", userId);
+  if (error) throw new Error(error.message ?? "Không lưu được cảm xúc.");
+};
+
+export const listNewsDepartments = async (companyId: string): Promise<{ id: string; name: string }[]> => {
+  const { data, error } = await db
+    .from("departments")
+    .select("id, name")
+    .eq("company_id", companyId)
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
+  if (error) throw new Error(error.message ?? "Không tải được phòng ban.");
+  return data ?? [];
 };
