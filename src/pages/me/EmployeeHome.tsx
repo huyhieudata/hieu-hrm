@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
+  FolderOpen,
   FileText,
   LayoutGrid,
   Newspaper,
@@ -85,6 +87,8 @@ const MobileEmployeeHome = () => {
     }
     items.push({ label: "Phiếu lương", icon: Wallet, to: "/toi/phieu-luong" });
     items.push({ label: "Tin tức", icon: Newspaper, to: "/toi/tin-tuc" });
+    items.push({ label: "Khảo sát", icon: ClipboardList, to: "/toi/khao-sat" });
+    items.push({ label: "Tài liệu", icon: FolderOpen, to: "/toi/tai-lieu" });
     if (canDo("attendance", "view")) items.push({ label: "Thiết bị", icon: Smartphone, to: "/toi/thiet-bi" });
     items.push({ label: "Tài khoản", icon: UserRound, to: "/toi" });
     items.push({ label: "Tất cả", icon: LayoutGrid, to: "/ung-dung" });
