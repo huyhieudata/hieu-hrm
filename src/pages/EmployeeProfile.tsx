@@ -399,8 +399,9 @@ const EmployeeProfile = () => {
   const org = useOrgStructure();
   const canInvite = role === "owner" || role === "admin" || role === "hr";
   const canManage = canManageModule("employees");
+  // SEC-02: chỉ Owner/Admin gán quyền; Admin không tự sửa quyền của chính mình (DB cũng chặn).
   const canManagePermissions =
-    role === "owner" || role === "admin" || role === "hr";
+    role === "owner" || (role === "admin" && employee?.user_id !== user?.id);
   const canDelete = isManagerial(role);
 
   const [employee, setEmployee] = useState<EmployeeRecord | null>(null);
