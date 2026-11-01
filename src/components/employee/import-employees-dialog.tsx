@@ -48,6 +48,7 @@ export const ImportEmployeesDialog = ({
   const [rows, setRows] = useState<EmployeeImportRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [accounts, setAccounts] = useState<AccountResult[]>([]);
 
@@ -106,12 +107,16 @@ export const ImportEmployeesDialog = ({
       const ids = outcome.createdIds ?? [];
       if (ids.length > 0) {
         const all: AccountResult[] = [];
-        for (let i = 0; i < ids.length; i += MAX_ACCOUNT_ROWS) {
-          const chunk = ids.slice(i, i + MAX_ACCOUNT_ROWS).map((id) => ({ key: id, employee_id: id, role: "employee" }));
+        // Gửi từng lô nhỏ (server xử lý song song 5 luồng) để hiện tiến độ i/N.
+        const step = Math.min(10, MAX_ACCOUNT_ROWS);
+        for (let i = 0; i < ids.length; i += step) {
+          setProgress(`Đang tạo tài khoản ${Math.min(i + step, ids.length)}/${ids.length}…`);
+          const chunk = ids.slice(i, i + step).map((id) => ({ key: id, employee_id: id, role: "employee" }));
           all.push(...(await createEmployeeAccounts(companyId, chunk).catch((e: unknown): AccountResult[] =>
             chunk.map((c) => ({ key: c.key, employee_id: c.key, full_name: "", email: "", result: "error" as const,
               message: e instanceof Error ? e.message : "Lỗi tạo tài khoản." })))));
         }
+        setProgress(null);
         setAccounts(all);
       }
       if (outcome.created > 0) {
@@ -128,6 +133,7 @@ export const ImportEmployeesDialog = ({
         });
       }
     } catch (importError) {
+      setProgress(null);
       setError(
         importError instanceof Error
           ? importError.message
@@ -304,7 +310,7 @@ export const ImportEmployeesDialog = ({
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            {importing ? "Đang import…" : `Import ${rows.length || ""} nhân sự`}
+            {importing ? progress ?? "Đang import…" : `Import ${rows.length || ""} nhân sự`}
           </Button>
         </DialogFooter>
       </DialogContent>

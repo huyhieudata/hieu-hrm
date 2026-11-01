@@ -184,6 +184,11 @@ export const FieldDialog = ({
       // Xoá giá trị của field phụ thuộc nếu không còn hợp lệ (vd: đổi phòng ban → chức danh cũ).
       fields.forEach((field) => {
         if (field.dependsOn !== name || !field.optionsByValue) return;
+        // Bỏ chọn phòng ban (về "Chưa chọn") ⇒ xoá luôn chức danh (vị trí lọc theo phòng ban).
+        if (!value || value === "none") {
+          next[field.name] = "";
+          return;
+        }
         const options = field.optionsByValue[value] ?? field.options ?? [];
         if (
           next[field.name] &&

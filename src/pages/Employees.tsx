@@ -22,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { SESSION_EXPIRED_MESSAGE, ensureFreshSession, isAuthError } from "@/lib/session-check";
 import { findEmployeeDuplicates } from "@/lib/change-requests";
 import { ChangeRequestsReview } from "@/components/employee/change-requests";
 
@@ -491,23 +492,33 @@ const Employees = () => {
         toast.success("Đã cập nhật hồ sơ nhân viên");
       } else {
         if (!companyId) throw new Error("Chưa chọn công ty.");
+        // Kiểm tra phiên TRƯỚC khi tạo ⇒ không tạo hồ sơ nửa vời khi phiên đã hết hạn.
+        if (!(await ensureFreshSession())) {
+          toast.error(SESSION_EXPIRED_MESSAGE, { duration: 8000 });
+          setFormOpen(false);
+          window.location.replace("/login");
+          return;
+        }
         const { account_access: access, ...profileValues } = values;
         const createdId = await createEmployee({
           ...profileValues,
           company_id: companyId,
           created_by: user?.id ?? null,
         });
-        // Tải lại danh sách (xoá cache) TRƯỚC khi đóng/điều hướng → quay lại không phải F5.
-        await load().catch(() => undefined);
+        // Đóng form ngay khi hồ sơ đã ghi (toast hiện ở Toaster gốc, không bị dialog che);
+        // danh sách tải lại song song, xong TRƯỚC khi điều hướng → quay lại không phải F5.
         setFormOpen(false);
+        const reload = load().catch(() => undefined);
         const goTo = `/employees/${createdId}${canProvision ? "?moi=1" : ""}`;
         const loginEmail = String(values.work_email || values.personal_email || "").trim();
         if (!canProvision) {
+          await reload;
           toast.success(`Đã tạo hồ sơ ${String(values.full_name ?? "")}`.trim(), { duration: 8000 });
           navigate(goTo);
           return;
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) {
+          await reload;
           toast.warning("Đã tạo hồ sơ — CHƯA có tài khoản đăng nhập", {
             description: "Không gửi email tài khoản vì hồ sơ chưa có email hợp lệ. Bổ sung email rồi bấm “Tạo tài khoản”.",
             duration: 10000,
@@ -515,6 +526,7 @@ const Employees = () => {
           navigate(goTo);
           return;
         }
+        const pending = toast.loading(`Đã tạo hồ sơ — đang tạo tài khoản cho ${loginEmail}…`);
         const accessValue = String(access || "role:employee");
         const [kind, ref] = accessValue.split(":");
         const results = await createEmployeeAccounts(companyId, [
@@ -524,7 +536,17 @@ const Employees = () => {
         ]).catch((error: unknown): AccountResult[] => [
           { key: createdId, employee_id: createdId, full_name: String(values.full_name ?? ""), email: loginEmail, result: "error", message: friendlyError(error) },
         ]);
+        await reload;
+        toast.dismiss(pending);
         const r = results[0];
+        if (r?.result === "error" && isAuthError(r.message ?? "")) {
+          toast.error("Đã tạo hồ sơ nhưng CHƯA tạo được tài khoản: phiên đăng nhập đã hết hạn", {
+            description: "Đăng nhập lại rồi mở hồ sơ và bấm “Tạo tài khoản”.",
+            duration: 10000,
+          });
+          navigate(goTo);
+          return;
+        }
         if (r?.result === "created" && r.mail_status === "sent") {
           toast.success("Đã tạo hồ sơ và tài khoản đăng nhập", { description: `Đã gửi email tài khoản tới ${r.email}`, duration: 8000 });
           navigate(goTo);

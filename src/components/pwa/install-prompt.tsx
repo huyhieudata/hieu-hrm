@@ -186,19 +186,30 @@ export const InstallPrompt = () => {
       return;
     }
     setInstalling(true);
+    const event = deferred;
+    // prompt() phải hiện trong 2s; nếu trình duyệt im lặng/bị từ chối ⇒ mở hướng dẫn cài tay, không khoá nút.
+    const shown = await Promise.race([
+      event.prompt().then(() => true).catch(() => false),
+      new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 2000)),
+    ]);
+    setInstalling(false);
+    setDeferred(null);
+    clearDeferredInstall();
+    if (!shown) {
+      toast.info("Trình duyệt chưa cho cài tự động — làm theo hướng dẫn bên dưới.", { duration: 6000 });
+      setInstructions(true);
+      return;
+    }
     try {
-      await deferred.prompt();
-      const choice = await deferred.userChoice;
+      const choice = await event.userChoice;
       if (choice.outcome === "accepted") {
         writeKey(INSTALL_DONE_KEY, "1");
         setOpen(false);
       } else {
         setInstructions(true);
       }
-    } finally {
-      setInstalling(false);
-      setDeferred(null);
-      clearDeferredInstall();
+    } catch {
+      setInstructions(true);
     }
   };
 
